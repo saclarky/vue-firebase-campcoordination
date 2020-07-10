@@ -35,10 +35,10 @@ export const store = new Vuex.Store({
     thisTripID: '',
 
     // CAMPERS
-    allCampersUIDs: [], // should be a getter
-    thisTripCampersUIDs: [],
-    thisTripCampersNoUIDs: [],
-    thisTripCampersPendingUIDs: [],
+    // allCampersUIDs: [], // should be a getter
+    // thisTripCampersUIDs: [],
+    // thisTripCampersNoUIDs: [],
+    // thisTripCampersPendingUIDs: [],
     thisTripCampers: [],
     thisTripCampersNo: [],
     thisTripCampersPending: [],
@@ -49,6 +49,16 @@ export const store = new Vuex.Store({
     userTripInvites: {}
   },
   getters: {
+    thisTripCampersNames: state => {
+      return Object.values(state.thisTripCampers)
+    },
+    thisTripCampersNoNames: state => {
+      return Object.values(state.thisTripCampersNo)
+    },
+    thisTripCampersPendingNames: state => {
+      return Object.values(state.thisTripCampersPending)
+    }
+    
     // getItems: state => {
     //   return state.items
     // }
@@ -93,23 +103,23 @@ export const store = new Vuex.Store({
       console.log('mutation to set the trip owner');
       state.thisTripOwner = name;
     },
-    setCamperUIDs: function (state, data) {
-      let cps = data.cps
-      let type = data.type
-      console.log('mutation to set ', type, ' campers');
-      let cl
-      switch (type) {
-        case 'yes':
-          cl = 'thisTripCampersUIDs'
-          break
-        case 'no':
-          cl = 'thisTripCampersNoUIDs'
-          break
-        default:
-          cl = 'thisTripCampersPendingUIDs'
-      }
-      state[cl] = cps;
-    },
+    // setCamperUIDs: function (state, data) {
+    //   let cps = data.cps
+    //   let type = data.type
+    //   console.log('mutation to set ', type, ' campers');
+    //   let cl
+    //   switch (type) {
+    //     case 'yes':
+    //       cl = 'thisTripCampersUIDs'
+    //       break
+    //     case 'no':
+    //       cl = 'thisTripCampersNoUIDs'
+    //       break
+    //     default:
+    //       cl = 'thisTripCampersPendingUIDs'
+    //   }
+    //   state[cl] = cps;
+    // },
     setTripCampers: function (state, data) {
       let cps = data.cps
       let type = data.type
@@ -171,13 +181,20 @@ export const store = new Vuex.Store({
       bindATrip:
       firestoreAction(context => {
         // i don't know if it respects where clauses?
-        return context.bindFirestoreRef('thisTrip', fb.db.collection('trips').doc(context.state.thisTripID)
-          .orderBy("date")) // date of trip, not when created
+        return context.bindFirestoreRef('thisTrip', fb.db.collection('trips').doc(context.state.thisTripID))
+           // order date of trip, not when created
       }),
     bindTripCampers: firestoreAction(context => {
       // will it notice on its own a change in trip id?
-      //todo: promises, wait on the bnd Trip action
       return context.bindFirestoreRef('thisTripCampers', fb.db.collection('campers').doc(context.state.thisTripID))
+    }),
+    bindTripCampersNo: firestoreAction(context => {
+      // will it notice on its own a change in trip id?
+      return context.bindFirestoreRef('thisTripCampersNo', fb.db.collection('campersNo').doc(context.state.thisTripID))
+    }),
+    bindTripCampersPending: firestoreAction(context => {
+      // will it notice on its own a change in trip id?
+      return context.bindFirestoreRef('thisTripCampersPending', fb.db.collection('campersPending').doc(context.state.thisTripID))
     }),
     queryUsernameAction: (context, uid) => {
       console.log('query a username from uid', uid)
@@ -195,81 +212,62 @@ export const store = new Vuex.Store({
           })
       })
     },
-    createTripPageData: ({ dispatch, commit }, tid) => {
+    createTripPageData: ({ dispatch, commit, state }, tid) => {
       let id = tid
       console.log('Wrapper function to run actions for setting up data for a trip page')
       console.log(tid)
-      dispatch('getThisTrip', tid)
-        .then((uid) => {
-          console.log("the current trip is set", 'owner:', uid, 'trip', id)
-          // TODO: data binds.... :/
+      commit('updateThisTripID', tid)
+      dispatch('bindATrip')
+        .then((trip) => {
+          console.log("the current trip is set", 'owner:', trip.uid, 'trip', id)
+          console.log('get the trip owner name')
+          dispatch('queryUsernameAction', trip.uid).then((name) => { commit('setTripOwner', name) })
+          dispatch('bindTripCampersPending')
+          dispatch('bindTripCampersNo')
+          dispatch('bindTripCampers')
+          // TODO: data binds.... :/ 
+          // campers based on tripID so once that is set bind refs using it...and have getters that
+          // mutate the keys etc for display in vue
+//TODO DEAL WITH EMPTY CAMPER RETURNS
+console.log('TODO DEAL WITH EMPTY CAMPER RETURNS')
+
           console.log('get yes campers')
-          dispatch('getThisTripCampersUIDs', { 'id': id, 'type': 'yes' }).then(uidArray => {
-            if (uidArray.length > 0) {
-              commit('setCamperUIDs', { 'cps': uidArray, 'type': 'yes' })
-              dispatch('getThisTripCampersNames', { 'uidArray': uidArray, 'type': 'yes' }).then(names => {
+            if (Object.keys(state.thisTripCampers).length > 0) {
+              dispatch('getThisTripCampersNames', { 'uidObj': state.thisTripCampers, 'type': 'yes' }).then(names => {
                 console.log('have confirmed campers')
                 commit('setTripCampers', { 'cps': names, 'type': 'yes' }) //yes
               })
             }
-          })
-
+         
           console.log('get declined campers')
-          dispatch('getThisTripCampersUIDs', { 'id': id, 'type': 'no' }).then(uidArray => {
-            if (uidArray.length > 0) {
-              commit('setCamperUIDs', { 'cps': uidArray, 'type': 'no' })
-              dispatch('getThisTripCampersNames', { 'uidArray': uidArray, 'type': 'no' }).then(names => {
-                console.log('have declined campers')
-                commit('setTripCampers', { 'cps': names, 'type': 'no' }) //no
-              })
-            }
-          })
-
+          if (Object.keys(state.thisTripCampersNo).length > 0) {
+            dispatch('getThisTripCampersNames', { 'uidObj': state.thisTripCampersNo, 'type': 'no' }).then(names => {
+              console.log('have declined campers')
+              commit('setTripCampers', { 'cps': names, 'type': 'no' }) //yes
+            })
+          }
+         
           console.log('get pending campers')
-          dispatch('getThisTripCampersUIDs', { 'id': id, 'type': 'pending' }).then(uidArray => {
-            if (uidArray.length > 0) {
-              commit('setCamperUIDs', { 'cps': uidArray, 'type': 'pending' })
-              dispatch('getThisTripCampersNames', { 'uidArray': uidArray, 'type': 'pending' }).then(names => {
-                console.log('have confirmed campers')
-                commit('setTripCampers', { 'cps': names, 'type': 'pending' }) //pending
-              })
-            }
-          })
-
-          console.log('get the trip owner name')
-          dispatch('queryUsernameAction', uid).then((name) => { commit('setTripOwner', name) })
+          if (Object.keys(state.thisTripCampersPending).length > 0) {
+            dispatch('getThisTripCampersNames', { 'uidObj': state.thisTripCampersPending, 'type': 'pending' }).then(names => {
+              console.log('have pending campers')
+              commit('setTripCampers', { 'cps': names, 'type': 'pending' }) //yes
+            })
+          }
+          
           console.log("routing to the trip")
           router.push({ path: '/trip' })
         })
     },
-    getThisTrip: (context, payload) => {
-      console.log('run action first to get the trip')
-      if (payload !== "") {
-        return new Promise((resolve, reject) => {
-          fb.db.collection("trips").doc(payload).get()
-            .then(doc => {
-              if (doc.exists) {
-                console.log("trip data:", doc.data());
-                context.commit('updateCurrentTrip', doc.data());
-                console.log(doc.id)
-                context.commit('updateThisTripID', doc.id)
-                console.log('committed now resolve promise with started-by uid')
-                resolve(doc.data().uid)
-              } else {
-                // doc.data() will be undefined in this case
-                console.log("No such trip document!");
-                reject(new Error("couldn't get the trip"));
-              }
-            })
-        })
-      } else {
-        context.commit('updateErrors', { msg: "Invalid trip id." });
-      }
-    },
+    
     saveNewTripAction: (context, name) => {
       fb.db.collection("trips").add({ 'name': name, 'uid': context.state.currentUser.uid })
         .then(doc => {
-          context.dispatch('getThisTrip', (doc.id));
+          context.commit('updateThisTripID', (doc.id))
+          //TODO store current user as a camper
+          console.log('TODO store current user as a camper')
+      // context.dispatch('bindATrip')
+      //     context.dispatch('getThisTrip', (doc.id));
         })
         .catch(error => {
           // this.errors = error;
@@ -308,52 +306,52 @@ export const store = new Vuex.Store({
     },
     // CAMPERS
     // return a promise with array of camper UIDS
-    getThisTripCampersUIDs: (context, data) => {
-      let id = data.id
-      let type = data.type
-      console.log('running getThisTripCampersUIDs for trip ', id, ' and type ', type)
-      return new Promise((resolve, reject) => {
-        if (id !== '') {
-          let cl
-          switch (type) {
-            case 'yes':
-              cl = 'campers'
-              break
-            case 'no':
-              cl = 'campersNo'
-              break
-            default:
-              cl = 'campersPending'
-          }
-          fb.db.collection(cl).doc(id).get()
-            .then(doc => {
-              if (doc.exists) {
-                console.log('camper list exists for ', type)
-                // convert keys of object to names list              
-                let camperArray = Object.keys(doc.data());
-                console.log("camper uid data:", camperArray);
-                resolve(camperArray)
-              } else {
-                // doc.data() will be undefined in this case
-                console.log("no campers for this trip yet, reutnring empty uid array!");
-                resolve([])
-              }
-            })
-            .catch(error => {
-              // this.errors = error;
-              console.log("Trip doc error:")
-              console.log(error.message);
-              reject(error.message)
-            });
-        } else {
-          context.commit('updateErrors', { msg: "Invalid trip id." });
-          reject('invalid trip id')
-        }
-      })
-    },
+    // getThisTripCampersUIDs: (context, data) => {
+    //   let id = data.id
+    //   let type = data.type
+    //   console.log('running getThisTripCampersUIDs for trip ', id, ' and type ', type)
+    //   return new Promise((resolve, reject) => {
+    //     if (id !== '') {
+    //       let cl
+    //       switch (type) {
+    //         case 'yes':
+    //           cl = 'campers'
+    //           break
+    //         case 'no':
+    //           cl = 'campersNo'
+    //           break
+    //         default:
+    //           cl = 'campersPending'
+    //       }
+    //       fb.db.collection(cl).doc(id).get()
+    //         .then(doc => {
+    //           if (doc.exists) {
+    //             console.log('camper list exists for ', type)
+    //             // convert keys of object to names list              
+    //             let camperArray = Object.keys(doc.data());
+    //             console.log("camper uid data:", camperArray);
+    //             resolve(camperArray)
+    //           } else {
+    //             // doc.data() will be undefined in this case
+    //             console.log("no campers for this trip yet, reutnring empty uid array!");
+    //             resolve([])
+    //           }
+    //         })
+    //         .catch(error => {
+    //           // this.errors = error;
+    //           console.log("Trip doc error:")
+    //           console.log(error.message);
+    //           reject(error.message)
+    //         });
+    //     } else {
+    //       context.commit('updateErrors', { msg: "Invalid trip id." });
+    //       reject('invalid trip id')
+    //     }
+    //   })
+    // },
     // returns a promise with array of names from any object with boolean ids
     getThisTripCampersNames: (context, data) => {
-      let camperArray = data.uidArray
+      let camperArray = Object.keys(data.uidObj)
       let type = data.type
       console.log('running getThisTripCampersNames for type ', type)
       return new Promise((resolve) => {
@@ -402,31 +400,26 @@ export const store = new Vuex.Store({
         context.commit('updateErrors', { msg: "empty trip id." });
       }
     },
-    inviteCamper: ({ state, dispatch, commit }, data) => {
+    inviteCamper: ({ state, dispatch }, data) => {
       console.log('invite camper')
       return new Promise((resolve, reject) => {
         let tid = data.tid;
         // get the uid from email
         let uidTo = dispatch('searchUsersByEmail', { 'email': data.email })
-        console.log('p ', uidTo)
         uidTo.then(userID => {
-          console.log('id from email: ', userID)
+          console.log('id from email: ', userID.id)
           // Make sure not already invited
           // Assumes on 'thisTrip' page and state is updated with camper values
-          let allCampers = state.thisTripCampersNoUIDs.concat(state.thisTripCampersPendingUIDs, state.thisTripCampersUIDs);
-          if (allCampers.includes(userID)) {
+          let allCampers = Object.keys(state.thisTripCampersNoUIDs).concat(Object.keys(state.thisTripCampersPendingUIDs), 
+          Object.keys(state.thisTripCampersUIDs));
+          if (allCampers.includes(userID.id)) {
             resolve('Duplicate')
           } else {
             console.log('not invited yet')
             // Get name
-            let uidToName;
-            let uidToPromise = dispatch('queryUsernameAction', userID)
+            let uidToName = userID.data().name;
             console.log('huh')
-            uidToPromise.then((name) => {
-              console.log('name from query promised back: ', name)
-              uidToName = name;
-              // Add a trip activity log entry
-              console.log(tid)
+            
               fb.db.collection('tripActivityLog').doc(tid).collection('logs')
                 .add({
                   'time': new Date().getTime(), 'from': state.currentUser.uid,
@@ -436,11 +429,11 @@ export const store = new Vuex.Store({
                 .then((res) => {
                   console.log(res)
                   // Add to pending campers
-                  fb.db.collection('campersPending').doc(tid).set({ [userID]: true })
+                  fb.db.collection('campersPending').doc(tid).set({ [userID.id]: uidToName })
                     .then(() => {
                       // if no data binds, update the state here....
-                      commit('setCamperUIDs', { 'cps': [userID], 'type': 'pending' })
-                      commit('setTripCampers', { 'cps': [uidToName], 'type': 'pending' })
+                      // commit('setCamperUIDs', { 'cps': [userID], 'type': 'pending' })
+                      // commit('setTripCampers', { 'cps': [uidToName], 'type': 'pending' })
                       // TODO:Notify user 
                       console.log("TODO INVITE USER")
                       resolve('invited')
@@ -450,7 +443,7 @@ export const store = new Vuex.Store({
                       reject(error.message)
                     })
                 })
-            })
+         
           }
         })
           .catch(e => {
@@ -469,7 +462,7 @@ export const store = new Vuex.Store({
             // todo is this an array from where query?
             console.log('user search results', user)
             if (!user.empty & user.docs.length === 1) {
-              resolve(user.docs[0].id)
+              resolve(user.docs[0])
             } else {
               reject("no such user or multiple results")
             }

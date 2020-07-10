@@ -35,15 +35,15 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 export default {
   data: function() {
     return {};
   },
-  computed: mapState({
-    thisTripCampers: "thisTripCampers",
-    thisTripCampersNo: "thisTripCampersNo",
-    thisTripCampersPending: "thisTripCampersPending",
+  computed: {
+  
+...mapGetters(['thisTripCampersNames', 'thisTripCampersNoNames','thisTripCampersPendingNames']),
+...mapState({
     invitesVerified: state => {
       let modified = [];
       state.thisTripInvites.forEach(invite => {
@@ -83,7 +83,8 @@ export default {
       });
       return modified;
     }
-  }),
+  })
+  },
   methods: {
     returnToDashboard() {
       this.$emit("closeCamperDetails");

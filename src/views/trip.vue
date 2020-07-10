@@ -95,7 +95,7 @@
 </template>
 
 <script>
-import {mapState} from 'vuex'
+import {mapState, mapGetters} from 'vuex'
 import camperDetails from '../components/camperDetails'
 import inviteCamperPopup from '../components/inviteCamperPopup'
 
@@ -120,7 +120,8 @@ export default {
 //       camperYes: function() {
 // return this.thisTripCampers
 //       },
-        ...mapState(['thisTrip', 'thisTripID', 'thisTripOwner', 'thisTripCampers'])
+...mapGetters(['thisTripCampersNames']),
+        ...mapState(['thisTrip', 'thisTripID', 'thisTripOwner'])
     },
     data: function() {
       return {

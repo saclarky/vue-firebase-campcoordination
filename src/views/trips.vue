@@ -72,7 +72,7 @@ export default {
     //TODO: If not logged in yet does it work?
     // TODO: listen for promise for loading spinner?
     this.$store.dispatch("bindTrips").then(() => {
-      console.logs("stop spinner");
+      console.log("stop spinner");
     });
     //   this.$store.dispatch("setItems");
   },

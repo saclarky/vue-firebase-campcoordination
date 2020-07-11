@@ -31,7 +31,7 @@
          
           <div class='itemBody'>
             <ul>
-              <li v-for="camper in thisTripCampers" :key="camper">{{camper}}</li>
+              <li v-for="camper in thisTripCampersNames" :key="camper">{{camper}}</li>
             </ul>
           </div>
           <i @click="toggleAddUser" class='plusIcon'></i>
@@ -137,8 +137,8 @@ export default {
       this.showInviteUser = !this.showInviteUser;
     },
     toggleCamperDetails() {
-      console.log('method to dispatch camper details data', this.thisTripID)
-      this.$store.dispatch('getThisTripCamperActivityLog',this.thisTripID)
+      console.log('toggle camper details', this.thisTripID)
+      // this.$store.dispatch('getThisTripCamperActivityLog',this.thisTripID)
       this.showCamperDetails = !this.showCamperDetails
       this.toggleDashboard()
     },

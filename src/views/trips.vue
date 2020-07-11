@@ -71,7 +71,8 @@ export default {
   created() {
     //TODO: If not logged in yet does it work?
     // TODO: listen for promise for loading spinner?
-    this.$store.dispatch("bindTrips").then(() => {
+    this.$store.dispatch("bindTrips").then((res) => {
+      console.log('what happens if theres no trips data? ', res)
       console.log("stop spinner");
     });
     //   this.$store.dispatch("setItems");

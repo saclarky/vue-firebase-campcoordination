@@ -12,7 +12,7 @@ fb.auth.onAuthStateChanged(user => {
   // TODO- logout clear data??
   console.log('auth state change triggered')
   if (user) {
-    console.log('there is a user')
+    console.log('there is a user: ', user) // TODO: why save profile if all info is here? Oh searching!
     // this line fires when it's a new user and the registration logic in login.vue already did it...
     store.commit('setCurrentUser', user)
     // next line shouldn't fire for new registered users, doesn't exist
@@ -33,37 +33,93 @@ export const store = new Vuex.Store({
     trips: [],
     thisTrip: {},
     thisTripID: '',
-
-    // CAMPERS
-    // allCampersUIDs: [], // should be a getter
-    // thisTripCampersUIDs: [],
-    // thisTripCampersNoUIDs: [],
-    // thisTripCampersPendingUIDs: [],
-    thisTripCampers: [],
-    thisTripCampersNo: [],
-    thisTripCampersPending: [],
     thisTripOwner: '',
-    thisTripInvites: [],
+
+    // CAMPERS DOCS DATA BINDS
+    thisTripCampers: {},
+    thisTripCampersNo: {},
+    thisTripCampersPending: {},
+    // thisTripInvites: [],
+
+    //TRIP LOGS
+    thisTripActivityLog: [],
+
+    // USER DATA BINDS
     currentUser: null,
-    userProfile: {},
-    userTripInvites: {}
+    userProfile: {}
   },
   getters: {
     thisTripCampersNames: state => {
-      return Object.values(state.thisTripCampers)
+      if (!state.thisTripCampers) {
+        return []
+      } else {
+        return Object.values(state.thisTripCampers)
+      }
     },
     thisTripCampersNoNames: state => {
-      return Object.values(state.thisTripCampersNo)
+      if (!state.thisTripCampersNo) {
+        return []
+      } else {
+        return Object.values(state.thisTripCampersNo)
+      }
     },
     thisTripCampersPendingNames: state => {
-      return Object.values(state.thisTripCampersPending)
+      if (!state.thisTripCampersPending) {
+        return []
+      } else {
+        return Object.values(state.thisTripCampersPending)
+      }
+    },
+    // TRIP LOGS
+    thisTripInviteLogs: state => {
+      let tripInviteLogs = [];
+      if (!state.thisTripActivityLog || state.thisTripActivityLog == 0) {
+        console.log('nope')
+        return []; // if doc is null give an empty array to iterate
+      } else {
+        Object.keys(state.thisTripActivityLog).forEach(key => {
+          if (state.thisTripActivityLog[key].category == 'invite') {
+            let modInvite = state.thisTripActivityLog[key];
+            if ("time" in modInvite) {
+              let dd = new Date(modInvite.time);
+              //am/pm
+              let hours = dd.getHours();
+              let flipper = " AM";
+              if (hours >= 12) {
+                hours = hours - 12;
+                flipper = " PM";
+              }
+              if (hours == 0) {
+                hours = 12;
+              }
+              let m = dd.getMinutes();
+              m = m < 10 ? "0" + m : m;
+
+              modInvite.time =
+                dd.getDate() +
+                " " +
+                dd.toLocaleString("default", {
+                  month: "long"
+                }) +
+                " " +
+                dd.getFullYear() +
+                " " +
+                hours +
+                ":" +
+                m +
+                flipper;
+            } else {
+              modInvite.time = "TBD";
+            }
+            tripInviteLogs.push(modInvite);
+          }
+        });
+        return tripInviteLogs;
+      }
     }
-    
-    // getItems: state => {
-    //   return state.items
-    // }
   },
-  mutations: { // CANNOT BE ASYNCHRONOUSM USE ACTIONS
+
+  mutations: { // CANNOT BE ASYNCHRONOUS USE ACTIONS
     updateErrors: (state, obj) => {
       state.errors = obj.msg;
     },
@@ -103,58 +159,9 @@ export const store = new Vuex.Store({
       console.log('mutation to set the trip owner');
       state.thisTripOwner = name;
     },
-    // setCamperUIDs: function (state, data) {
-    //   let cps = data.cps
-    //   let type = data.type
-    //   console.log('mutation to set ', type, ' campers');
-    //   let cl
-    //   switch (type) {
-    //     case 'yes':
-    //       cl = 'thisTripCampersUIDs'
-    //       break
-    //     case 'no':
-    //       cl = 'thisTripCampersNoUIDs'
-    //       break
-    //     default:
-    //       cl = 'thisTripCampersPendingUIDs'
-    //   }
-    //   state[cl] = cps;
-    // },
-    setTripCampers: function (state, data) {
-      let cps = data.cps
-      let type = data.type
-      console.log('mutation to set ', type, ' campers');
-      let cl
-      switch (type) {
-        case 'yes':
-          cl = 'thisTripCampers'
-          break
-        case 'no':
-          cl = 'thisTripCampersNo'
-          break
-        default:
-          cl = 'thisTripCampersPending'
-      }
-      state[cl] = cps;
-    },
-    setTripInvites: function (state, invites) {
-      console.log('mutation to set invitations log');
-      console.log(invites)
-      state.thisTripInvites = invites; // array of invite objects
-      console.log('update')
-    },
-    // setItems: state => {
-    //   let items = []
-    //   db.collection('items').orderBy('created_at').onSnapshot((snapshot) => {
-    //     items = []
-    //     snapshot.forEach((doc) => {
-    //       items.push({ id: doc.id, title: doc.data().title, status: doc.data().status })
-    //     })
-    //     state.items = items
-    //   })
-    // },
     ...vuexfireMutations
   },
+
   actions: {
     // TODO bind other tables?
     bindItemsRef: firestoreAction(context => {
@@ -175,17 +182,18 @@ export const store = new Vuex.Store({
     bindTrips:
       firestoreAction(context => {
         // i don't know if it respects where clauses?
-        return context.bindFirestoreRef('trips', fb.db.collection('trips').where("uid", "==", context.state.currentUser.uid)
-          .orderBy("date")) // date of trip, not when created
+        return context.bindFirestoreRef('trips', fb.db.collection('trips').where("uid", "==", context.state.currentUser.uid))
+          // .orderBy("date")) // date of trip, not when created
+          // TODO ERROR: if there's no date orderBy doesn't retrieve it
       }),
-      bindATrip:
+    bindATrip:
       firestoreAction(context => {
         // i don't know if it respects where clauses?
         return context.bindFirestoreRef('thisTrip', fb.db.collection('trips').doc(context.state.thisTripID))
-           // order date of trip, not when created
       }),
     bindTripCampers: firestoreAction(context => {
       // will it notice on its own a change in trip id?
+      // DOC returns an object, returns null if no data
       return context.bindFirestoreRef('thisTripCampers', fb.db.collection('campers').doc(context.state.thisTripID))
     }),
     bindTripCampersNo: firestoreAction(context => {
@@ -195,6 +203,12 @@ export const store = new Vuex.Store({
     bindTripCampersPending: firestoreAction(context => {
       // will it notice on its own a change in trip id?
       return context.bindFirestoreRef('thisTripCampersPending', fb.db.collection('campersPending').doc(context.state.thisTripID))
+    }),
+    bindTripActivityLog: firestoreAction(context => {
+      // will it notice on its own a change in trip id?
+      // COLLECTION returns an array; not null, lenght 0 if no results
+      return context.bindFirestoreRef('thisTripActivityLog', fb.db.collection('tripActivityLog').doc(context.state.thisTripID)
+        .collection('logs'))
     }),
     queryUsernameAction: (context, uid) => {
       console.log('query a username from uid', uid)
@@ -212,7 +226,7 @@ export const store = new Vuex.Store({
           })
       })
     },
-    createTripPageData: ({ dispatch, commit, state }, tid) => {
+    createTripPageData: ({ dispatch, commit }, tid) => {
       let id = tid
       console.log('Wrapper function to run actions for setting up data for a trip page')
       console.log(tid)
@@ -221,60 +235,46 @@ export const store = new Vuex.Store({
         .then((trip) => {
           console.log("the current trip is set", 'owner:', trip.uid, 'trip', id)
           console.log('get the trip owner name')
-          dispatch('queryUsernameAction', trip.uid).then((name) => { commit('setTripOwner', name) })
-          dispatch('bindTripCampersPending')
-          dispatch('bindTripCampersNo')
-          dispatch('bindTripCampers')
-          // TODO: data binds.... :/ 
-          // campers based on tripID so once that is set bind refs using it...and have getters that
-          // mutate the keys etc for display in vue
-//TODO DEAL WITH EMPTY CAMPER RETURNS
-console.log('TODO DEAL WITH EMPTY CAMPER RETURNS')
-
-          console.log('get yes campers')
-            if (Object.keys(state.thisTripCampers).length > 0) {
-              dispatch('getThisTripCampersNames', { 'uidObj': state.thisTripCampers, 'type': 'yes' }).then(names => {
-                console.log('have confirmed campers')
-                commit('setTripCampers', { 'cps': names, 'type': 'yes' }) //yes
-              })
-            }
-         
-          console.log('get declined campers')
-          if (Object.keys(state.thisTripCampersNo).length > 0) {
-            dispatch('getThisTripCampersNames', { 'uidObj': state.thisTripCampersNo, 'type': 'no' }).then(names => {
-              console.log('have declined campers')
-              commit('setTripCampers', { 'cps': names, 'type': 'no' }) //yes
-            })
-          }
-         
-          console.log('get pending campers')
-          if (Object.keys(state.thisTripCampersPending).length > 0) {
-            dispatch('getThisTripCampersNames', { 'uidObj': state.thisTripCampersPending, 'type': 'pending' }).then(names => {
-              console.log('have pending campers')
-              commit('setTripCampers', { 'cps': names, 'type': 'pending' }) //yes
-            })
-          }
-          
+          dispatch('queryUsernameAction', trip.uid).then((name) => {
+            console.log('have owner name promise return')
+            commit('setTripOwner', name)
+          })
+          dispatch('bindTripActivityLog')
+          dispatch('bindTripCampersPending').then(res => {
+            console.log("Pending trip campers retrieved", res)
+          })
+          dispatch('bindTripCampersNo').then(res => {
+            console.log("Declined trip campers retrieved", res)
+          })
+          dispatch('bindTripCampers').then(res => {
+            console.log('Campers retrieved', res)
+          })
+          // TODO - make this instead at end of promises?
           console.log("routing to the trip")
           router.push({ path: '/trip' })
         })
     },
-    
-    saveNewTripAction: (context, name) => {
-      fb.db.collection("trips").add({ 'name': name, 'uid': context.state.currentUser.uid })
+
+    saveNewTripAction: ({ state }, name) => {
+      //TODO: TDB into blank fields?
+      fb.db.collection("trips").add({ 'name': name, 'uid': state.currentUser.uid })
         .then(doc => {
-          context.commit('updateThisTripID', (doc.id))
-          //TODO store current user as a camper
-          console.log('TODO store current user as a camper')
-      // context.dispatch('bindATrip')
-      //     context.dispatch('getThisTrip', (doc.id));
+          // context.commit('updateThisTripID', (doc.id))
+          //TODO redirect to new trip page?
+          fb.db.collection('campers').doc(doc.id).set({
+            [state.currentUser.uid]: state.userProfile.name
+          }).then(() => {
+            console.log('saved current user to trip campers')
+          }).catch(e => {
+            console.log("error saving new trip's owner as a camper")
+            console.log(e.message)
+          })
         })
         .catch(error => {
           // this.errors = error;
           console.log("Save new trip error:")
           console.log(error);
         });
-
     },
     deleteTripAction: (context, id) => {
       if (id) {
@@ -292,8 +292,7 @@ console.log('TODO DEAL WITH EMPTY CAMPER RETURNS')
             if (mutateTrip === true) {
               // mutation update thisTrip
               context.commit('updateCurrentTrip', {});
-              // Reroute to trips page if deleted from a trip view or elsewhere
-
+              // TODO Reroute to trips page if deleted from a trip view or elsewhere
             }
           })
           .catch(function (error) {
@@ -304,122 +303,43 @@ console.log('TODO DEAL WITH EMPTY CAMPER RETURNS')
         context.commit('updateErrors', { msg: "Invaid trip ID." });
       }
     },
-    // CAMPERS
-    // return a promise with array of camper UIDS
-    // getThisTripCampersUIDs: (context, data) => {
-    //   let id = data.id
-    //   let type = data.type
-    //   console.log('running getThisTripCampersUIDs for trip ', id, ' and type ', type)
-    //   return new Promise((resolve, reject) => {
-    //     if (id !== '') {
-    //       let cl
-    //       switch (type) {
-    //         case 'yes':
-    //           cl = 'campers'
-    //           break
-    //         case 'no':
-    //           cl = 'campersNo'
-    //           break
-    //         default:
-    //           cl = 'campersPending'
-    //       }
-    //       fb.db.collection(cl).doc(id).get()
-    //         .then(doc => {
-    //           if (doc.exists) {
-    //             console.log('camper list exists for ', type)
-    //             // convert keys of object to names list              
-    //             let camperArray = Object.keys(doc.data());
-    //             console.log("camper uid data:", camperArray);
-    //             resolve(camperArray)
-    //           } else {
-    //             // doc.data() will be undefined in this case
-    //             console.log("no campers for this trip yet, reutnring empty uid array!");
-    //             resolve([])
-    //           }
-    //         })
-    //         .catch(error => {
-    //           // this.errors = error;
-    //           console.log("Trip doc error:")
-    //           console.log(error.message);
-    //           reject(error.message)
-    //         });
-    //     } else {
-    //       context.commit('updateErrors', { msg: "Invalid trip id." });
-    //       reject('invalid trip id')
-    //     }
-    //   })
-    // },
-    // returns a promise with array of names from any object with boolean ids
-    getThisTripCampersNames: (context, data) => {
-      let camperArray = Object.keys(data.uidObj)
-      let type = data.type
-      console.log('running getThisTripCampersNames for type ', type)
-      return new Promise((resolve) => {
-        let camperArrayNames = [];
-        for (let i = 0; i < camperArray.length; i++) {
-          // returns a promise, store that in array to await resolution
-          camperArrayNames.push(context.dispatch('queryUsernameAction', camperArray[i]));
-        }
-        Promise.all(camperArrayNames).then(names => {
-          console.log('promise returned with all camper names: ', names)
-          resolve(names);
-        })
-      })
-    },
-    getThisTripCamperActivityLog: (context, tid) => {
-      console.log('run camper actviity log action using trip id', tid)
-      if (tid !== '') {
-        console.log('call db function for activity table')
-
-        fb.db.collection("tripActivityLog").doc(tid).collection('logs').where("category", "==", "invite")
-          //GO through every doc (invite) and append to the store item here? thisTripInvites
-          .get()
-          .then(docs => {
-            console.log('full docs', docs)
-            if (!docs.empty) {
-              let detailsDocArray = []
-              for (let i = 0; i < docs.docs.length; i++) {
-                console.log(docs.docs)
-                let detailsDocs = docs.docs[i].data();
-                detailsDocs.id = docs.docs[i].id
-                console.log("invite data " + i + ": ", detailsDocs);
-                detailsDocArray.push(detailsDocs);
-              }
-              console.log('end of loop code')
-              context.commit('setTripInvites', detailsDocArray);
-            } else {
-              console.log('no trip invite docs in collection')
-            }
-          })
-          .catch(error => {
-            console.log("Trip doc error:")
-            console.log(error);
-          });
-      } else {
-        console.log('empty trip id')
-        context.commit('updateErrors', { msg: "empty trip id." });
-      }
-    },
     inviteCamper: ({ state, dispatch }, data) => {
       console.log('invite camper')
       return new Promise((resolve, reject) => {
         let tid = data.tid;
-        // get the uid from email
+        // get the user from email
         let uidTo = dispatch('searchUsersByEmail', { 'email': data.email })
         uidTo.then(userID => {
-          console.log('id from email: ', userID.id)
-          // Make sure not already invited
-          // Assumes on 'thisTrip' page and state is updated with camper values
-          let allCampers = Object.keys(state.thisTripCampersNoUIDs).concat(Object.keys(state.thisTripCampersPendingUIDs), 
-          Object.keys(state.thisTripCampersUIDs));
-          if (allCampers.includes(userID.id)) {
-            resolve('Duplicate')
+          if (!userID) {
+            reject(null)
           } else {
-            console.log('not invited yet')
-            // Get name
-            let uidToName = userID.data().name;
-            console.log('huh')
-            
+            console.log('id from email: ', userID.id)
+            // Make sure not already invited
+            // In case of null (e.g. no data) assign empty array or else get the UIDs from keys
+            let yesUID, noUID, pUID
+            if (!state.thisTripCampers) {
+              yesUID = []
+            } else {
+              yesUID = Object.keys(state.thisTripCampers)
+            }
+            if (!state.thisTripCampersNo) {
+              noUID = []
+            } else {
+              noUID = Object.keys(state.thisTripCampersNo)
+            }
+            if (!state.thisTripCampersPending) {
+              pUID = []
+            } else {
+              pUID = Object.keys(state.thisTripCampersPending)
+            }
+            let allCampers = yesUID.concat(noUID, pUID);
+            if (allCampers.includes(userID.id)) {
+              resolve('duplicate')
+            } else {
+              console.log('not invited yet')
+              // Get name
+              let uidToName = userID.data().name;
+              // Add an activity log message about the invite
               fb.db.collection('tripActivityLog').doc(tid).collection('logs')
                 .add({
                   'time': new Date().getTime(), 'from': state.currentUser.uid,
@@ -431,22 +351,24 @@ console.log('TODO DEAL WITH EMPTY CAMPER RETURNS')
                   // Add to pending campers
                   fb.db.collection('campersPending').doc(tid).set({ [userID.id]: uidToName })
                     .then(() => {
-                      // if no data binds, update the state here....
-                      // commit('setCamperUIDs', { 'cps': [userID], 'type': 'pending' })
-                      // commit('setTripCampers', { 'cps': [uidToName], 'type': 'pending' })
                       // TODO:Notify user 
                       console.log("TODO INVITE USER")
                       resolve('invited')
                     })
                     .catch(error => {
-                      console.log('error in invite')
+                      console.log('error in adding pending camper')
                       reject(error.message)
                     })
                 })
-         
+                .catch(error => {
+                  console.log('error in writing activity log')
+                  reject(error.message)
+                })
+            }
           }
         })
           .catch(e => {
+            console.log('error in email search')
             reject(e.message)
           })
       })
@@ -464,7 +386,7 @@ console.log('TODO DEAL WITH EMPTY CAMPER RETURNS')
             if (!user.empty & user.docs.length === 1) {
               resolve(user.docs[0])
             } else {
-              reject("no such user or multiple results")
+              reject(null)
             }
           })
           .catch(error => {

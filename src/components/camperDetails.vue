@@ -11,18 +11,18 @@
     <div class="row">
       <div class="wrapper col1">
            <div>Confirmed, can edit trip page</div>
-        <div v-for="yes in thisTripCampers" :key="yes">{{yes}}</div>
+        <div v-for="yes in thisTripCampersNames" :key="yes">{{yes}}</div>
         <div>Pending, can view trip page</div>
-        <div v-for="rsvp in thisTripCampersPending" :key="rsvp">{{rsvp}}</div>
+        <div v-for="rsvp in thisTripCampersPendingNames" :key="rsvp">{{rsvp}}</div>
         <div>Declined, no access to the trip</div>
-        <div v-for="no in thisTripCampersNo" :key="no">{{no}}</div>
+        <div v-for="no in thisTripCampersNoNames" :key="no">{{no}}</div>
        
       </div>
       <div class="wrapper col2">
         <div>Activity Log</div>
 
         <!-- TODO what if there are empty fields, e.g. no time throews Date() error -- validatedInvites computed? -->
-        <div v-for="invite in invitesVerified" :key="invite.id">
+        <div v-for="invite in thisTripInviteLogs" :key="invite.id">
           <span class="logEntry">
             {{invite.time}}
             -
@@ -35,55 +35,17 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from "vuex";
+import { mapGetters } from "vuex";
 export default {
   data: function() {
     return {};
   },
   computed: {
   
-...mapGetters(['thisTripCampersNames', 'thisTripCampersNoNames','thisTripCampersPendingNames']),
-...mapState({
-    invitesVerified: state => {
-      let modified = [];
-      state.thisTripInvites.forEach(invite => {
-        let modInvite = invite;
-        if ("time" in invite) {
-          let dd = new Date(invite.time);
-          //am/pm
-          let hours = dd.getHours();
-          let flipper = " AM";
-          if (hours >= 12) {
-            hours = hours - 12;
-            flipper = " PM";
-          }
-          if (hours == 0) {
-            hours = 12;
-          }
-          let m = dd.getMinutes();
-          m = m < 10 ? "0" + m : m;
+...mapGetters(['thisTripCampersNames', 'thisTripCampersNoNames','thisTripCampersPendingNames','thisTripInviteLogs']),
 
-          modInvite.time =
-            dd.getDate() +
-            " " +
-            dd.toLocaleString("default", {
-              month: "long"
-            }) +
-            " " +
-            dd.getFullYear() +
-            " " +
-            hours +
-            ":" +
-            m +
-            flipper;
-        } else {
-          modInvite.time = "TBD";
-        }
-        modified.push(modInvite);
-      });
-      return modified;
-    }
-  })
+   
+  
   },
   methods: {
     returnToDashboard() {

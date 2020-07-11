@@ -41,10 +41,18 @@ export default {
             console.log(document.getElementById("newCamperEmail").value)
             // TODO: grab friends UID, grab trip id prop, and dispatch
             this.$store.dispatch('inviteCamper', {'email': document.getElementById("newCamperEmail").value, 'tid': this.tripid}).then((res) => {
-                console.log(res)
- this.$emit('closeInvite')
-            })
-           
+               if(!res) {
+                 console.log('no user found with that email')
+               } else if (res==="duplicate") {
+                 console.log('This user was already invited')
+                 } else if(res === "invited") {
+                   console.log(res)
+ 
+                 } else {
+console.log('error?', res)
+               }
+              //  this.$emit('closeInvite')
+            })           
         }
     }
 }

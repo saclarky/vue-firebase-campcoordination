@@ -20,8 +20,7 @@
       </div>
       <div class="wrapper col2">
         <div>Activity Log</div>
-
-        <!-- TODO what if there are empty fields, e.g. no time throews Date() error -- validatedInvites computed? -->
+        <!-- empty time fields/missing field dealt with in vuex getter -->
         <div v-for="invite in thisTripInviteLogs" :key="invite.id">
           <span class="logEntry">
             {{invite.time}}

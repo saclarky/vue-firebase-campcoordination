@@ -311,7 +311,7 @@ export const store = new Vuex.Store({
         let uidTo = dispatch('searchUsersByEmail', { 'email': data.email })
         uidTo.then(userID => {
           if (!userID) {
-            reject(null)
+            resolve(null)
           } else {
             console.log('id from email: ', userID.id)
             // Make sure not already invited
@@ -386,7 +386,7 @@ export const store = new Vuex.Store({
             if (!user.empty & user.docs.length === 1) {
               resolve(user.docs[0])
             } else {
-              reject(null)
+              resolve(null)
             }
           })
           .catch(error => {

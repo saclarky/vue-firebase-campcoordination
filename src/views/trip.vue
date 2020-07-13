@@ -80,7 +80,7 @@
    
     </div>
    <!-- use the modal component, pass in the prop -->
-          <inviteCamperPopup @closeInvite="toggleAddUser" v-if="showInviteUser" :tripid="thisTripID">
+          <inviteCamperPopup @closeInvite="toggleAddUser()" v-if="showInviteUser" :tripid="thisTripID">
             <!--
       you can use custom content here to overwrite
       default content

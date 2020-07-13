@@ -1,61 +1,64 @@
 <template>
-     <transition name="modal">
-        <div class="modal-mask">
-          <div class="modal-wrapper">
-            <div class="modal-container">
+  <transition name="modal">
+    <div class="modal-mask">
+      <div class="modal-wrapper">
+        <div class="modal-container">
+          <div class="modal-header">
+            Invite a Friend to Join
+            <slot name="body"></slot>
+          </div>
+          <div class="sidenote">They must already have a Campers account, </div>
+          <div class="sidenote">and the email you search must match their account</div>
+<!-- TODO invite them to create Campers account-->
+          <div class="modal-body">
+            <!-- TODO   explain you already have to be friends and they have an account, pass tid prop               -->
+            <label class="rowItem" for="newCamperEmail">Camper's Registered Email:</label>
+            <input class="rowItem" id="newCamperEmail" placeholder="Summer" />
+            <button class="rowItem button grow" @click="sendNewInvite">Invite</button>
+          </div>
+          
 
-              <div class="modal-header">
-                  Invite a Friend to Join <slot name="body">
-                  
-                </slot> 
-              </div>
-
-              <div class="modal-body">
-                
-                <!-- TODO   explain you already have to be friends and they have an account, pass tid prop               -->
-                    <label class='rowItem' for="newCamperEmail">Friend's Registered Email: </label>
-                    <input class='rowItem' id="newCamperEmail" placeholder="Summer">
-                    <button class='rowItem' @click="sendNewInvite">Save</button>
-              </div>
-              <div>Sorry about the using their email, still working out the best way to locate other users accurately</div>
-
-              <div class="modal-footer">
-                
-                  <button @click="$emit('closeInvite')">
-                    Cancel
-                  </button>
-                
-              </div>
-            </div>
+          <div class="modal-footer">
+            <button class='hero-cta-button button grow' @click="$emit('closeInvite')">Close</button>
           </div>
         </div>
-      </transition>
+      </div>
+    </div>
+  </transition>
 </template>
 
 <script>
 export default {
-   props: ['tripid'],
-    methods: {
-        sendNewInvite() {
-
-            console.log(document.getElementById("newCamperEmail").value)
-            // TODO: grab friends UID, grab trip id prop, and dispatch
-            this.$store.dispatch('inviteCamper', {'email': document.getElementById("newCamperEmail").value, 'tid': this.tripid}).then((res) => {
-               if(!res) {
-                 console.log('no user found with that email')
-               } else if (res==="duplicate") {
-                 console.log('This user was already invited')
-                 } else if(res === "invited") {
-                   console.log(res)
- 
-                 } else {
-console.log('error?', res)
-               }
-              //  this.$emit('closeInvite')
-            })           
-        }
+  props: ["tripid"],
+  methods: {
+    sendNewInvite() {
+      console.log(document.getElementById("newCamperEmail").value);
+      // TODO: grab friends UID, grab trip id prop, and dispatch
+      this.$store
+        .dispatch("inviteCamper", {
+          email: document.getElementById("newCamperEmail").value,
+          tid: this.tripid
+        })
+        .then(res => {  
+          this.$emit('closeInvite');       
+          if (!res) {
+            this.$toasted.show("No registered account.")
+            console.log("no user found with that email");
+          } else if (res === "duplicate") {
+            this.$toasted.show('This user was already invited.')
+            console.log("This user was already invited");
+          } else if (res === "invited") {            
+            this.$toasted.show('Success! User invited.')
+            console.log(res);
+          } else {
+            this.$toasted.show('Error: '+ res)
+            console.log("error?", res);
+          }
+           
+        });
     }
-}
+  }
+};
 </script>
 
 <style>
@@ -72,7 +75,7 @@ console.log('error?', res)
 }
 
 .modal-wrapper {
-    height: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -102,11 +105,15 @@ console.log('error?', res)
   justify-content: center;
   align-items: center;
 }
-.rowItem  {
-    padding: 0 5px;
+.rowItem {
+  padding: 0 5px;
 }
 button.rowItem {
-    margin-left: 10px;
+  margin-left: 10px;
+}
+.sidenote {
+  font-size: .9rem;
+  font-style:italic;
 }
 
 /* .modal-default-button {

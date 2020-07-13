@@ -3,6 +3,14 @@ import App from './App.vue'
 import router from './router'
 import {store} from './store'
 const fb = require('./firebaseConfig.js')
+// register the plugin on vue
+import Toasted from 'vue-toasted';
+Vue.use(Toasted, {
+    position: 'top-center',
+    duration: 2000,
+    keepOnHover: true,
+    theme: "bubble"
+})
 
 Vue.config.productionTip = false
 

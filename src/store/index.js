@@ -46,7 +46,8 @@ export const store = new Vuex.Store({
 
     // USER DATA BINDS
     currentUser: null,
-    userProfile: {}
+    userProfile: {},
+    thisUserNotifications: []
   },
   getters: {
     thisTripCampersNames: state => {
@@ -73,13 +74,14 @@ export const store = new Vuex.Store({
     // TRIP LOGS
     thisTripInviteLogs: state => {
       let tripInviteLogs = [];
-      if (!state.thisTripActivityLog || state.thisTripActivityLog == 0) {
+      console.log("TODO logs are array? ", Array.isArray(state.thisTripActivityLog))
+      if (!state.thisTripActivityLog || state.thisTripActivityLog.length == 0) {
         console.log('nope')
         return []; // if doc is null give an empty array to iterate
       } else {
-        Object.keys(state.thisTripActivityLog).forEach(key => {
-          if (state.thisTripActivityLog[key].category == 'invite') {
-            let modInvite = state.thisTripActivityLog[key];
+        state.thisTripActivityLog.forEach(key => {
+          if (key.category == 'invite') {
+            let modInvite = key;
             if ("time" in modInvite) {
               let dd = new Date(modInvite.time);
               //am/pm
@@ -116,6 +118,51 @@ export const store = new Vuex.Store({
         });
         return tripInviteLogs;
       }
+    },
+
+    //USER
+    thisUserNotificationsGetter: state => {
+      let inviteObj = []
+      if (state.thisUserNotifications.length > 0) {
+        state.thisUserNotifications.forEach(doc => {
+          let modInvite = doc;
+            if ("time" in modInvite) {
+              let dd = new Date(modInvite.time);
+              //am/pm
+              let hours = dd.getHours();
+              let flipper = " AM";
+              if (hours >= 12) {
+                hours = hours - 12;
+                flipper = " PM";
+              }
+              if (hours == 0) {
+                hours = 12;
+              }
+              let m = dd.getMinutes();
+              m = m < 10 ? "0" + m : m;
+
+              modInvite.time =
+                dd.getDate() +
+                " " +
+                dd.toLocaleString("default", {
+                  month: "long"
+                }) +
+                " " +
+                dd.getFullYear() +
+                " " +
+                hours +
+                ":" +
+                m +
+                flipper;
+            } else {
+              modInvite.time = "TBD";
+            }
+            inviteObj.push(modInvite);
+        })
+      } else {
+        inviteObj.push({ text: "No notifications!" })
+      }
+      return inviteObj
     }
   },
 
@@ -183,8 +230,8 @@ export const store = new Vuex.Store({
       firestoreAction(context => {
         // i don't know if it respects where clauses?
         return context.bindFirestoreRef('trips', fb.db.collection('trips').where("uid", "==", context.state.currentUser.uid))
-          // .orderBy("date")) // date of trip, not when created
-          // TODO ERROR: if there's no date orderBy doesn't retrieve it
+        // .orderBy("date")) // date of trip, not when created
+        // TODO ERROR: if there's no date orderBy doesn't retrieve it
       }),
     bindATrip:
       firestoreAction(context => {
@@ -209,6 +256,10 @@ export const store = new Vuex.Store({
       // COLLECTION returns an array; not null, lenght 0 if no results
       return context.bindFirestoreRef('thisTripActivityLog', fb.db.collection('tripActivityLog').doc(context.state.thisTripID)
         .collection('logs'))
+    }),
+    bindUserNotifications: firestoreAction(context => {
+      return context.bindFirestoreRef('thisUserNotifications', fb.db.collection('userNotifications')
+        .doc(context.state.currentUser.uid).collection('notifications'))
     }),
     queryUsernameAction: (context, uid) => {
       console.log('query a username from uid', uid)
@@ -256,52 +307,62 @@ export const store = new Vuex.Store({
     },
 
     saveNewTripAction: ({ state }, name) => {
-      //TODO: TDB into blank fields?
-      fb.db.collection("trips").add({ 'name': name, 'uid': state.currentUser.uid })
-        .then(doc => {
-          // context.commit('updateThisTripID', (doc.id))
-          //TODO redirect to new trip page?
-          fb.db.collection('campers').doc(doc.id).set({
-            [state.currentUser.uid]: state.userProfile.name
-          }).then(() => {
-            console.log('saved current user to trip campers')
-          }).catch(e => {
-            console.log("error saving new trip's owner as a camper")
-            console.log(e.message)
-          })
-        })
-        .catch(error => {
-          // this.errors = error;
-          console.log("Save new trip error:")
-          console.log(error);
-        });
+      return new Promise((resolve, reject) => {
+ //TODO: TDB into blank fields?
+ fb.db.collection("trips").add({ 'name': name, 'uid': state.currentUser.uid })
+ .then(doc => {
+   // context.commit('updateThisTripID', (doc.id))
+   //TODO redirect to new trip page?
+   fb.db.collection('campers').doc(doc.id).set({
+     [state.currentUser.uid]: state.userProfile.name
+   }).then(() => {
+     resolve("saved")
+     console.log('saved current user to trip campers')
+   }).catch(e => {
+     console.log("error saving new trip's owner as a camper")
+     console.log(e.message)
+     reject(e.message)
+   })
+ })
+ .catch(error => {
+   // this.errors = error;
+   console.log("Save new trip error:")
+   console.log(error);
+   reject(error.message)
+ });
+      })     
     },
     deleteTripAction: (context, id) => {
-      if (id) {
-        let mutateTrip = false
-        if (id === context.state.thisTrip.id) {
-          // mutation update thisTrip
-          mutateTrip = true;
+      return new Promise((resolve, reject) => {
+        if (id) {
+          let mutateTrip = false
+          if (id === context.state.thisTrip.id) {
+            // mutation update thisTrip
+            mutateTrip = true;
+          }
+          fb.db.collection("trips")
+            .doc(id)
+            .delete()
+            .then(function () {
+              console.log("Document successfully deleted");
+              //TODO: iff current trip, update and route
+              if (mutateTrip === true) {
+                // mutation update thisTrip
+                context.commit('updateCurrentTrip', {});
+                // TODO Reroute to trips page if deleted from a trip view or elsewhere                
+              }
+              resolve('Trip deleted')
+            })
+            .catch(function (error) {
+              console.log(error)
+              reject(error.message)
+            });
+        } else {
+          context.commit('updateErrors', { msg: "Invaid trip ID." });
+          resolve("Invalid trip ID.")
         }
-        fb.db.collection("trips")
-          .doc(id)
-          .delete()
-          .then(function () {
-            console.log("Document successfully deleted");
-            //TODO: iff current trip, update and route
-            if (mutateTrip === true) {
-              // mutation update thisTrip
-              context.commit('updateCurrentTrip', {});
-              // TODO Reroute to trips page if deleted from a trip view or elsewhere
-            }
-          })
-          .catch(function (error) {
-            console.log(error)
-            context.commit('updateErrors', { msg: error.message });
-          });
-      } else {
-        context.commit('updateErrors', { msg: "Invaid trip ID." });
-      }
+      })
+     
     },
     inviteCamper: ({ state, dispatch }, data) => {
       console.log('invite camper')
@@ -347,12 +408,19 @@ export const store = new Vuex.Store({
                   'category': "invite"
                 })
                 .then((res) => {
-                  console.log(res)
+                  console.log(res) //invite id is here res.id
                   // Add to pending campers
                   fb.db.collection('campersPending').doc(tid).set({ [userID.id]: uidToName })
                     .then(() => {
-                      // TODO:Notify user 
-                      console.log("TODO INVITE USER")
+                      // Add notification to user dashboard
+                      fb.db.collection('userNotifications').doc(userID.id).collection('notifications').add({
+                        'category': 'tripInvite',
+                        'tid': tid,
+                        'time': new Date().getTime(),
+                        'text': state.userProfile.name + " invited you to join " + state.thisTrip.name,
+                        'response': false,
+                        'from': state.currentUser.uid
+                      })
                       resolve('invited')
                     })
                     .catch(error => {

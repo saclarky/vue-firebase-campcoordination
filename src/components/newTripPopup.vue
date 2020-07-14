@@ -39,8 +39,18 @@ export default {
         saveNewTrip() {
 
             console.log(document.getElementById("newTripName").value)
-            this.$store.dispatch('saveNewTripAction', document.getElementById("newTripName").value)
-            this.$emit('close')
+            this.$store.dispatch('saveNewTripAction', document.getElementById("newTripName").value).then((res, rej) => {
+               this.$emit('close')
+              if(res) {
+              
+                this.$toasted.show('Success! Trip Saved.')
+            console.log(res);
+          } else {
+            this.$toasted.show('Error: '+ rej)
+            console.log("error?", rej);
+          }
+            })
+           
         }
     }
 }

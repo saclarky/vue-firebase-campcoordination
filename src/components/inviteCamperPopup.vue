@@ -39,7 +39,7 @@ export default {
           email: document.getElementById("newCamperEmail").value,
           tid: this.tripid
         })
-        .then(res => {  
+        .then((res, rej) => {  
           this.$emit('closeInvite');       
           if (!res) {
             this.$toasted.show("No registered account.")
@@ -51,8 +51,8 @@ export default {
             this.$toasted.show('Success! User invited.')
             console.log(res);
           } else {
-            this.$toasted.show('Error: '+ res)
-            console.log("error?", res);
+            this.$toasted.show('Error: '+ rej)
+            console.log("error?", rej);
           }
            
         });

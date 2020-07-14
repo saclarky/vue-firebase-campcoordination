@@ -95,7 +95,17 @@ export default {
     },
     deleteTrip: function(id) {
       console.log("delete trip");
-      this.$store.dispatch("deleteTripAction", id);
+      this.$store.dispatch("deleteTripAction", id).then((res,rej) => {
+        if (res) {
+          if(res == 'Trip deleted') {
+            this.$toasted.show('Trip deleted')
+          } else {
+            this.$toasted.show(res)
+          }
+        } else {
+          this.$toasted.show(rej)
+        }
+      })
     },
     goToTrip: function(e) {
       console.log("dispatch ");

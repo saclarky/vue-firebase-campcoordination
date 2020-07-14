@@ -33,8 +33,18 @@
             <!-- <h3 slot="header">custom header</h3> -->
           </newTripPopup>
         </div>
-
-        <div v-if="trips && trips.length > 0">
+        <div>
+          <div v-for="item in joinedTrips" :key="item.id" :id="item.id" class="tripContent">
+            <div @click="goToTrip(item.id)">{{item.name}}</div>
+            <!-- TODO: how validate other rows below? If date field is empty, breaks -->
+            <div
+              v-if="item.date"
+            >{{new Date(item.date.seconds * 1000).getDate() }} {{ new Date(item.date.seconds * 1000).toLocaleString('default', { month: 'long' }) }} {{new Date(item.date.seconds * 1000).getFullYear() }}</div>
+            <div v-if="item.location">{{item.location.Oa}}, {{item.location.Ba}}</div>
+         
+          </div> 
+        </div>
+        <div>
           <div v-for="item in trips" :key="item.id" :id="item.id" class="tripContent">
             <div @click="goToTrip(item.id)">{{item.name}}</div>
             <!-- TODO: how validate other rows below? If date field is empty, breaks -->
@@ -76,6 +86,7 @@ export default {
       console.log('what happens if theres no trips data? ', res)
       console.log("stop spinner");
     });
+    this.$store.dispatch("bindJoinedTrips")
     //   this.$store.dispatch("setItems");
   },
   components: {
@@ -88,7 +99,7 @@ export default {
       showAddTrip: false
     };
   },
-  computed: mapState(["errors", "trips"]),
+  computed: mapState(["errors", "trips", "joinedTrips"]),
   methods: {
     //CANNOT use arrow shorthand => for functions if need "this.$store"
     toggleAddTrip() {

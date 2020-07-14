@@ -34,6 +34,7 @@ export const store = new Vuex.Store({
 
     //TRIPS
     trips: [],
+    joinedTrips: [],
     thisTrip: {},
     thisTripID: '',
     thisTripOwner: '',
@@ -244,6 +245,14 @@ export const store = new Vuex.Store({
         // i don't know if it respects where clauses?
         console.log("TODO this doesn't display trips wehre invited")
         return context.bindFirestoreRef('trips', fb.db.collection('trips').where("uid", "==", context.state.currentUser.uid))
+        // .orderBy("date")) // date of trip, not when created
+        // TODO ERROR: if there's no date orderBy doesn't retrieve it
+      }),
+      bindJoinedTrips:
+      firestoreAction(context => {
+        // i don't know if it respects where clauses?
+        console.log("TODO this doesn't display trips wehre invited")
+        return context.bindFirestoreRef('joinedTrips', fb.db.collection('trips').where("campers", "array-contains", context.state.currentUser.uid))
         // .orderBy("date")) // date of trip, not when created
         // TODO ERROR: if there's no date orderBy doesn't retrieve it
       }),
@@ -494,7 +503,7 @@ export const store = new Vuex.Store({
             'text': state.userProfile.name + " accepted trip invite.",
             'category': "inviteRSVP"
           })
-          
+
         Promise.all([a, b, c, d]).then(() => {
           resolve('joined')
         }).catch(error => {

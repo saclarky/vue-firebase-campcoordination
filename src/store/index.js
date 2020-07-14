@@ -347,6 +347,7 @@ export const store = new Vuex.Store({
       })
     },
     deleteTripAction: (context, id) => {
+      console.log('TODO delete campers and sub docs etc')
       return new Promise((resolve, reject) => {
         if (id) {
           let mutateTrip = false
@@ -365,7 +366,19 @@ export const store = new Vuex.Store({
                 context.commit('updateCurrentTrip', {});
                 // TODO Reroute to trips page if deleted from a trip view or elsewhere                
               }
-              resolve('Trip deleted')
+              
+              // Delete campers
+              let delC = fb.db.collection('campers').doc(id).delete()
+              let delCP = fb.db.collection('campersPending').doc(id).delete()
+              let delN = fb.db.collection('campersNo').doc(id).delete()
+              // delete logs
+              console.log('TODO figure out deleting collections for removing logs from trip')
+              Promise.all([delC, delCP, delN]).then(() => {
+                resolve('Trip deleted')
+              }).catch(function (error) {
+                console.log(error)
+                reject(error.message)
+              });
             })
             .catch(function (error) {
               console.log(error)

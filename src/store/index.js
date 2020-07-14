@@ -366,7 +366,7 @@ export const store = new Vuex.Store({
                 context.commit('updateCurrentTrip', {});
                 // TODO Reroute to trips page if deleted from a trip view or elsewhere                
               }
-              
+
               // Delete campers
               let delC = fb.db.collection('campers').doc(id).delete()
               let delCP = fb.db.collection('campersPending').doc(id).delete()
@@ -470,44 +470,43 @@ export const store = new Vuex.Store({
     },
     joinTripAction: ({ state }, data) => {
       return new Promise((resolve, reject) => {
-        console.log('fb', fb)
         // Remove from Pending campers
-        fb.db.collection('campersPending').doc(data.tid).update({
+        let a = fb.db.collection('campersPending').doc(data.tid).update({
           [state.currentUser.uid]: firebase.firestore.FieldValue.delete()
         })
-          .then(function () {
-            console.log("Document successfully deleted");
-            // set versus add --> set requires ID to be specified, add() auto-generates
-            fb.db.collection('campers').doc(data.tid).set({
-              [state.currentUser.uid]: state.userProfile.name
-              // TODO have two tabs open and test auto-update on trip page
-            }).then(() => {
-              console.log("added camper to trip")
-              // Add an activity log message about the invite
-              fb.db.collection('tripActivityLog').doc(data.tid).collection('logs')
-                .add({
-                  'time': new Date().getTime(), 'from': state.currentUser.uid,
-                  'text': state.userProfile.name + " accepted trip invite.",
-                  'category': "inviteRSVP"
-                }).then(() => {
-                  console.log('set log')
-                  resolve('joined')
-                }).catch(function (error) {
-                  reject(error.message)
-                });
-            }).catch(function (error) {
-              reject(error.message)
-            });
+
+        // set versus add --> set requires ID to be specified, add() auto-generates
+        // Add to campers
+        let b = fb.db.collection('campers').doc(data.tid).set({
+          [state.currentUser.uid]: state.userProfile.name
+          // TODO have two tabs open and test auto-update on trip page
+        })
+
+        // add to trip campers array
+        let c = fb.db.collection('trips').doc(data.tid).update({
+          campers: firebase.firestore.FieldValue.arrayUnion(state.currentUser.uid)
+        })
+
+        // Add an activity log message about the invite
+        let d = fb.db.collection('tripActivityLog').doc(data.tid).collection('logs')
+          .add({
+            'time': new Date().getTime(), 'from': state.currentUser.uid,
+            'text': state.userProfile.name + " accepted trip invite.",
+            'category': "inviteRSVP"
           })
-          .catch(function (error) {
-            reject(error.message)
-          });
+          
+        Promise.all([a, b, c, d]).then(() => {
+          resolve('joined')
+        }).catch(error => {
+          reject(error.message)
+        })
+
       })
     },
     declineTripAction: ({ state }, data) => {
       return new Promise((resolve, reject) => {
         // Remove from Pending campers
-       
+
         fb.db.collection('campersPending').doc(data.tid).update({
           [state.currentUser.uid]: firebase.firestore.FieldValue.delete()
         })

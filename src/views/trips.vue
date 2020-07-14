@@ -69,6 +69,7 @@ import newTripPopup from "../components/newTripPopup.vue";
 export default {
   name: "trips",
   created() {
+    console.log("TODO: MUST separate owned from joined trips somehow, asterisk? and disable delete...")
     //TODO: If not logged in yet does it work?
     // TODO: listen for promise for loading spinner?
     this.$store.dispatch("bindTrips").then((res) => {

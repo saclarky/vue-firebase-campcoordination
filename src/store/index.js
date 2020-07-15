@@ -345,7 +345,7 @@ export const store = new Vuex.Store({
             .then(() => {
               // Strange issue trying to debug, 'empty' existing collections.
 // Might be because of not created ancestor first explicity so here...
-fb.db.collection('tripActivityLog').doc(doc.uid).set({'null':null})
+fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
               resolve("saved")
               console.log('saved current user to trip campers')
             }).catch(e => {
@@ -388,7 +388,48 @@ fb.db.collection('tripActivityLog').doc(doc.uid).set({'null':null})
               let delCP = fb.db.collection('campersPending').doc(id).delete()
               let delN = fb.db.collection('campersNo').doc(id).delete()
               // delete logs
-              console.log('TODO figure out deleting collections for removing logs from trip')
+              console.log('TODO redo trip activity log collection deletion, recursive bad? cloud function?')              
+              fb.db.collection('tripActivityLog').doc(id).collection('logs').get().then((docs) => {
+                //todo, what if no logs, empty array? does for eahc throw something?
+                let waiting = []
+                docs.forEach(doc => {
+                  waiting.push( fb.db.collection("tripActivityLog")
+                  .doc(id).collection("logs").doc(doc.id)
+                  .delete())
+                })
+                Promise.all(waiting).then(() => {
+                  // fb.db.collection('tripActivityLog').doc(id).collection('logs').delete() NOT A FUNCTION/not necessary
+                  console.log('still concerned, TODO check logs collection is not orphaned')
+                    fb.db.collection('tripActivityLog').doc(id).delete()                 
+                })
+              })
+              console.log('TODO figure out updating user notifcations about the trip... alert disabled? deleted?')
+              // could wait until they try and if tripID doesn't exist, let them know and delete it?
+              // collectionGroup grabs subcollections with the same name! (so don't reuse...)
+              // BUT can't delete from there so not very helpful...
+              // fb.db.collectionGroup('notifications').where('tid','==',id).get().then((data) => {
+              //   console.log('All the notifications that match deleted trip id: ', data)
+              //   //todo, what if no logs, empty array? does for eahc throw something?
+              //   //docs.empty == true
+              //   data.docs.forEach(matchedNotification => {
+              //     console.log('CG Doc, delete here?: ', matchedNotification.id, matchedNotification.data().text)
+              //     // fb.db.collectionGroup("notifications").doc(doc.id).delete() NOT ALLOWED
+              //   })
+              // })
+                 console.log("TERRIBLE SOLUTION FOR TESTING: loop every user and every doc for deleting")
+                 console.log("DO YOU HEAR ME FIX THIS")
+                  fb.db.collection('userNotifications').get().then(users => {
+                    users.docs.forEach(user => {
+                      fb.db.collection('userNotifications').doc(user.id).collection('notifications').get().then(notifications => {
+                        notifications.docs.forEach(n => {
+                          if (n.data().tid == id) {
+                            fb.db.collection('userNotifications').doc(user.id).collection('notifications').doc(n.id).delete()
+                          }
+                        })
+                      })
+                    })
+                  })             
+              
               Promise.all([delC, delCP, delN]).then(() => {
                 resolve('Trip deleted')
               }).catch(function (error) {

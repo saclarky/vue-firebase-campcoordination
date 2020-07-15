@@ -19,7 +19,7 @@
           
 
           <div class="modal-footer">
-            <button class='hero-cta-button button grow' @click="$emit('closeInvite')">Close</button>
+            <button class='hero-cta-button button grow' @click="$emit('closeInvite')" :disabled="disableClose">Close</button>
           </div>
         </div>
       </div>
@@ -30,8 +30,17 @@
 <script>
 export default {
   props: ["tripid"],
+  data: function() {
+    return {
+      disableClose: false
+    }
+  },
   methods: {
+    toggleDisableClose() {
+this.disableClose = !this.disableClose
+    },
     sendNewInvite() {
+      this.toggleDisableClose();
       console.log(document.getElementById("newCamperEmail").value);
       // TODO: grab friends UID, grab trip id prop, and dispatch
       this.$store

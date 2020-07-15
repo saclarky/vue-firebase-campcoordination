@@ -15,7 +15,7 @@
                   default body
                 </slot> -->                  
                     <label class='rowItem' for="newTripName">Trip Name: </label>
-                    <input class='rowItem' id="newTripName" placeholder="Summer Mountain Jam">
+                    <input class='rowItem' id="newTripName" placeholder="Desert Getaway 2020">
                     <button class='rowItem' @click="saveNewTrip">Save</button>
               </div>
 

@@ -33,18 +33,10 @@
             <!-- <h3 slot="header">custom header</h3> -->
           </newTripPopup>
         </div>
-        <div>
-          <div v-for="item in joinedTrips" :key="item.id" :id="item.id" class="tripContent">
-            <div @click="goToTrip(item.id)">{{item.name}}</div>
-            <!-- TODO: how validate other rows below? If date field is empty, breaks -->
-            <div
-              v-if="item.date"
-            >{{new Date(item.date.seconds * 1000).getDate() }} {{ new Date(item.date.seconds * 1000).toLocaleString('default', { month: 'long' }) }} {{new Date(item.date.seconds * 1000).getFullYear() }}</div>
-            <div v-if="item.location">{{item.location.Oa}}, {{item.location.Ba}}</div>
-         
-          </div> 
-        </div>
-        <div>
+
+        
+        <div class="tripBlock">
+          <div class="title">My Trips</div>
           <div v-for="item in trips" :key="item.id" :id="item.id" class="tripContent">
             <div @click="goToTrip(item.id)">{{item.name}}</div>
             <!-- TODO: how validate other rows below? If date field is empty, breaks -->
@@ -59,6 +51,18 @@
             <!-- TODO: sort checked items to bottom of list? -->
             <small style="text-decoration:underline;" @click="deleteTrip(item.id)">Delete</small>
           </div>
+        </div>
+        <div class="tripBlock">
+          <div class="title"> Joined Trips </div>
+          <div v-for="item in joinedTrips" :key="item.id" :id="item.id" class="tripContent">
+            <div @click="goToTrip(item.id)">{{item.name}}</div>
+            <!-- TODO: how validate other rows below? If date field is empty, breaks -->
+            <div
+              v-if="item.date"
+            >{{new Date(item.date.seconds * 1000).getDate() }} {{ new Date(item.date.seconds * 1000).toLocaleString('default', { month: 'long' }) }} {{new Date(item.date.seconds * 1000).getFullYear() }}</div>
+            <div v-if="item.location">{{item.location.Oa}}, {{item.location.Ba}}</div>
+         
+          </div> 
         </div>
       </div>
     </div>
@@ -158,6 +162,9 @@ export default {
   color: #f7ffff;
   padding: 10px 5px 30px 5px;
 }
+.hero-content {
+  margin-bottom: 30px;
+}
 
 .hero-bottom {
   display: flex;
@@ -181,7 +188,7 @@ export default {
   display: flex;
   flex-direction: row;
   align-items: center;
-  /* justify-content: center; */
+  justify-content: center;
   background-color: #d6dee6d9;
 }
 .tripContent:hover {
@@ -191,9 +198,8 @@ export default {
 div.tripContent > div {
   padding: 5px 15px;
 }
-#errors {
-  background: #a52222;
-  color: #fff;
-  padding: 5px;
+
+.title {
+  text-align: left;
 }
 </style>

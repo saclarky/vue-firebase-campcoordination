@@ -165,6 +165,20 @@ export const store = new Vuex.Store({
           } else {
             modInvite.time = "";
           }
+          if("tid" in modInvite) {
+            console.log('TODO: if trip has been deleted inform user')
+            if('tripDeleted' in modInvite) {
+console.log("use to vbind classes?")
+            } else {
+              fb.db.collection('trips').doc(modInvite.tid).get().then((doc) => {
+                console.log(doc)
+               
+                  modInvite.tripDeleted = !doc.exists
+                  //TODO: commit change to DB
+                
+              })
+            }
+          }
           // Trip Invitations Category
           switch (doc.category) {
             case "tripInvite":
@@ -403,32 +417,20 @@ fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
                     fb.db.collection('tripActivityLog').doc(id).delete()                 
                 })
               })
-              console.log('TODO figure out updating user notifcations about the trip... alert disabled? deleted?')
-              // could wait until they try and if tripID doesn't exist, let them know and delete it?
-              // collectionGroup grabs subcollections with the same name! (so don't reuse...)
-              // BUT can't delete from there so not very helpful...
-              // fb.db.collectionGroup('notifications').where('tid','==',id).get().then((data) => {
-              //   console.log('All the notifications that match deleted trip id: ', data)
-              //   //todo, what if no logs, empty array? does for eahc throw something?
-              //   //docs.empty == true
-              //   data.docs.forEach(matchedNotification => {
-              //     console.log('CG Doc, delete here?: ', matchedNotification.id, matchedNotification.data().text)
-              //     // fb.db.collectionGroup("notifications").doc(doc.id).delete() NOT ALLOWED
-              //   })
-              // })
-                 console.log("TERRIBLE SOLUTION FOR TESTING: loop every user and every doc for deleting")
-                 console.log("DO YOU HEAR ME FIX THIS")
-                  fb.db.collection('userNotifications').get().then(users => {
-                    users.docs.forEach(user => {
-                      fb.db.collection('userNotifications').doc(user.id).collection('notifications').get().then(notifications => {
-                        notifications.docs.forEach(n => {
-                          if (n.data().tid == id) {
-                            fb.db.collection('userNotifications').doc(user.id).collection('notifications').doc(n.id).delete()
-                          }
-                        })
-                      })
-                    })
-                  })             
+          console.log('TODO figure out updating user notifcations about the trip... alert disabled? deleted?')            
+                //  console.log("TERRIBLE SOLUTION FOR TESTING: loop every user and every doc for deleting")
+                //  console.log("DO YOU HEAR ME FIX THIS")
+                //   fb.db.collection('userNotifications').get().then(users => {
+                //     users.docs.forEach(user => {
+                //       fb.db.collection('userNotifications').doc(user.id).collection('notifications').get().then(notifications => {
+                //         notifications.docs.forEach(n => {
+                //           if (n.data().tid == id) {
+                //             fb.db.collection('userNotifications').doc(user.id).collection('notifications').doc(n.id).delete()
+                //           }
+                //         })
+                //       })
+                //     })
+                //   })             
               
               Promise.all([delC, delCP, delN]).then(() => {
                 resolve('Trip deleted')

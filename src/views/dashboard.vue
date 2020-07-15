@@ -2,8 +2,9 @@
   <div>
     <div>
       <div>Notifications</div>
+      <div>strikethrough means the trip was deleted by the trip owner</div>
       <!-- TODO filter responded, time frame etc -->
-      <div v-for="alert in thisUserNotificationsGetter.tripInvites" :key="alert.id">
+      <div v-for="alert in thisUserNotificationsGetter.tripInvites" :key="alert.id" :class="{deleted: alert.tripDeleted}">
         <!-- from | time | category | message | actions/responded -->
         <span>
           {{alert.time}}
@@ -72,9 +73,12 @@ export default {
 
 <style scoped>
 .joined {
-  border: 2px green solid;
+  border: 2px green solid
 }
 .declined {
-  border: 2px red solid;
+  border: 2px red solid
+}
+.deleted {
+  text-decoration: overline
 }
 </style>

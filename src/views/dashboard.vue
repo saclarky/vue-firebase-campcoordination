@@ -11,9 +11,9 @@
           {{alert.text}}
         </span>
         <span>
-          <button @click="joinTrip(alert.tid)">Join</button>
-          <button>Decline</button>
-          <button>Delete</button>
+          <button @click="joinTrip(alert.tid, alert.id, alert.isDeclined)" :class="{joined: alert.isJoined}" :disabled="alert.isJoined">Join</button>
+          <button @click="declineTrip(alert.tid, alert.id, alert.isJoined)" :class="{declined: alert.isDeclined}" :disabled="alert.isDeclined">Decline</button>
+          <!-- <button>Delete</button> -->
         </span>
       </div>
     </div>
@@ -32,8 +32,8 @@ export default {
     ...mapGetters(["thisUserNotificationsGetter"])
   },
   methods: {
-    joinTrip: function(tripID) {
-      console.log("tid: ", tripID);
+    joinTrip: function(tripID, notiID, isD) {
+      console.log("tid: ", tripID, 'nid ', notiID);
       // change response to true?
       // disable buttons and add actual RSVP value in gray italics? Or...
       // is better UX to highlight the join button as the RSVP but leave everything active
@@ -42,7 +42,7 @@ export default {
       // retract invitation --> disable user notification join/decline w /disabled attribute, give a note like 'trip is full',
       // remove from pending
       this.$store
-        .dispatch("joinTripAction", { tid: tripID })
+        .dispatch("joinTripAction", { tid: tripID, nid: notiID, isDeclined: isD })
         .then((res, rej) => {
           if (res) {
             this.$toasted.show("Done! Joined trip.");
@@ -53,9 +53,9 @@ export default {
           }
         });
     },
-    declineTrip: function(tripID) {
+    declineTrip: function(tripID, notiID, isJ) {
       this.$store
-        .dispatch("declineTripAction", { tid: tripID })
+        .dispatch("declineTripAction", { tid: tripID, nid: notiID, isJoined: isJ })
         .then((res, rej) => {
           if (res) {
             this.$toasted.show("Done! Declined trip.");
@@ -71,4 +71,10 @@ export default {
 </script>
 
 <style scoped>
+.joined {
+  border: 2px green solid;
+}
+.declined {
+  border: 2px red solid;
+}
 </style>

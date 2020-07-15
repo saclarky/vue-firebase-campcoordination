@@ -78,13 +78,16 @@ export const store = new Vuex.Store({
     // TRIP LOGS
     thisTripInviteLogs: state => {
       let tripInviteLogs = [];
+      console.log(state.thisTripActivityLog)
       console.log("TODO logs are array? ", Array.isArray(state.thisTripActivityLog))
       if (!state.thisTripActivityLog || state.thisTripActivityLog.length == 0) {
         console.log('nope')
         return []; // if doc is null give an empty array to iterate
       } else {
+        
         state.thisTripActivityLog.forEach(key => {
-          if (key.category == 'invite') {
+          console.log(key)
+          if ( ['invite', 'inviteRSVP'].includes(key.category ) ) {
             let modInvite = key;
             if ("time" in modInvite) {
               let dd = new Date(modInvite.time);
@@ -248,7 +251,7 @@ export const store = new Vuex.Store({
         // .orderBy("date")) // date of trip, not when created
         // TODO ERROR: if there's no date orderBy doesn't retrieve it
       }),
-      bindJoinedTrips:
+    bindJoinedTrips:
       firestoreAction(context => {
         // i don't know if it respects where clauses?
         console.log("TODO this doesn't display trips wehre invited")
@@ -338,7 +341,11 @@ export const store = new Vuex.Store({
             //TODO redirect to new trip page?
             fb.db.collection('campers').doc(doc.id).set({
               [state.currentUser.uid]: state.userProfile.name
-            }).then(() => {
+            })
+            .then(() => {
+              // Strange issue trying to debug, 'empty' existing collections.
+// Might be because of not created ancestor first explicity so here...
+fb.db.collection('tripActivityLog').doc(doc.uid).set({'null':null})
               resolve("saved")
               console.log('saved current user to trip campers')
             }).catch(e => {
@@ -454,7 +461,8 @@ export const store = new Vuex.Store({
                         'tid': tid,
                         'time': new Date().getTime(),
                         'text': state.userProfile.name + " invited you to join " + state.thisTrip.name,
-                        'response': false,
+                        'isJoined': false,
+                        'isDeclined': false,
                         'from': state.currentUser.uid
                       })
                       resolve('invited')
@@ -478,11 +486,22 @@ export const store = new Vuex.Store({
       })
     },
     joinTripAction: ({ state }, data) => {
+      //  deal with scenario of alreayd declined, now joining
+      // TODO deal with if the camper has since been removed from the trip, aka deadline
       return new Promise((resolve, reject) => {
-        // Remove from Pending campers
-        let a = fb.db.collection('campersPending').doc(data.tid).update({
-          [state.currentUser.uid]: firebase.firestore.FieldValue.delete()
-        })
+        //IFF trip previously declined, remove from 'no'; IFF first response, remove from 'pending'
+        let a
+        if (data.isDeclined == true) {
+          // Remove from Declined campers
+          a = fb.db.collection('campersNo').doc(data.tid).update({
+            [state.currentUser.uid]: firebase.firestore.FieldValue.delete()
+          })
+        } else {
+          // Remove from Pending campers
+          a = fb.db.collection('campersPending').doc(data.tid).update({
+            [state.currentUser.uid]: firebase.firestore.FieldValue.delete()
+          })
+        }
 
         // set versus add --> set requires ID to be specified, add() auto-generates
         // Add to campers
@@ -503,8 +522,14 @@ export const store = new Vuex.Store({
             'text': state.userProfile.name + " accepted trip invite.",
             'category': "inviteRSVP"
           })
+        // update user notification response
+        let e = fb.db.collection('userNotifications').doc(state.currentUser.uid).collection('notifications')
+          .doc(data.nid).update({
+            'isJoined': true,
+            'isDeclined': false
+          })
 
-        Promise.all([a, b, c, d]).then(() => {
+        Promise.all([a, b, c, d, e]).then(() => {
           resolve('joined')
         }).catch(error => {
           reject(error.message)
@@ -514,36 +539,52 @@ export const store = new Vuex.Store({
     },
     declineTripAction: ({ state }, data) => {
       return new Promise((resolve, reject) => {
-        // Remove from Pending campers
 
-        fb.db.collection('campersPending').doc(data.tid).update({
-          [state.currentUser.uid]: firebase.firestore.FieldValue.delete()
-        })
-          .then(function () {
-            console.log("Document successfully deleted");
+        // update user notification response
+        let d = fb.db.collection('userNotifications').doc(state.currentUser.uid).collection('notifications')
+          .doc(data.nid).update({
+            'isDeclined': true,
+            'isJoined': false
+          })
+          //IFF trip previously joined, remove from 'yes'; IFF first response, remove from 'pending'
+          let c,e
+          if (data.isJoined == true) {
+            // Remove from Yes campers
+            c = fb.db.collection('campers').doc(data.tid).update({
+              [state.currentUser.uid]: firebase.firestore.FieldValue.delete()
+            })
+            //TODO remove from trips campers array
+             e = fb.db.collection('trips').doc(data.tid).update({
+              campers: firebase.firestore.FieldValue.arrayRemove(state.currentUser.uid)
+            })
+          } else {
+            // Remove from Pending campers
+            c = fb.db.collection('campersPending').doc(data.tid).update({
+              [state.currentUser.uid]: firebase.firestore.FieldValue.delete()
+            })
+            e = () => {
+              resolve()
+            }
+          }
+  
             // set versus add --> set requires ID to be specified, add() auto-generates
-            fb.db.collection('campersNo').doc(data.tid).set({
+           let b = fb.db.collection('campersNo').doc(data.tid).set({
               [state.currentUser.uid]: state.userProfile.name
               // TODO have two tabs open and test auto-update on trip page
-            }).then(() => {
+            })
               // Add an activity log message about the invite
-              fb.db.collection('tripActivityLog').doc(data.tid).collection('logs')
+             let a = fb.db.collection('tripActivityLog').doc(data.tid).collection('logs')
                 .add({
                   'time': new Date().getTime(), 'from': state.currentUser.uid,
                   'text': state.userProfile.name + " declined trip invite.",
                   'category': "inviteRSVP"
-                }).then(() => {
-                  resolve('declined')
-                }).catch(function (error) {
-                  reject(error.message)
-                });
-            }).catch(function (error) {
-              reject(error.message)
-            });
-          })
-          .catch(function (error) {
-            reject(error.message)
-          });
+                })
+        Promise.all([a, b, c, d, e]).then(() => {
+          resolve('declined')
+        }).catch(e => {
+          reject(e.message)
+        })
+
       })
     },
     searchUsersByEmail: (context, data) => {

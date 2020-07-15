@@ -185,6 +185,10 @@ export default {
               this.$store.dispatch("fetchUserProfile");
               // this.$store.dispatch('bindProfileRef'); // keep profile obejct updated from firebase AFTER log-in. 
 //TODO: IF THIS ISN"T FIRST PAGE then missing this bind and that's bad......
+// Strange issue trying to debug, 'empty' existing collections.
+// Might be because of not created ancestor first explicity so here...
+fb.db.collection('userNotifications').doc(user.user.uid).set({'null':null})
+
               this.$router.push("/dashboard");
             })
             .catch(err => {

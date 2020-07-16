@@ -134,6 +134,7 @@ export const store = new Vuex.Store({
 
       if (state.thisUserNotifications.length > 0) {
         state.thisUserNotifications.forEach(doc => {
+          console.log('is this a data situation?', doc)
           let modInvite = doc;
           if ("time" in modInvite) {
             let dd = new Date(modInvite.time);
@@ -165,20 +166,7 @@ export const store = new Vuex.Store({
           } else {
             modInvite.time = "";
           }
-          if("tid" in modInvite) {
-            console.log('TODO: if trip has been deleted inform user')
-            if('tripDeleted' in modInvite) {
-console.log("use to vbind classes?")
-            } else {
-              fb.db.collection('trips').doc(modInvite.tid).get().then((doc) => {
-                console.log(doc)
-               
-                  modInvite.tripDeleted = !doc.exists
-                  //TODO: commit change to DB
-                
-              })
-            }
-          }
+         
           // Trip Invitations Category
           switch (doc.category) {
             case "tripInvite":
@@ -189,7 +177,7 @@ console.log("use to vbind classes?")
           }
         })
       }
-      console.log('return batch of objects by category')
+      //return batch of objects by category
       return {
         'tripInvites': inviteObj,
         'tripResponses': responsesObj
@@ -417,21 +405,17 @@ fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
                     fb.db.collection('tripActivityLog').doc(id).delete()                 
                 })
               })
-          console.log('TODO figure out updating user notifcations about the trip... alert disabled? deleted?')            
-                //  console.log("TERRIBLE SOLUTION FOR TESTING: loop every user and every doc for deleting")
-                //  console.log("DO YOU HEAR ME FIX THIS")
-                //   fb.db.collection('userNotifications').get().then(users => {
-                //     users.docs.forEach(user => {
-                //       fb.db.collection('userNotifications').doc(user.id).collection('notifications').get().then(notifications => {
-                //         notifications.docs.forEach(n => {
-                //           if (n.data().tid == id) {
-                //             fb.db.collection('userNotifications').doc(user.id).collection('notifications').doc(n.id).delete()
-                //           }
-                //         })
-                //       })
-                //     })
-                //   })             
-              
+                // store userid inside notifications so easier to delete...
+                console.log("Not great, TODO something better for user notification")
+                fb.db.collectionGroup('notifications').where('tid','==', id).get().then(docs => {
+                  docs.docs.forEach(doc => {
+                    console.log(doc)
+                    fb.db.collection('userNotifications').doc(doc.data().to).collection('notifications').doc(doc.id).update({
+                      'tripDeleted': true
+                    })
+                  })
+                })
+               
               Promise.all([delC, delCP, delN]).then(() => {
                 resolve('Trip deleted')
               }).catch(function (error) {
@@ -506,7 +490,8 @@ fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
                         'text': state.userProfile.name + " invited you to join " + state.thisTrip.name,
                         'isJoined': false,
                         'isDeclined': false,
-                        'from': state.currentUser.uid
+                        'from': state.currentUser.uid,
+                        'to': userID.id
                       })
                       resolve('invited')
                     })

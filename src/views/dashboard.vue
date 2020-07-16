@@ -2,20 +2,25 @@
   <div>
     <div>
       <div>Notifications</div>
-      <div>strikethrough means the trip was deleted by the trip owner</div>
       <!-- TODO filter responded, time frame etc -->
-      <div v-for="alert in thisUserNotificationsGetter.tripInvites" :key="alert.id" :class="{deleted: alert.tripDeleted}">
+      <div v-for="alert in thisUserNotificationsGetter.tripInvites" :key="alert.id" >
         <!-- from | time | category | message | actions/responded -->
-        <span>
+        <span :class="{strike: alert.tripDeleted}">
           {{alert.time}}
           -
           {{alert.text}}
         </span>
-        <span>
+        <span :class="{deleted: alert.tripDeleted}">
+          <!-- TODO change text to joined/declined after a selecton, innerHTML -->
           <button @click="joinTrip(alert.tid, alert.id, alert.isDeclined)" :class="{joined: alert.isJoined}" :disabled="alert.isJoined">Join</button>
           <button @click="declineTrip(alert.tid, alert.id, alert.isJoined)" :class="{declined: alert.isDeclined}" :disabled="alert.isDeclined">Decline</button>
           <!-- <button>Delete</button> -->
         </span>
+        <span :class="{deleted: !alert.tripDeleted}"> The owner deleted this trip</span>
+      </div>
+      
+      <div v-for="alert in thisUserNotificationsGetter.tripResponses" :key="alert.id" >
+        <span>{{alert.text}}</span>
       </div>
     </div>
   </div>
@@ -30,6 +35,7 @@ export default {
     });
   },
   computed: {
+
     ...mapGetters(["thisUserNotificationsGetter"])
   },
   methods: {
@@ -78,7 +84,10 @@ export default {
 .declined {
   border: 2px red solid
 }
+.strike {
+  text-decoration: line-through
+}
 .deleted {
-  text-decoration: overline
+  display: none;
 }
 </style>

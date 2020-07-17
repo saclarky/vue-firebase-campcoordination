@@ -5,15 +5,15 @@ const fb = require('../firebaseConfig.js')
 import { vuexfireMutations, firestoreAction } from 'vuexfire'
 import firebase from 'firebase'
 import router from '../router'
-
+console.log('use vuex in index.js')
 Vue.use(Vuex)
 
-// handle page reload... this is also in main.js?
+// handle page reload... this is also in main.js to slow down vue reloads until signed-in?? Why does this fire first?
 fb.auth.onAuthStateChanged(user => {
   // TODO- logout clear data??
-  console.log('auth state change triggered')
+  console.log('auth state change triggered index.js')
   if (user) {
-    console.log('there is a user: ', user) // TODO: why save profile if all info is here? Oh searching!
+    console.log('there is a user') // TODO: why save profile if all info is here? Oh searching!
     // this line fires when it's a new user and the registration logic in login.vue already did it...
     store.commit('setCurrentUser', user)
     // next line shouldn't fire for new registered users, doesn't exist
@@ -23,7 +23,11 @@ fb.auth.onAuthStateChanged(user => {
     // Get user-related stuff
     // Here? Or in views on load to minimize DB queries? Yah...
   }
+  else {
+    console.log('set null? like if I delete someone and this reacts')
+  }
 })
+console.log("is main.js loading everything first?")
 
 // export default new Vuex.Store({
 export const store = new Vuex.Store({
@@ -134,7 +138,8 @@ export const store = new Vuex.Store({
 
       if (state.thisUserNotifications.length > 0) {
         state.thisUserNotifications.forEach(doc => {
-          console.log('is this a data situation?', doc)
+          // console.log('is this a data situation?', doc)
+          // No it's basically already doc.data() but it has ID too
           let modInvite = doc;
           if ("time" in modInvite) {
             let dd = new Date(modInvite.time);
@@ -745,3 +750,4 @@ fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
     // }
   }
 })
+console.log('index.js end')

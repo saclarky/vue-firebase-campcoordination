@@ -10,9 +10,9 @@ import trip from '../views/trip.vue'
 import newTrip from '../views/newTrip'
 import notifications from '../views/userNotifications'
 import settings from '../views/settings'
-
+console.log('vue use vue router')
 Vue.use(VueRouter)
-
+console.log('routes obj list')
   const routes = [
   {
     path: '/',
@@ -80,7 +80,7 @@ meta: {
     }
 }
 ]
-
+console.log('vue router constant created')
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
@@ -91,12 +91,14 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
+    console.log('to ', to)
+    console.log('from ', from)
    console.log('router before each stuff')
         window.scrollTo(0,0);
    
   const requiresAuth = to.matched.some(x => x.meta.requiresAuth)
   const currentUser = firebase.auth().currentUser
-
+console.log('router is checking firebase auth for user here!')
   if (requiresAuth && !currentUser) {
       next('/login')
   } else if (requiresAuth && currentUser) {

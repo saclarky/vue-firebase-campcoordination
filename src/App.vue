@@ -6,6 +6,7 @@
 </template>
 
 <script>
+console.log("App!")
 // import {mapState} from 'vuex'
 import navigation from './components/navigation.vue'
 export default {

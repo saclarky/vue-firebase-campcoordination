@@ -25,13 +25,12 @@
           <button @click="login" class="button">Log In</button>
 
           <div class="extras">
-            <a @click='togglePasswordReset'>Forgot Password</a>
+            <a @click="togglePasswordReset">Forgot Password</a>
             <a @click="toggleForm">Create an Account</a>
           </div>
         </form>
 
-
-<!-- SIGNUP -->
+        <!-- SIGNUP -->
         <form v-if="!showLoginForm && !showForgotPassword" @submit.prevent>
           <h1>Get Started</h1>
 
@@ -64,25 +63,30 @@
           </div>
         </form>
         <form v-if="showForgotPassword" @submit.prevent class="password-reset">
-                    <div v-if="!passwordResetSuccess">
-                        <h1>Reset Password</h1>
-                        <p>We will send you an email to reset your password</p>
+          <div v-if="!passwordResetSuccess">
+            <h1>Reset Password</h1>
+            <p>We will send you an email to reset your password</p>
 
-                        <label for="email3">Email</label>
-                        <input v-model.trim="passwordForm.email" type="text" placeholder="you@email.com" id="email3" />
+            <label for="email3">Email</label>
+            <input
+              v-model.trim="passwordForm.email"
+              type="text"
+              placeholder="you@email.com"
+              id="email3"
+            />
 
-                        <button @click="resetPassword" class="button">Submit</button>
+            <button @click="resetPassword" class="button">Submit</button>
 
-                        <div class="extras">
-                            <a @click="togglePasswordReset">Back to Log In</a>
-                        </div>
-                    </div>
-                    <div v-else>
-                        <h1>Email Sent</h1>
-                        <p>check your email for a link to reset your password</p>
-                        <button @click="togglePasswordReset" class="button">Back to login</button>
-                    </div>
-                </form>
+            <div class="extras">
+              <a @click="togglePasswordReset">Back to Log In</a>
+            </div>
+          </div>
+          <div v-else>
+            <h1>Email Sent</h1>
+            <p>check your email for a link to reset your password</p>
+            <button @click="togglePasswordReset" class="button">Back to login</button>
+          </div>
+        </form>
         <transition name="fade">
           <div v-if="errorMsg !== ''" class="error-msg">
             <p>{{ errorMsg }}</p>
@@ -109,8 +113,8 @@ export default {
         password: ""
       },
       passwordForm: {
-                    email: ''
-                },
+        email: ""
+      },
       showLoginForm: true,
       showForgotPassword: false,
       performingRequest: false,
@@ -124,37 +128,32 @@ export default {
       this.showLoginForm = !this.showLoginForm;
     },
     togglePasswordReset() {
-                if (this.showForgotPassword) {
-                    this.showLoginForm = true
-                    this.showForgotPassword = false
-                    this.passwordResetSuccess = false
-                } else {
-                    this.showLoginForm = false
-                    this.showForgotPassword = true
-                }
-            },
+      if (this.showForgotPassword) {
+        this.showLoginForm = true;
+        this.showForgotPassword = false;
+        this.passwordResetSuccess = false;
+      } else {
+        this.showLoginForm = false;
+        this.showForgotPassword = true;
+      }
+    },
     login() {
-      console.log('login')
+      console.log("login");
       // this.performingRequest = true;
-      fb.auth.signInWithEmailAndPassword(
+      fb.auth
+        .signInWithEmailAndPassword(
           this.loginForm.email,
           this.loginForm.password
         )
-        .then(user => {
-          console.log(user.user)
-          console.log('login method set user from sign-in promise, but is aithStateChange also triggered?')
-          this.$store.commit("setCurrentUser", user.user);
-          console.log('login method fetch profile')
-          this.$store.dispatch("fetchUserProfile");
-          // console.log('method to dispatch binfProfile ')
-          // this.$store.dispatch('bindProfileRef'); // keep profile obejct updated from firebase AFTER log-in. 
-//TODO: IF THIS ISN"T FIRST PAGE then missing this bind and that's bad......
+        .then(() => {
+// Sign-in triggers auth state change to save user and get profile into state
+// https://stackoverflow.com/questions/45204288/initialize-vue-app-after-firebase-auth-state-changed
+          this.performingRequest = false;
           this.$router.push("/dashboard");
+          
         })
         .catch(err => {
-          console.log('sign in error')
-          console.log(err.message);
-          this.errorMsg = err.message;
+          this.$toasted.show(err.message)
           this.performingRequest = false;
         });
     },
@@ -162,59 +161,87 @@ export default {
       this.performingRequest = true;
       // todo: error account exists/email used
       // todo: reset password? forgot pw?
-      fb.auth
-        .createUserWithEmailAndPassword(
+//      firebase.auth Error Codes
+// auth/email-already-in-use
+// Thrown if there already exists an account with the given email address.
+// auth/invalid-email
+// Thrown if the email address is not valid.
+// auth/operation-not-allowed
+// Thrown if email/password accounts are not enabled. Enable email/password accounts in the Firebase Console, under the Auth tab.
+// auth/weak-password
+// Thrown if the password is not strong enough.
+      fb.auth.createUserWithEmailAndPassword( // THIS TRIGGERS A SIGN-IN WHICH TRIGGERS ONAUTHSTATECHANGE(), USER IS SAVED
+      // BUT PROFILE IS EMPTY
           this.signupForm.email,
           this.signupForm.password
         )
         .then(user => {
           // this.$store.commit("setCurrentUser", user.user); // bc authStatChange listener?
-          console.log("now add profile after fb auth user created. Error? authstatechange may trigger b4 this runs");
+         console.log("set timeout")
+         setTimeout(() => { 
+            console.log(            "TIMEOUT, now add profile after fb auth user created. Error? authstatechange may trigger b4 this runs" );
+          console.log('create profile for ', user.user.uid)
           // create user obj
-          fb.db
+          let profilePromise = fb.db
             .collection("users")
             .doc(user.user.uid)
             .set({
               name: this.signupForm.name,
               email: this.signupForm.email
               // title: this.signupForm.title
-            })
-            .then(() => {
-              console.log("promise returned from saving a new profile registration");
-              console.log('fetch profile since auth state change would ahve possibly run too early')
+            });
+          console.log("cancelled? promise", profilePromise);
+          profilePromise
+            .then(doc => {
+              console.log(
+                "promise returned from saving a new profile registration",
+                doc
+              );
+              console.log(
+                "fetch profile since auth state change would ahve possibly run too early"
+              );
               this.$store.dispatch("fetchUserProfile");
-              // this.$store.dispatch('bindProfileRef'); // keep profile obejct updated from firebase AFTER log-in. 
-//TODO: IF THIS ISN"T FIRST PAGE then missing this bind and that's bad......
-// Strange issue trying to debug, 'empty' existing collections.
-// Might be because of not created ancestor first explicity so here...
-fb.db.collection('userNotifications').doc(user.user.uid).set({'null':null})
-
-              this.$router.push("/dashboard");
+              // Strange issue trying to debug, 'empty' existing collections.
+              // Might be because of not created ancestor first explicity so here...
+              fb.db
+                .collection("userNotifications")
+                .doc(user.user.uid)
+                .set({ null: null })
+                .then(() => {
+                  
+          this.performingRequest = false;
+                  this.$router.push("/dashboard");
+                });
             })
             .catch(err => {
-              console.log(err.message);
-              this.errorMsg = err.message;
+              this.$toasted.show(err.message);
               this.performingRequest = false;
             });
+          }, 3000);
+        
         })
         .catch(err => {
-          this.errorMsg = err.message;
-          console.log(err);
+          this.$toasted.show(err.message);
+          
+          this.performingRequest = false;
         });
     },
-    
-            resetPassword() {
-                this.performingRequest = true
-                fb.auth.sendPasswordResetEmail(this.passwordForm.email).then(() => {
-                    this.performingRequest = false
-                    this.passwordResetSuccess = true
-                    this.passwordForm.email = ''
-                }).catch(err => {
-                    console.log(err)
-                    this.performingRequest = false
-                    this.errorMsg = err.message
-                })
-            }
+
+    resetPassword() {
+      this.performingRequest = true;
+      fb.auth
+        .sendPasswordResetEmail(this.passwordForm.email)
+        .then(() => {
+          this.performingRequest = false;
+          this.passwordResetSuccess = true;
+          this.passwordForm.email = "";
+        })
+        .catch(err => {
+          console.log(err);
+          this.performingRequest = false;
+          this.errorMsg = err.message;
+        });
+    }
   }
 };
 </script>

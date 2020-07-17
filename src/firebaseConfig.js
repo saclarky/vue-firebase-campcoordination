@@ -11,7 +11,7 @@ var config = {
     appId: "1:778501407382:web:10954e1d4b955f1293b8b7",
     measurementId: "G-FG1NJ5MLZ7"
   };
-  
+  console.log('initialize firebase from config file')
   firebase.initializeApp(config)
   
   // export const db = firebase.firestore()

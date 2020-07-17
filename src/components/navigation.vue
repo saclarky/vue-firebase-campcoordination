@@ -11,7 +11,7 @@
         </div>
 
         <div v-if="currentUser" class="nav-menu" >
-          <div  v-on:click='toggleAccount'>Hi, {{userProfile.name}}!</div>
+          <div  v-on:click='toggleAccount'>Hi, {{currentUser.displayName}}!</div>
           <div v-show="accountShow" class="menu">
             <div class="menu-item" v-on:click='toggleAccount'>
               <router-link to="/settings">Settings</router-link>
@@ -48,7 +48,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(["currentUser", "userProfile"])
+    ...mapState(["currentUser"])
   },
   methods: {
       toggleAccount() {
@@ -63,7 +63,7 @@ if(this.accountShow==true){this.accountShow=false;}
       fb.auth
         .signOut()
         .then(() => {
-          this.$store.dispatch("clearData");
+          this.$store.dispatch("clearData"); // authStateChange actually can do this? 
           this.$router.push("/login");
         })
         .catch(err => {

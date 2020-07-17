@@ -11,20 +11,24 @@ Vue.use(Vuex)
 // handle page reload... this is also in main.js to slow down vue reloads until signed-in?? Why does this fire first?
 fb.auth.onAuthStateChanged(user => {
   // TODO- logout clear data??
-  console.log('auth state change triggered index.js')
+  console.log('auth state change triggered index.js') 
   if (user) {
-    console.log('there is a user') // TODO: why save profile if all info is here? Oh searching!
-    // this line fires when it's a new user and the registration logic in login.vue already did it...
-    store.commit('setCurrentUser', user)
-    // next line shouldn't fire for new registered users, doesn't exist
-    // AND there's a data ref to changing currentuser to get profile so no need!
-    // ignore last line, a change in uid doesn't seem to trigger it
-    store.dispatch('fetchUserProfile')
-    // Get user-related stuff
-    // Here? Or in views on load to minimize DB queries? Yah...
+    console.log('creation ', user.metadata.creationTime)
+    console.log('signin ', user.metadata.lastSignInTime)
+    if( user.metadata.creationTime == user.metadata.lastSignInTime) {
+      console.log('new user! but do this without ms seems sketchy. Other option have a state object changed when registering?')
+      // Don't fetch or commit the currentuser/profile it likely hasn't been saved yet, code in login.vue will do it
+      return
+    } else {
+      console.log('existing user, saving to state')
+      store.commit('setCurrentUser', user)
+      store.dispatch('fetchUserProfile')
+    }
   }
   else {
     console.log('set null? like if I delete someone and this reacts')
+    store.commit('setCurrentUser', null);
+    store.commit('setUserProfile', {});
   }
 })
 console.log("is main.js loading everything first?")
@@ -32,6 +36,7 @@ console.log("is main.js loading everything first?")
 // export default new Vuex.Store({
 export const store = new Vuex.Store({
   state: {
+    registeringUser: false,
     items: [],
     errors: "",
     itemInput: "",
@@ -226,14 +231,32 @@ export const store = new Vuex.Store({
       console.log(id)
       state.thisTripID = id;
     },
-    setTripOwner: function (state, name) {
-      console.log('mutation to set the trip owner');
-      state.thisTripOwner = name;
-    },
+    // setTripOwner: function (state, name) {
+    //   console.log('mutation to set the trip owner');
+    //   state.thisTripOwner = name;
+    // },
     ...vuexfireMutations
   },
 
   actions: {
+    assignDisplayName: ({state}, data) => {
+      // TODO: 1, unsure if this updates state user and 2) note this isn't firebase profile, it's auth method
+      if(state.currentUser) {
+        return state.currentUser.updateProfile({displayName: data.displayName})
+      } else {
+        return new Promise((resolve) => {
+          resolve('empty')
+        })
+      }
+     
+//       // great thought but I think this blocks everything including authStateChange, currentUser will never arrive
+//      do {
+//         setTimeout(function() {console.log("do")},1000) 
+//       }
+//       while (state.currentUser === null)
+// console.log('does this run? nope')
+//      
+    },
     // TODO bind other tables?
     bindItemsRef: firestoreAction(context => {
       // context contains all original properties like commit, state, etc
@@ -294,22 +317,23 @@ export const store = new Vuex.Store({
       return context.bindFirestoreRef('thisUserNotifications', fb.db.collection('userNotifications')
         .doc(context.state.currentUser.uid).collection('notifications'))
     }),
-    queryUsernameAction: (context, uid) => {
-      console.log('query a username from uid', uid)
-      return new Promise((resolve, reject) => {
-        fb.db.collection("users").doc(uid).get()
-          .then(doc => {
-            console.log('have the username doc for ', uid)
-            if (doc.exists) {
-              console.log(uid, ' name is ', doc.data().name)
-              resolve(doc.data().name);
-            } else {
-              console.log('error, username does not exist docs not updated with changes')
-              reject(new Error("Username doesn't exist! Uh oh. Check tables are updated."));
-            }
-          })
-      })
-    },
+    // queryUsernameAction: (context, uid) => {
+    //   console.log('easier to query auth.users? maybe harder')
+    //   console.log('query a username from uid', uid)
+    //   return new Promise((resolve, reject) => {
+    //     fb.db.collection("users").doc(uid).get()
+    //       .then(doc => {
+    //         console.log('have the username doc for ', uid)
+    //         if (doc.exists) {
+    //           console.log(uid, ' name is ', doc.data().name)
+    //           resolve(doc.data().name);
+    //         } else {
+    //           console.log('error, username does not exist docs not updated with changes')
+    //           reject(new Error("Username doesn't exist! Uh oh. Check tables are updated."));
+    //         }
+    //       })
+    //   })
+    // },
     createTripPageData: ({ dispatch, commit }, tid) => {
       let id = tid
       console.log('Wrapper function to run actions for setting up data for a trip page')
@@ -317,12 +341,12 @@ export const store = new Vuex.Store({
       commit('updateThisTripID', tid)
       dispatch('bindATrip')
         .then((trip) => {
-          console.log("the current trip is set", 'owner:', trip.uid, 'trip', id)
-          console.log('get the trip owner name')
-          dispatch('queryUsernameAction', trip.uid).then((name) => {
-            console.log('have owner name promise return')
-            commit('setTripOwner', name)
-          })
+          console.log("the current trip is set", 'owner:', trip.owner, 'trip', id)
+          console.log('get the trip owner name, TODO just save the name with the trip')
+          // dispatch('queryUsernameAction', trip.uid).then((name) => {
+          //   console.log('have owner name promise return')
+          //   commit('setTripOwner', trip.owner)
+          // })
           dispatch('bindTripActivityLog')
           dispatch('bindTripCampersPending').then(res => {
             console.log("Pending trip campers retrieved", res)
@@ -342,19 +366,20 @@ export const store = new Vuex.Store({
     saveNewTripAction: ({ state }, name) => {
       return new Promise((resolve, reject) => {
         //TODO: TDB into blank fields?
-        fb.db.collection("trips").add({ 'name': name, 'uid': state.currentUser.uid })
+        fb.db.collection("trips").add({ 'name': name, 'uid': state.currentUser.uid, 'owner': state.currentUser.displayName })
           .then(doc => {
             // context.commit('updateThisTripID', (doc.id))
             //TODO redirect to new trip page?
             fb.db.collection('campers').doc(doc.id).set({
-              [state.currentUser.uid]: state.userProfile.name
+              [state.currentUser.uid]: state.currentUser.displayName
             })
             .then(() => {
+              
+              console.log('saved current user to trip campers')
               // Strange issue trying to debug, 'empty' existing collections.
 // Might be because of not created ancestor first explicity so here...
 fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
               resolve("saved")
-              console.log('saved current user to trip campers')
             }).catch(e => {
               console.log("error saving new trip's owner as a camper")
               console.log(e.message)
@@ -479,7 +504,7 @@ fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
               fb.db.collection('tripActivityLog').doc(tid).collection('logs')
                 .add({
                   'time': new Date().getTime(), 'from': state.currentUser.uid,
-                  'text': state.userProfile.name + " invited " + uidToName + " to join the trip",
+                  'text': state.currentUser.displayName + " invited " + uidToName + " to join the trip",
                   'category': "invite"
                 })
                 .then((res) => {
@@ -492,7 +517,7 @@ fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
                         'category': 'tripInvite',
                         'tid': tid,
                         'time': new Date().getTime(),
-                        'text': state.userProfile.name + " invited you to join " + state.thisTrip.name,
+                        'text': state.currentUser.displayName + " invited you to join " + state.thisTrip.name,
                         'isJoined': false,
                         'isDeclined': false,
                         'from': state.currentUser.uid,
@@ -539,7 +564,7 @@ fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
         // set versus add --> set requires ID to be specified, add() auto-generates
         // Add to campers
         let b = fb.db.collection('campers').doc(data.tid).set({
-          [state.currentUser.uid]: state.userProfile.name
+          [state.currentUser.uid]: state.currentUser.displayName
           // TODO have two tabs open and test auto-update on trip page
         })
 
@@ -552,7 +577,7 @@ fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
         let d = fb.db.collection('tripActivityLog').doc(data.tid).collection('logs')
           .add({
             'time': new Date().getTime(), 'from': state.currentUser.uid,
-            'text': state.userProfile.name + " accepted trip invite.",
+            'text': state.currentUser.displayName + " accepted trip invite.",
             'category': "inviteRSVP"
           })
         // update user notification response
@@ -602,14 +627,14 @@ fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
   
             // set versus add --> set requires ID to be specified, add() auto-generates
            let b = fb.db.collection('campersNo').doc(data.tid).set({
-              [state.currentUser.uid]: state.userProfile.name
+              [state.currentUser.uid]: state.currentUser.displayName
               // TODO have two tabs open and test auto-update on trip page
             })
               // Add an activity log message about the invite
              let a = fb.db.collection('tripActivityLog').doc(data.tid).collection('logs')
                 .add({
                   'time': new Date().getTime(), 'from': state.currentUser.uid,
-                  'text': state.userProfile.name + " declined trip invite.",
+                  'text': state.currentUser.displayName + " declined trip invite.",
                   'category': "inviteRSVP"
                 })
         Promise.all([a, b, c, d, e]).then(() => {
@@ -699,10 +724,11 @@ fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
     },
     // LOGGING IN // AUTH STUFF
     fetchUserProfile({ commit, state }) {
-      console.log('dispatch user profile get');
+      console.log('handle empty profiles more elegantly...')
+      console.log('dispatch user profile get, TODO ONLY RUN when need it, not on auth state change...? maybe null it on auth change');
       console.log(state.currentUser.uid)
       fb.db.collection('users').doc(state.currentUser.uid).get().then(res => {
-        console.log(res)
+        console.log('user profile exists? ', res.exists)
         if (res.exists) {
           console.log('got the profile')
           commit('setUserProfile', res.data())

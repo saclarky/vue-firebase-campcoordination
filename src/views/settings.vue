@@ -17,6 +17,16 @@
 
                 <button @click="updateProfileMethod" class="button">Update Profile</button>
             </form>
+
+             <form @submit.prevent>
+                <label for="authname">Name</label>
+                <input v-model.trim="authName" type="text" id="authname" />
+
+                <!-- <label for="title">Job Title</label> -->
+                <!-- <input v-model.trim="title" type="text" :placeholder="userProfile.title" id="title" /> -->
+
+                <button @click="updateAuthMethod" class="button">Update User</button>
+            </form>
         </div>
     </section>
 </template>
@@ -27,6 +37,7 @@ import { mapState } from 'vuex'
         data() {
             return {
                 name: '',
+                authName: '',
                 showSuccess: false
             }
         },
@@ -34,6 +45,19 @@ import { mapState } from 'vuex'
     ...mapState(['currentUser','userProfile'])
   },
      methods: {
+         deleteAccount: function() {
+console.log("TODO- delete userNotifications, profiel, references and auth")
+         },
+         updateAuthMethod: function() {
+             this.$store.dispatch('assignDisplayName', {displayName: this.authName }).then(() => {
+               
+      this.authname = '' //TODO: if success?
+         this.showSuccess = true;
+         this.$toasted.show("Name saved!")
+             }).catch(e => {
+                 this.$toasted.show(e.message)
+             })
+     } ,
          updateProfileMethod: function() {
              this.$store.dispatch('updateProfile', {name: this.name !== '' ? this.name : this.userProfile.name});
          this.name = '' //TODO: if success?

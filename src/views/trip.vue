@@ -11,7 +11,7 @@
   <div class="hero">
       <div class="hero-top" id="nav-bar">
         <h1 class="hero-title">{{thisTrip.name}}</h1>
-        <h2>Started by {{thisTripOwner}}</h2>
+        <h2>Started by {{thisTrip.owner}}</h2>
         <div class="hero-icon"></div>
       </div>
       <div class="hero-bottom">
@@ -121,11 +121,10 @@ export default {
 // return this.thisTripCampers
 //       },
 ...mapGetters(['thisTripCampersNames']),
-        ...mapState(['thisTrip', 'thisTripID', 'thisTripOwner'])
+        ...mapState(['thisTrip', 'thisTripID'])
     },
     data: function() {
       return {
-        tripOwner: '',
         showDashboard: true,
         showMessages: true,
         showCamperDetails: false,

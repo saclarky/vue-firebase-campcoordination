@@ -34,11 +34,11 @@
         <form v-if="!showLoginForm && !showForgotPassword" @submit.prevent>
           <h1>Get Started</h1>
 
-          <label for="name">Name</label>
-          <input v-model.trim="signupForm.name" type="text" placeholder="Savvy Apps" id="name" />
+          <label for="name">First Name</label>
+          <input v-model.trim="signupForm.name" type="text" placeholder="Tamira" id="name" />
 
-          <!-- <label for="title">Title</label> -->
-          <!-- <input v-model.trim="signupForm.title" type="text" placeholder="Company" id="title" /> -->
+          <label for="lastName">Last Name</label>
+          <input v-model.trim="signupForm.lastName" type="text" placeholder="Jones" id="lastName" />
 
           <label for="email2">Email</label>
           <input
@@ -46,6 +46,7 @@
             type="text"
             placeholder="you@email.com"
             id="email2"
+            required
           />
 
           <label for="password2">Password</label>
@@ -99,7 +100,7 @@
 
 <script>
 const fb = require("../firebaseConfig.js");
-
+import {mapState} from 'vuex'
 export default {
   data() {
     return {
@@ -109,6 +110,7 @@ export default {
       },
       signupForm: {
         name: "",
+        lastName: "",
         email: "",
         password: ""
       },
@@ -121,6 +123,9 @@ export default {
       errorMsg: "",
       passwordResetSuccess: false
     };
+  },
+  computed: {
+    ...mapState(['currentUser'])
   },
   methods: {
     toggleForm() {
@@ -139,6 +144,14 @@ export default {
     },
     login() {
       console.log("login");
+      if (this.loginForm.email == "") {
+        this.$toasted.show("Please enter an email.");
+        return;
+      }
+      if (this.loginForm.password == "") {
+        this.$toasted.show("Please enter a password.");
+        return;
+      }
       // this.performingRequest = true;
       fb.auth
         .signInWithEmailAndPassword(
@@ -146,70 +159,93 @@ export default {
           this.loginForm.password
         )
         .then(() => {
-// Sign-in triggers auth state change to save user and get profile into state
-// https://stackoverflow.com/questions/45204288/initialize-vue-app-after-firebase-auth-state-changed
+          // Sign-in triggers auth state change to save user and get profile into state
+          // https://stackoverflow.com/questions/45204288/initialize-vue-app-after-firebase-auth-state-changed
           this.performingRequest = false;
           this.$router.push("/dashboard");
-          
         })
         .catch(err => {
-          this.$toasted.show(err.message)
+          this.$toasted.show(err.message);
           this.performingRequest = false;
         });
     },
-    signup() {
+    signup: function() {
+      // Form validation
+      if (this.signupForm.name == "") {
+        this.$toasted.show("Please enter a first name.");
+        return;
+      }
+      if (this.signupForm.email == "") {
+        this.$toasted.show("Please enter an email.");
+        return;
+      }
+      if (this.signupForm.password == "") {
+        this.$toasted.show("Please enter a password.");
+        return;
+      }
       this.performingRequest = true;
       // todo: error account exists/email used
       // todo: reset password? forgot pw?
-//      firebase.auth Error Codes
-// auth/email-already-in-use
-// Thrown if there already exists an account with the given email address.
-// auth/invalid-email
-// Thrown if the email address is not valid.
-// auth/operation-not-allowed
-// Thrown if email/password accounts are not enabled. Enable email/password accounts in the Firebase Console, under the Auth tab.
-// auth/weak-password
-// Thrown if the password is not strong enough.
-      fb.auth.createUserWithEmailAndPassword( // THIS TRIGGERS A SIGN-IN WHICH TRIGGERS ONAUTHSTATECHANGE(), USER IS SAVED
-      // BUT PROFILE IS EMPTY
+      //      firebase.auth Error Codes
+      // auth/email-already-in-use
+      // Thrown if there already exists an account with the given email address.
+      // auth/invalid-email
+      // Thrown if the email address is not valid.
+      // auth/operation-not-allowed
+      // Thrown if email/password accounts are not enabled. Enable email/password accounts in the Firebase Console, under the Auth tab.
+      // auth/weak-password
+      // Thrown if the password is not strong enough.
+      fb.auth
+        .createUserWithEmailAndPassword(
+          // THIS TRIGGERS A SIGN-IN WHICH TRIGGERS ONAUTHSTATECHANGE(), USER IS SAVED
+          // BUT PROFILE IS EMPTY
           this.signupForm.email,
           this.signupForm.password
         )
         .then(user => {
-          // this.$store.commit("setCurrentUser", user.user); // bc authStatChange listener?
-         console.log("set timeout")
-         setTimeout(() => { 
-            console.log(            "TIMEOUT, now add profile after fb auth user created. Error? authstatechange may trigger b4 this runs" );
-          console.log('create profile for ', user.user.uid)
-          // create user obj
+          console.log(
+            "auth finished created user obj, any authStateChange should be exited", user
+          ); // here it says reason is 'signin/ or something? Additional inof. user.user is teh actual user
+
+          //Set profile name on auth user now
+          user.user.updateProfile({displayName: this.signupForm.name})
+          // this.$store
+          //   .dispatch("assignDisplayName", {
+          //     displayName: this.signupForm.name
+          //   })
+            .then(res => {
+              // coMMIT user state here beuase the display name is assigned and there won't be data update issues
+              // When I did it before the nav bar greeting didn't work until a click? wierd
+              this.$store.commit('setCurrentUser', user.user)
+              if (res === "empty") {
+                console.log("authchange has nto run...");
+                this.$toasted.show('Race condition assign versus save :/')
+              } else {
+                console.log("assigned display name as first name" ); //TODO: what if a trip has 2 people same name?
+               // create user obj
           let profilePromise = fb.db
             .collection("users")
             .doc(user.user.uid)
             .set({
-              name: this.signupForm.name,
+              name: this.signupForm.name, // keep bc for now using when search by email and query name from uid client-side
+              lastName: this.signupForm.lastName,
               email: this.signupForm.email
               // title: this.signupForm.title
             });
-          console.log("cancelled? promise", profilePromise);
+       
           profilePromise
-            .then(doc => {
-              console.log(
-                "promise returned from saving a new profile registration",
-                doc
-              );
-              console.log(
-                "fetch profile since auth state change would ahve possibly run too early"
-              );
+            .then(() => {
+              console.log('fetch profile')
               this.$store.dispatch("fetchUserProfile");
               // Strange issue trying to debug, 'empty' existing collections.
               // Might be because of not created ancestor first explicity so here...
+              console.log('create empty notification logs')
               fb.db
                 .collection("userNotifications")
                 .doc(user.user.uid)
                 .set({ null: null })
                 .then(() => {
-                  
-          this.performingRequest = false;
+                  this.performingRequest = false;
                   this.$router.push("/dashboard");
                 });
             })
@@ -217,12 +253,21 @@ export default {
               this.$toasted.show(err.message);
               this.performingRequest = false;
             });
-          }, 3000);
-        
+              }
+            })
+            .catch(err => {
+              this.$toasted.show(err.message);
+              this.performingRequest = false;
+            });
+
+          // 2
+          
+          console.log("create profile for ", user.user.uid);
+         
         })
         .catch(err => {
           this.$toasted.show(err.message);
-          
+
           this.performingRequest = false;
         });
     },

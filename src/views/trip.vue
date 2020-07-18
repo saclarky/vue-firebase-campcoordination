@@ -27,15 +27,15 @@
       <div v-if="showDashboard" class='dashboard'>
       <div class='gridWrapper'>
         <div class='gridItem'>
-          <h4>Campers</h4>        
+          <h4>Definitely Going</h4>        
          
           <div class='itemBody'>
-            <ul>
-              <li v-for="camper in thisTripCampersNames" :key="camper">{{camper}}</li>
-            </ul>
+            
+              <div class="item" v-for="camper in thisTripCampersNames" :key="camper">{{camper}}</div>
+            
           </div>
-          <i @click="toggleAddUser" class='plusIcon'></i>
-          <div @click="toggleCamperDetails" class='actionRow'><p>Details</p> <div class='rightArrowIcon'></div></div>
+     
+          <div @click="toggleCamperDetails" class='actionRow'> <div class='rightArrowIcon'></div></div>
         </div>
          <div class='gridItem'>
           <h4>Gear</h4>
@@ -79,25 +79,13 @@
     </div>
    
     </div>
-   <!-- use the modal component, pass in the prop -->
-          <inviteCamperPopup @closeInvite="toggleAddUser()" v-if="showInviteUser" :tripid="thisTripID">
-            <!--
-      you can use custom content here to overwrite
-      default content
-            -->
-            
-             <template v-slot:body>
-              <h3>{{thisTrip.name}}</h3>
-            </template>
-            <!-- <h3 slot="header">custom header</h3> -->
-          </inviteCamperPopup> 
+  
   </div>
 </template>
 
 <script>
 import {mapState, mapGetters} from 'vuex'
 import camperDetails from '../components/camperDetails'
-import inviteCamperPopup from '../components/inviteCamperPopup'
 
 export default {
   name: "trip",
@@ -113,31 +101,24 @@ export default {
    
   },
   components: {
-    camperDetails,
-    inviteCamperPopup
+    camperDetails
   },
     computed: {
 //       camperYes: function() {
 // return this.thisTripCampers
 //       },
 ...mapGetters(['thisTripCampersNames']),
-        ...mapState(['thisTrip', 'thisTripID'])
+        ...mapState(['thisTrip'])
     },
     data: function() {
       return {
         showDashboard: true,
         showMessages: true,
-        showCamperDetails: false,
-        showInviteUser: false
+        showCamperDetails: false
       }
   },
-  methods: {
-     toggleAddUser() {
-      this.showInviteUser = !this.showInviteUser;
-    },
+  methods: {    
     toggleCamperDetails() {
-      console.log('toggle camper details', this.thisTripID)
-      // this.$store.dispatch('getThisTripCamperActivityLog',this.thisTripID)
       this.showCamperDetails = !this.showCamperDetails
       this.toggleDashboard()
     },
@@ -145,12 +126,16 @@ export default {
       this.showDashboard = !this.showDashboard
       this.showMessages = !this.showMessages
     }
-    }
-  
+    }  
 }
   </script>
 
 <style scoped>
+h4 {
+  margin: 0;
+  padding: 0;
+  font-size: 1.2rem;
+}
 /* HERO CSS */
 .hero {
   display: flex;
@@ -209,7 +194,8 @@ export default {
   align-items: center;
   justify-content: center;
   box-shadow: 1px 1px 3px 1px rgba(57, 57, 57, 0.2);
-  padding: 15px;
+  padding: 10px;
+  background:#95c9d1bf;
 }
 .actionRow {
   display: flex;
@@ -218,6 +204,9 @@ export default {
       justify-content: center;
     width: 100%;
     cursor: pointer;
+    color:gray;
+    font-size:.9rem;
+    font-style:italic;
 }
 .actionRow > p {
   margin-right: 10px;
@@ -238,11 +227,23 @@ export default {
   background-size: contain;
   width: 15px;
   height: 15px;
-  color: black;
+  color: gray;
 }
+
+.itemBody {
+  padding: 10px;
+}
+
+.item {
+  font-size: 1rem;
+  line-height: 1.6rem;
+  /* text-align: left; */
+}
+
 
 /* messages section */
 #messages {
   margin-top: 15px;
 }
+
 </style>

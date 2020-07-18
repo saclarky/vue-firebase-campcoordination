@@ -9,6 +9,7 @@
     </div>
 
     <div class="row">
+           <i @click="toggleAddUser" class='plusIcon'></i>
       <div class="wrapper col1">
            <div>Confirmed, can edit trip page</div>
         <div v-for="yes in thisTripCampersNames" :key="yes">{{yes}}</div>
@@ -30,23 +31,44 @@
         </div>
       </div>
     </div>
+     <!-- use the modal component, pass in the prop -->
+          <inviteCamperPopup @closeInvite="toggleAddUser()" v-if="showInviteUser" :tripid="thisTripID">
+            <!--
+      you can use custom content here to overwrite
+      default content
+            -->
+            
+             <template v-slot:body>
+              <h3>{{thisTrip.name}}</h3>
+            </template>
+            <!-- <h3 slot="header">custom header</h3> -->
+          </inviteCamperPopup> 
   </div>
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapState } from "vuex";
+import inviteCamperPopup from '../components/inviteCamperPopup'
 export default {
   data: function() {
-    return {};
+    return {
+      
+        showInviteUser: false
+    };
   },
-  computed: {
-  
+  computed: {  
 ...mapGetters(['thisTripCampersNames', 'thisTripCampersNoNames','thisTripCampersPendingNames','thisTripInviteLogs']),
 
-   
+   ...mapState(['thisTrip','thisTripID'])
   
   },
+   components: {
+     inviteCamperPopup
+  },
   methods: {
+     toggleAddUser() {
+      this.showInviteUser = !this.showInviteUser;
+    },
     returnToDashboard() {
       this.$emit("closeCamperDetails");
     }
@@ -93,5 +115,13 @@ export default {
   font-style: italic;
   padding: 5px;
   display: inline;
+}
+.plusIcon {
+  background: url("../assets/add-plus.svg") no-repeat center center;
+  background-size: contain;
+  width: 50px;
+  height: 50px;
+  margin-bottom: 15px;
+  cursor: pointer;
 }
 </style>

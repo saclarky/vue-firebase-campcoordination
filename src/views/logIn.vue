@@ -209,10 +209,7 @@ export default {
 
           //Set profile name on auth user now
           user.user.updateProfile({displayName: this.signupForm.name})
-          // this.$store
-          //   .dispatch("assignDisplayName", {
-          //     displayName: this.signupForm.name
-          //   })
+          
             .then(res => {
               // coMMIT user state here beuase the display name is assigned and there won't be data update issues
               // When I did it before the nav bar greeting didn't work until a click? wierd

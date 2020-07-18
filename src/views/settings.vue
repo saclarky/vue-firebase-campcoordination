@@ -49,7 +49,7 @@ import { mapState } from 'vuex'
 console.log("TODO- delete userNotifications, profiel, references and auth")
          },
          updateAuthMethod: function() {
-             this.$store.dispatch('assignDisplayName', {displayName: this.authName }).then(() => {
+             this.currentUser.updateProfile({displayName: this.authName }).then(() => {
                
       this.authname = '' //TODO: if success?
          this.showSuccess = true;

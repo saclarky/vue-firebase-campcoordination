@@ -239,24 +239,6 @@ export const store = new Vuex.Store({
   },
 
   actions: {
-    assignDisplayName: ({state}, data) => {
-      // TODO: 1, unsure if this updates state user and 2) note this isn't firebase profile, it's auth method
-      if(state.currentUser) {
-        return state.currentUser.updateProfile({displayName: data.displayName})
-      } else {
-        return new Promise((resolve) => {
-          resolve('empty')
-        })
-      }
-     
-//       // great thought but I think this blocks everything including authStateChange, currentUser will never arrive
-//      do {
-//         setTimeout(function() {console.log("do")},1000) 
-//       }
-//       while (state.currentUser === null)
-// console.log('does this run? nope')
-//      
-    },
     // TODO bind other tables?
     bindItemsRef: firestoreAction(context => {
       // context contains all original properties like commit, state, etc
@@ -311,11 +293,11 @@ export const store = new Vuex.Store({
       // will it notice on its own a change in trip id?
       // COLLECTION returns an array; not null, lenght 0 if no results
       return context.bindFirestoreRef('thisTripActivityLog', fb.db.collection('tripActivityLog').doc(context.state.thisTripID)
-        .collection('logs'))
+        .collection('logs').orderBy("time").limit(20))
     }),
     bindUserNotifications: firestoreAction(context => {
       return context.bindFirestoreRef('thisUserNotifications', fb.db.collection('userNotifications')
-        .doc(context.state.currentUser.uid).collection('notifications'))
+        .doc(context.state.currentUser.uid).collection('notifications').orderBy("time").limit(20))
     }),
     // queryUsernameAction: (context, uid) => {
     //   console.log('easier to query auth.users? maybe harder')
@@ -368,8 +350,12 @@ export const store = new Vuex.Store({
         //TODO: TDB into blank fields?
         fb.db.collection("trips").add({ 'name': name, 'uid': state.currentUser.uid, 'owner': state.currentUser.displayName })
           .then(doc => {
-            // context.commit('updateThisTripID', (doc.id))
+           // Create docs for future camper updates
+           fb.db.collection('campersNo').doc(doc.id).set({})
+           fb.db.collection('campersPending').doc(doc.id).set({})
             //TODO redirect to new trip page?
+            // Since it's a new trip use SET because need to also create the document
+            // If use update throws an error, no document to update
             fb.db.collection('campers').doc(doc.id).set({
               [state.currentUser.uid]: state.currentUser.displayName
             })
@@ -510,7 +496,7 @@ fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
                 .then((res) => {
                   console.log(res) //invite id is here res.id
                   // Add to pending campers
-                  fb.db.collection('campersPending').doc(tid).set({ [userID.id]: uidToName })
+                  fb.db.collection('campersPending').doc(tid).update({ [userID.id]: uidToName })
                     .then(() => {
                       // Add notification to user dashboard
                       fb.db.collection('userNotifications').doc(userID.id).collection('notifications').add({
@@ -562,8 +548,9 @@ fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
         }
 
         // set versus add --> set requires ID to be specified, add() auto-generates
+        // BUT both are for entire documents not just fields in documents ==  update()
         // Add to campers
-        let b = fb.db.collection('campers').doc(data.tid).set({
+        let b = fb.db.collection('campers').doc(data.tid).update({
           [state.currentUser.uid]: state.currentUser.displayName
           // TODO have two tabs open and test auto-update on trip page
         })
@@ -626,7 +613,7 @@ fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
           }
   
             // set versus add --> set requires ID to be specified, add() auto-generates
-           let b = fb.db.collection('campersNo').doc(data.tid).set({
+           let b = fb.db.collection('campersNo').doc(data.tid).update({
               [state.currentUser.uid]: state.currentUser.displayName
               // TODO have two tabs open and test auto-update on trip page
             })

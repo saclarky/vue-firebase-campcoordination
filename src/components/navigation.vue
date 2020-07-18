@@ -80,7 +80,7 @@ section {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 30px;
+  padding: 10px 30px;
 }
 .nav-menu {
   padding: 0 15px;
@@ -134,6 +134,6 @@ a.router-link-exact-active {
   background-size: contain;
   width: 25px;
   height: 25px;
-  /* margin-bottom: 15px; */
+  margin-bottom: 0;
 }
 </style>

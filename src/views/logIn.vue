@@ -1,46 +1,57 @@
 <template>
   <div id="login">
-    <transition name="fade">
+
+     <div class="hero">
+      <div class="hero-top" id="nav-bar">
+        <h1 class="hero-title"> {{sectionTitle}} </h1>
+        <div class="hero-icon"></div>
+      </div>
+
+      <div class="hero-bottom">
+        <div class="hero-content">
+           <transition name="fade">
       <div v-if="performingRequest" class="loading">
         <p>Loading...</p>
       </div>
     </transition>
     <section>
-      <div>Login/Register Page</div>
       <div class="col2">
-        <form v-if="showLoginForm" @submit.prevent>
-          <h1>Welcome Back</h1>
-
-          <label for="email1">Email</label>
-          <input v-model.trim="loginForm.email" type="text" placeholder="you@email.com" id="email1" />
-
-          <label for="password1">Password</label>
+        <!-- LOGIN FORM -->
+        <div v-if="showLoginForm" class='aForm' >
+          <div class='formInputs'>
+             <div class='formRow'> <label for="email1">Email:</label>
+          <input v-model.trim="loginForm.email" type="text" placeholder="you@email.com" id="email1" /></div>
+           
+<div class='formRow'>
+          <label for="password1" >Password:</label>
           <input
             v-model.trim="loginForm.password"
             type="password"
             placeholder="******"
             id="password1"
-          />
-
-          <button @click="login" class="button">Log In</button>
-
-          <div class="extras">
-            <a @click="togglePasswordReset">Forgot Password</a>
-            <a @click="toggleForm">Create an Account</a>
+          /></div>
           </div>
-        </form>
+         
+
+          <button @click="login">Log-In</button>
+
+          <div class="extras formRow">
+            <button @click="togglePasswordReset">Forgot Password</button>
+            <button @click="toggleForm">Register</button>
+          </div>
+        </div>
 
         <!-- SIGNUP -->
-        <form v-if="!showLoginForm && !showForgotPassword" @submit.prevent>
-          <h1>Get Started</h1>
-
-          <label for="name">First Name</label>
+        <div v-if="!showLoginForm && !showForgotPassword" class='aForm'>
+<div class='formRow'>
+          <label for="name">First Name:</label>
           <input v-model.trim="signupForm.name" type="text" placeholder="Tamira" id="name" />
-
-          <label for="lastName">Last Name</label>
+</div>
+<div class='formRow'>
+          <label for="lastName">Last Name:</label>
           <input v-model.trim="signupForm.lastName" type="text" placeholder="Jones" id="lastName" />
-
-          <label for="email2">Email</label>
+</div><div class='formRow'>
+          <label for="email2">Email:</label>
           <input
             v-model.trim="signupForm.email"
             type="text"
@@ -48,24 +59,23 @@
             id="email2"
             required
           />
-
-          <label for="password2">Password</label>
+</div><div class='formRow'>
+          <label for="password2">Password:</label>
           <input
             v-model.trim="signupForm.password"
             type="password"
             placeholder="min 6 characters"
             id="password2"
           />
-
-          <button @click="signup" class="button">Sign Up</button>
+</div>
+          <button @click="signup">Register</button>
 
           <div class="extras">
-            <a @click="toggleForm">Back to Log In</a>
+            <button @click="toggleForm">Back to Log-In</button>
           </div>
-        </form>
-        <form v-if="showForgotPassword" @submit.prevent class="password-reset">
+        </div>
+        <div v-if="showForgotPassword"  class="password-reset">
           <div v-if="!passwordResetSuccess">
-            <h1>Reset Password</h1>
             <p>We will send you an email to reset your password</p>
 
             <label for="email3">Email</label>
@@ -76,18 +86,18 @@
               id="email3"
             />
 
-            <button @click="resetPassword" class="button">Submit</button>
+            <button @click="resetPassword" >Submit</button>
 
             <div class="extras">
-              <a @click="togglePasswordReset">Back to Log In</a>
+              <button @click="togglePasswordReset">Back to Log-In</button>
             </div>
           </div>
           <div v-else>
             <h1>Email Sent</h1>
             <p>check your email for a link to reset your password</p>
-            <button @click="togglePasswordReset" class="button">Back to login</button>
+            <button @click="togglePasswordReset" >Back to log-in</button>
           </div>
-        </form>
+        </div>
         <transition name="fade">
           <div v-if="errorMsg !== ''" class="error-msg">
             <p>{{ errorMsg }}</p>
@@ -95,6 +105,12 @@
         </transition>
       </div>
     </section>
+        </div>
+      </div>
+    </div>   
+
+
+   
   </div>
 </template>
 
@@ -104,6 +120,7 @@ import {mapState} from 'vuex'
 export default {
   data() {
     return {
+      sectionTitle: "Log-In",
       loginForm: {
         email: "",
         password: ""
@@ -131,15 +148,23 @@ export default {
     toggleForm() {
       this.errorMsg = "";
       this.showLoginForm = !this.showLoginForm;
+      switch(this.showLoginForm) {
+        case(true):
+          this.sectionTitle = "Log-In";
+          break;
+        default:
+          this.sectionTitle = "Register"}
     },
     togglePasswordReset() {
       if (this.showForgotPassword) {
         this.showLoginForm = true;
         this.showForgotPassword = false;
         this.passwordResetSuccess = false;
+        this.sectionTitle = "Log-In"
       } else {
         this.showLoginForm = false;
         this.showForgotPassword = true;
+        this.sectionTitle = "Forgot Password"
       }
     },
     login() {
@@ -287,3 +312,90 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+button {
+  cursor: pointer;
+   font-size: .9rem;
+  padding: 5px;
+  width: 150px;
+  color: #6a6a6a;
+      margin: 15px;
+    align-self: center;
+    border-radius: 3px;
+    border:none;
+    box-shadow: 1px 1px 3px 1px rgba(57, 57, 57, 0.2);
+}
+button:hover {
+  background: #d3eee1;
+}
+label {
+  color: #202020;
+  font-size: 1.1rem;
+      width: 100px;
+    text-align: right;
+}
+.aForm {
+  display: flex;
+  flex-direction: column;
+}
+.formInputs {
+  margin-bottom: 20px;
+}
+.formRow {
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+  justify-content: center;
+}
+.formRow > input {
+  flex: 1;
+}
+.formRow > label {
+  margin-right: 10px;
+}
+
+/* HERO CSS */
+.hero {
+  display: flex;
+  flex-flow: column nowrap;
+  background: linear-gradient(
+      rgba(45, 45, 45, 0.6),
+      rgba(0, 0, 0, 0.37),
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0.5)
+    ),
+    url(../assets/tyssul-patel-o-zOatT4kQw-unsplash.jpg) no-repeat;
+  background-size: cover;
+  /* height: 490px; */
+  width: 100%;
+  /*margin-bottom: 15px;*/
+}
+.hero-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* justify-content: space-between; */
+  /* padding: 15px 0; */
+  color: #f7ffff;
+  padding: 10px 5px 30px 5px;
+}
+
+.hero-bottom {
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+  align-items: center;
+  flex: 1;
+  padding: 0 15px;
+}
+.hero-icon {
+  background: url("../assets/CampingW.png") no-repeat center center;
+  background-size: contain;
+  width: 50px;
+  height: 50px;
+  margin-bottom: 15px;
+}
+
+</style>

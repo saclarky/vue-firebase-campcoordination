@@ -81,14 +81,14 @@ a {
 .button {
     /*color: #07B7C5;*/
     /* color: #9ba5a2; */
-    color: #09709a;
+    /* color: #09709a; */
     border-radius: 3px;
     /* border: 1px solid #129E71; */
-    border: 1px solid #09709a;
+    /* border: 1px solid #09709a; */
     /* box-shadow: 1px 1px rgba(176, 176, 176, 0.2); */
     box-shadow: 1px 1px 3px 1px rgba(57, 57, 57, 0.2);
-    padding: 15px 30px;
-    background-color: white;
+    /* padding: 15px 30px; */
+    /* background-color: white; */
 }
 .hero-cta-button {
     background-color: rgba(245, 245, 245, 0.9);

@@ -11,11 +11,11 @@ Vue.use(Vuex)
 // handle page reload... this is also in main.js to slow down vue reloads until signed-in?? Why does this fire first?
 fb.auth.onAuthStateChanged(user => {
   // TODO- logout clear data??
-  console.log('auth state change triggered index.js') 
+  console.log('auth state change triggered index.js')
   if (user) {
     console.log('creation ', user.metadata.creationTime)
     console.log('signin ', user.metadata.lastSignInTime)
-    if( user.metadata.creationTime == user.metadata.lastSignInTime) {
+    if (user.metadata.creationTime == user.metadata.lastSignInTime) {
       console.log('new user! but do this without ms seems sketchy. Other option have a state object changed when registering?')
       // Don't fetch or commit the currentuser/profile it likely hasn't been saved yet, code in login.vue will do it
       return
@@ -87,16 +87,13 @@ export const store = new Vuex.Store({
     // TRIP LOGS
     thisTripInviteLogs: state => {
       let tripInviteLogs = [];
-      console.log(state.thisTripActivityLog)
-      console.log("TODO logs are array? ", Array.isArray(state.thisTripActivityLog))
       if (!state.thisTripActivityLog || state.thisTripActivityLog.length == 0) {
         console.log('nope')
         return []; // if doc is null give an empty array to iterate
       } else {
-        
+
         state.thisTripActivityLog.forEach(key => {
-          console.log(key)
-          if ( ['invite', 'inviteRSVP'].includes(key.category ) ) {
+          if (['invite', 'inviteRSVP'].includes(key.category)) {
             let modInvite = key;
             if ("time" in modInvite) {
               let dd = new Date(modInvite.time);
@@ -176,7 +173,7 @@ export const store = new Vuex.Store({
           } else {
             modInvite.time = "";
           }
-         
+
           // Trip Invitations Category
           switch (doc.category) {
             case "tripInvite":
@@ -258,7 +255,6 @@ export const store = new Vuex.Store({
     bindTrips:
       firestoreAction(context => {
         // i don't know if it respects where clauses?
-        console.log("TODO this doesn't display trips wehre invited")
         return context.bindFirestoreRef('trips', fb.db.collection('trips').where("uid", "==", context.state.currentUser.uid))
         // .orderBy("date")) // date of trip, not when created
         // TODO ERROR: if there's no date orderBy doesn't retrieve it
@@ -266,7 +262,6 @@ export const store = new Vuex.Store({
     bindJoinedTrips:
       firestoreAction(context => {
         // i don't know if it respects where clauses?
-        console.log("TODO this doesn't display trips wehre invited")
         return context.bindFirestoreRef('joinedTrips', fb.db.collection('trips').where("campers", "array-contains", context.state.currentUser.uid))
         // .orderBy("date")) // date of trip, not when created
         // TODO ERROR: if there's no date orderBy doesn't retrieve it
@@ -350,27 +345,27 @@ export const store = new Vuex.Store({
         //TODO: TDB into blank fields?
         fb.db.collection("trips").add({ 'name': name, 'uid': state.currentUser.uid, 'owner': state.currentUser.displayName })
           .then(doc => {
-           // Create docs for future camper updates
-           fb.db.collection('campersNo').doc(doc.id).set({})
-           fb.db.collection('campersPending').doc(doc.id).set({})
+            // Create docs for future camper updates
+            fb.db.collection('campersNo').doc(doc.id).set({})
+            fb.db.collection('campersPending').doc(doc.id).set({})
             //TODO redirect to new trip page?
             // Since it's a new trip use SET because need to also create the document
             // If use update throws an error, no document to update
             fb.db.collection('campers').doc(doc.id).set({
               [state.currentUser.uid]: state.currentUser.displayName
             })
-            .then(() => {
-              
-              console.log('saved current user to trip campers')
-              // Strange issue trying to debug, 'empty' existing collections.
-// Might be because of not created ancestor first explicity so here...
-fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
-              resolve("saved")
-            }).catch(e => {
-              console.log("error saving new trip's owner as a camper")
-              console.log(e.message)
-              reject(e.message)
-            })
+              .then(() => {
+
+                console.log('saved current user to trip campers')
+                // Strange issue trying to debug, 'empty' existing collections.
+                // Might be because of not created ancestor first explicity so here...
+                fb.db.collection('tripActivityLog').doc(doc.id).set({ 'null': null })
+                resolve("saved")
+              }).catch(e => {
+                console.log("error saving new trip's owner as a camper")
+                console.log(e.message)
+                reject(e.message)
+              })
           })
           .catch(error => {
             // this.errors = error;
@@ -406,32 +401,32 @@ fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
               let delCP = fb.db.collection('campersPending').doc(id).delete()
               let delN = fb.db.collection('campersNo').doc(id).delete()
               // delete logs
-              console.log('TODO redo trip activity log collection deletion, recursive bad? cloud function?')              
+              console.log('TODO redo trip activity log collection deletion, recursive bad? cloud function?')
               fb.db.collection('tripActivityLog').doc(id).collection('logs').get().then((docs) => {
                 //todo, what if no logs, empty array? does for eahc throw something?
                 let waiting = []
                 docs.forEach(doc => {
-                  waiting.push( fb.db.collection("tripActivityLog")
-                  .doc(id).collection("logs").doc(doc.id)
-                  .delete())
+                  waiting.push(fb.db.collection("tripActivityLog")
+                    .doc(id).collection("logs").doc(doc.id)
+                    .delete())
                 })
                 Promise.all(waiting).then(() => {
                   // fb.db.collection('tripActivityLog').doc(id).collection('logs').delete() NOT A FUNCTION/not necessary
                   console.log('still concerned, TODO check logs collection is not orphaned')
-                    fb.db.collection('tripActivityLog').doc(id).delete()                 
+                  fb.db.collection('tripActivityLog').doc(id).delete()
                 })
               })
-                // store userid inside notifications so easier to delete...
-                console.log("Not great, TODO something better for user notification")
-                fb.db.collectionGroup('notifications').where('tid','==', id).get().then(docs => {
-                  docs.docs.forEach(doc => {
-                    console.log(doc)
-                    fb.db.collection('userNotifications').doc(doc.data().to).collection('notifications').doc(doc.id).update({
-                      'tripDeleted': true
-                    })
+              // store userid inside notifications so easier to delete...
+              console.log("Not great, TODO something better for user notification")
+              fb.db.collectionGroup('notifications').where('tid', '==', id).get().then(docs => {
+                docs.docs.forEach(doc => {
+                  console.log(doc)
+                  fb.db.collection('userNotifications').doc(doc.data().to).collection('notifications').doc(doc.id).update({
+                    'tripDeleted': true
                   })
                 })
-               
+              })
+
               Promise.all([delC, delCP, delN]).then(() => {
                 resolve('Trip deleted')
               }).catch(function (error) {
@@ -529,6 +524,53 @@ fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
           })
       })
     },
+    removeCamperAction: ({ state }, data) => {
+      // Check which table to delete from
+      // Add trip activity log
+      console.log('remove camper action')
+      let prom = []
+      return new Promise((resolve, reject) => {
+        // remove at camper table
+        prom.push(fb.db.collection(data.camperTable).doc(state.thisTripID).update({
+          [data.cid]: firebase.firestore.FieldValue.delete()
+        }))
+        if (data.camperTable === 'campers') {
+          // delete fromt trip array
+          prom.push(fb.db.collection('trips').doc(state.thisTripID).update({
+            campers: firebase.firestore.FieldValue.arrayRemove(data.cid)
+          }))
+        }
+        // Add an activity log message about the removal
+        prom.push(fb.db.collection('tripActivityLog').doc(state.thisTripID).collection('logs')
+          .add({
+            'time': new Date().getTime(), 'from': state.currentUser.uid,
+            'text': state.currentUser.displayName + " removed " + data.name + " from the trip",
+            'category': "invite"
+          }))
+
+        // Remove their dashboard notification so can't rejoin etc?
+        // Add notification to user dashboard
+        fb.db.collection('userNotifications').doc(data.cid).collection('notifications').where("tid", "==", state.thisTripID).get()
+          .then((docs) => {
+            if (docs.empty) { console.log("not possible?") } else {
+              // DOCS>DOCS funny reminder... get the data to loop
+              docs.docs.forEach(doc => {
+                console.log('delete',doc)
+                prom.push(fb.db.collection('userNotifications').doc(data.cid).collection('notifications').doc(doc.id).delete())
+              })
+              Promise.all(prom).then((huh) => {
+                console.log('huh',huh)
+                resolve('removed')
+              }).catch(error => {
+                console.log(error.message)
+                reject(error)
+              })
+            }
+          })
+
+      })
+
+    },
     joinTripAction: ({ state }, data) => {
       //  deal with scenario of alreayd declined, now joining
       // TODO deal with if the camper has since been removed from the trip, aka deadline
@@ -591,39 +633,39 @@ fb.db.collection('tripActivityLog').doc(doc.id).set({'null':null})
             'isDeclined': true,
             'isJoined': false
           })
-          //IFF trip previously joined, remove from 'yes'; IFF first response, remove from 'pending'
-          let c,e
-          if (data.isJoined == true) {
-            // Remove from Yes campers
-            c = fb.db.collection('campers').doc(data.tid).update({
-              [state.currentUser.uid]: firebase.firestore.FieldValue.delete()
-            })
-            //TODO remove from trips campers array
-             e = fb.db.collection('trips').doc(data.tid).update({
-              campers: firebase.firestore.FieldValue.arrayRemove(state.currentUser.uid)
-            })
-          } else {
-            // Remove from Pending campers
-            c = fb.db.collection('campersPending').doc(data.tid).update({
-              [state.currentUser.uid]: firebase.firestore.FieldValue.delete()
-            })
-            e = () => {
-              resolve()
-            }
+        //IFF trip previously joined, remove from 'yes'; IFF first response, remove from 'pending'
+        let c, e
+        if (data.isJoined == true) {
+          // Remove from Yes campers
+          c = fb.db.collection('campers').doc(data.tid).update({
+            [state.currentUser.uid]: firebase.firestore.FieldValue.delete()
+          })
+          //TODO remove from trips campers array
+          e = fb.db.collection('trips').doc(data.tid).update({
+            campers: firebase.firestore.FieldValue.arrayRemove(state.currentUser.uid)
+          })
+        } else {
+          // Remove from Pending campers
+          c = fb.db.collection('campersPending').doc(data.tid).update({
+            [state.currentUser.uid]: firebase.firestore.FieldValue.delete()
+          })
+          e = () => {
+            resolve()
           }
-  
-            // set versus add --> set requires ID to be specified, add() auto-generates
-           let b = fb.db.collection('campersNo').doc(data.tid).update({
-              [state.currentUser.uid]: state.currentUser.displayName
-              // TODO have two tabs open and test auto-update on trip page
-            })
-              // Add an activity log message about the invite
-             let a = fb.db.collection('tripActivityLog').doc(data.tid).collection('logs')
-                .add({
-                  'time': new Date().getTime(), 'from': state.currentUser.uid,
-                  'text': state.currentUser.displayName + " declined trip invite.",
-                  'category': "inviteRSVP"
-                })
+        }
+
+        // set versus add --> set requires ID to be specified, add() auto-generates
+        let b = fb.db.collection('campersNo').doc(data.tid).update({
+          [state.currentUser.uid]: state.currentUser.displayName
+          // TODO have two tabs open and test auto-update on trip page
+        })
+        // Add an activity log message about the invite
+        let a = fb.db.collection('tripActivityLog').doc(data.tid).collection('logs')
+          .add({
+            'time': new Date().getTime(), 'from': state.currentUser.uid,
+            'text': state.currentUser.displayName + " declined trip invite.",
+            'category': "inviteRSVP"
+          })
         Promise.all([a, b, c, d, e]).then(() => {
           resolve('declined')
         }).catch(e => {

@@ -9,15 +9,23 @@
     </div>
 
     <div class="row">
-           <i @click="toggleAddUser" class='plusIcon'></i>
+      <i @click="toggleAddUser" class="plusIcon"></i>
       <div class="wrapper col1">
-           <div>Confirmed, can edit trip page</div>
-        <div v-for="(yes, uid) in thisTripCampers" :key="uid">{{yes}} <button @click="removeCamper(uid)">remove</button></div>
+        <div>Confirmed, can edit trip page</div>
+        <div v-for="(yes, uid) in thisTripCampers" :key="uid">
+          {{yes}}
+          <button @click="removeCamper(uid)" :class="{buttonDisabled: thisTrip.uid === uid} ">remove</button>
+        </div>
         <div>Pending, can view trip page</div>
-        <div v-for="(rsvp, uid) in thisTripCampersPending" :key="uid">{{rsvp}} <button @click="removeCamper(uid)">remove</button></div>
+        <div v-for="(rsvp, uid) in thisTripCampersPending" :key="uid">
+          {{rsvp}}
+          <button @click="removeCamper(uid)">remove</button>
+        </div>
         <div>Declined, no access to the trip</div>
-        <div v-for="(no, uid) in thisTripCampersNo" :key="uid">{{no}} <button @click="removeCamper(uid)">remove</button></div>
-       
+        <div v-for="(no, uid) in thisTripCampersNo" :key="uid">
+          {{no}}
+          <button @click="removeCamper(uid)">remove</button>
+        </div>
       </div>
       <div class="wrapper col2">
         <div>Activity Log</div>
@@ -31,49 +39,80 @@
         </div>
       </div>
     </div>
-     <!-- use the modal component, pass in the prop -->
-          <inviteCamperPopup @closeInvite="toggleAddUser()" v-if="showInviteUser" :tripid="thisTripID">
-            <!--
+    <!-- use the modal component, pass in the prop -->
+    <inviteCamperPopup @closeInvite="toggleAddUser()" v-if="showInviteUser" :tripid="thisTripID">
+      <!--
       you can use custom content here to overwrite
       default content
-            -->
-            
-             <template v-slot:body>
-              <h3>{{thisTrip.name}}</h3>
-            </template>
-            <!-- <h3 slot="header">custom header</h3> -->
-          </inviteCamperPopup> 
+      -->
+
+      <template v-slot:body>
+        <h3>{{thisTrip.name}}</h3>
+      </template>
+      <!-- <h3 slot="header">custom header</h3> -->
+    </inviteCamperPopup>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapState } from "vuex";
-import inviteCamperPopup from '../components/inviteCamperPopup'
+import inviteCamperPopup from "../components/inviteCamperPopup";
 export default {
   data: function() {
     return {
-      
-        showInviteUser: false
+      showInviteUser: false
     };
   },
-  computed: {  
-...mapGetters(['thisTripInviteLogs']),
+  computed: {
+    ...mapGetters(["thisTripInviteLogs"]),
 
-   ...mapState(['thisTripCampers', 'thisTripCampersNo','thisTripCampersPending','thisTrip','thisTripID'])
-  
+    ...mapState([
+      "thisTripCampers",
+      "thisTripCampersNo",
+      "thisTripCampersPending",
+      "thisTrip",
+      "thisTripID"
+    ])
   },
-   components: {
-     inviteCamperPopup
+  components: {
+    inviteCamperPopup
   },
   methods: {
-     toggleAddUser() {
+    toggleAddUser() {
       this.showInviteUser = !this.showInviteUser;
     },
     returnToDashboard() {
       this.$emit("closeCamperDetails");
     },
     removeCamper(camperID) {
-      console.log(camperID)
+      // TODO: don't have 'remove' button by the camp owner. disabled?
+      console.log("Remove ",camperID);
+      if (camperID !== this.thisTrip.uid) {
+         let camperTable
+          let name
+            if(Object.keys(this.thisTripCampers).includes(camperID)) {
+              camperTable = 'campers'
+              name= this.thisTripCampers[camperID]
+            }
+            if(Object.keys(this.thisTripCampersNo).includes(camperID)) {
+              camperTable = 'campersNo'
+              name= this.thisTripCampersNo[camperID]
+            }if(Object.keys(this.thisTripCampersPending).includes(camperID)) {
+              camperTable = 'campersPending'              
+              name= this.thisTripCampersPending[camperID]
+            }
+            
+        this.$store
+          .dispatch("removeCamperAction", { 'cid': camperID, 'name': name, 'camperTable':camperTable })
+          .then(() => {
+            this.$toasted.show("Camper removed.");
+          })
+          .catch(e => {
+            this.$toasted.show(e.message);
+          });
+      } else {
+        this.$toasted.show("Cannot delete trip owner.");
+      }
     }
   }
 };
@@ -126,5 +165,8 @@ export default {
   height: 50px;
   margin-bottom: 15px;
   cursor: pointer;
+}
+.buttonDisabled {
+  display: none;
 }
 </style>

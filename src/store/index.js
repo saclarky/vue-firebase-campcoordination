@@ -63,27 +63,27 @@ export const store = new Vuex.Store({
     thisUserNotifications: []
   },
   getters: {
-    thisTripCampersNames: state => {
-      if (!state.thisTripCampers) {
-        return []
-      } else {
-        return Object.values(state.thisTripCampers)
-      }
-    },
-    thisTripCampersNoNames: state => {
-      if (!state.thisTripCampersNo) {
-        return []
-      } else {
-        return Object.values(state.thisTripCampersNo)
-      }
-    },
-    thisTripCampersPendingNames: state => {
-      if (!state.thisTripCampersPending) {
-        return []
-      } else {
-        return Object.values(state.thisTripCampersPending)
-      }
-    },
+    // thisTripCampersNames: state => {
+    //   if (!state.thisTripCampers) {
+    //     return []
+    //   } else {
+    //     return Object.values(state.thisTripCampers)
+    //   }
+    // },
+    // thisTripCampersNoNames: state => {
+    //   if (!state.thisTripCampersNo) {
+    //     return []
+    //   } else {
+    //     return Object.values(state.thisTripCampersNo)
+    //   }
+    // },
+    // thisTripCampersPendingNames: state => {
+    //   if (!state.thisTripCampersPending) {
+    //     return []
+    //   } else {
+    //     return Object.values(state.thisTripCampersPending)
+    //   }
+    // },
     // TRIP LOGS
     thisTripInviteLogs: state => {
       let tripInviteLogs = [];
@@ -293,11 +293,11 @@ export const store = new Vuex.Store({
       // will it notice on its own a change in trip id?
       // COLLECTION returns an array; not null, lenght 0 if no results
       return context.bindFirestoreRef('thisTripActivityLog', fb.db.collection('tripActivityLog').doc(context.state.thisTripID)
-        .collection('logs').orderBy("time").limit(20))
+        .collection('logs').orderBy("time", "desc").limit(20))
     }),
     bindUserNotifications: firestoreAction(context => {
       return context.bindFirestoreRef('thisUserNotifications', fb.db.collection('userNotifications')
-        .doc(context.state.currentUser.uid).collection('notifications').orderBy("time").limit(20))
+        .doc(context.state.currentUser.uid).collection('notifications').orderBy("time", "desc").limit(20))
     }),
     // queryUsernameAction: (context, uid) => {
     //   console.log('easier to query auth.users? maybe harder')

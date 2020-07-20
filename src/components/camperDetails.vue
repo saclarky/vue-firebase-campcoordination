@@ -12,11 +12,11 @@
            <i @click="toggleAddUser" class='plusIcon'></i>
       <div class="wrapper col1">
            <div>Confirmed, can edit trip page</div>
-        <div v-for="yes in thisTripCampersNames" :key="yes">{{yes}}</div>
+        <div v-for="(yes, uid) in thisTripCampers" :key="uid">{{yes}} <button @click="removeCamper(uid)">remove</button></div>
         <div>Pending, can view trip page</div>
-        <div v-for="rsvp in thisTripCampersPendingNames" :key="rsvp">{{rsvp}}</div>
+        <div v-for="(rsvp, uid) in thisTripCampersPending" :key="uid">{{rsvp}} <button @click="removeCamper(uid)">remove</button></div>
         <div>Declined, no access to the trip</div>
-        <div v-for="no in thisTripCampersNoNames" :key="no">{{no}}</div>
+        <div v-for="(no, uid) in thisTripCampersNo" :key="uid">{{no}} <button @click="removeCamper(uid)">remove</button></div>
        
       </div>
       <div class="wrapper col2">
@@ -57,9 +57,9 @@ export default {
     };
   },
   computed: {  
-...mapGetters(['thisTripCampersNames', 'thisTripCampersNoNames','thisTripCampersPendingNames','thisTripInviteLogs']),
+...mapGetters(['thisTripInviteLogs']),
 
-   ...mapState(['thisTrip','thisTripID'])
+   ...mapState(['thisTripCampers', 'thisTripCampersNo','thisTripCampersPending','thisTrip','thisTripID'])
   
   },
    components: {
@@ -71,6 +71,9 @@ export default {
     },
     returnToDashboard() {
       this.$emit("closeCamperDetails");
+    },
+    removeCamper(camperID) {
+      console.log(camperID)
     }
   }
 };

@@ -31,7 +31,7 @@
          
           <div class='itemBody'>
             
-              <div class="item" v-for="camper in thisTripCampersNames" :key="camper">{{camper}}</div>
+              <div class="item" v-for="(camper, uid) in thisTripCampers" :key="uid">{{camper}}</div>
             
           </div>
      
@@ -84,7 +84,7 @@
 </template>
 
 <script>
-import {mapState, mapGetters} from 'vuex'
+import {mapState} from 'vuex'
 import camperDetails from '../components/camperDetails'
 
 export default {
@@ -107,8 +107,8 @@ export default {
 //       camperYes: function() {
 // return this.thisTripCampers
 //       },
-...mapGetters(['thisTripCampersNames']),
-        ...mapState(['thisTrip'])
+// ...mapGetters(['thisTripCampersNames']),
+        ...mapState(['thisTrip', 'thisTripCampers'])
     },
     data: function() {
       return {

@@ -48,6 +48,9 @@ export const store = new Vuex.Store({
     thisTripID: '',
     thisTripOwner: '',
 
+    //GEAR
+    thisTripGroupGear: [],
+
     // CAMPERS DOCS DATA BINDS
     thisTripCampers: {},
     thisTripCampersNo: {},
@@ -63,27 +66,6 @@ export const store = new Vuex.Store({
     thisUserNotifications: []
   },
   getters: {
-    // thisTripCampersNames: state => {
-    //   if (!state.thisTripCampers) {
-    //     return []
-    //   } else {
-    //     return Object.values(state.thisTripCampers)
-    //   }
-    // },
-    // thisTripCampersNoNames: state => {
-    //   if (!state.thisTripCampersNo) {
-    //     return []
-    //   } else {
-    //     return Object.values(state.thisTripCampersNo)
-    //   }
-    // },
-    // thisTripCampersPendingNames: state => {
-    //   if (!state.thisTripCampersPending) {
-    //     return []
-    //   } else {
-    //     return Object.values(state.thisTripCampersPending)
-    //   }
-    // },
     // TRIP LOGS
     thisTripInviteLogs: state => {
       let tripInviteLogs = [];
@@ -290,6 +272,10 @@ export const store = new Vuex.Store({
       return context.bindFirestoreRef('thisTripActivityLog', fb.db.collection('tripActivityLog').doc(context.state.thisTripID)
         .collection('logs').orderBy("time", "desc").limit(20))
     }),
+    bindTripGroupGear: firestoreAction(context => {
+      return context.bindFirestoreRef('thisTripGroupGear', fb.db.collection('groupGear').doc(context.state.thisTripID)
+        .collection('gear'))
+    }),
     bindUserNotifications: firestoreAction(context => {
       return context.bindFirestoreRef('thisUserNotifications', fb.db.collection('userNotifications')
         .doc(context.state.currentUser.uid).collection('notifications').orderBy("time", "desc").limit(20))
@@ -346,6 +332,7 @@ export const store = new Vuex.Store({
         fb.db.collection("trips").add({ 'name': name, 'uid': state.currentUser.uid, 'owner': state.currentUser.displayName })
           .then(doc => {
             // Create docs for future camper updates
+            fb.db.collection('groupGear').doc(doc.id).set({})
             fb.db.collection('campersNo').doc(doc.id).set({})
             fb.db.collection('campersPending').doc(doc.id).set({})
             //TODO redirect to new trip page?
@@ -400,6 +387,21 @@ export const store = new Vuex.Store({
               let delC = fb.db.collection('campers').doc(id).delete()
               let delCP = fb.db.collection('campersPending').doc(id).delete()
               let delN = fb.db.collection('campersNo').doc(id).delete()
+              // Delete group gear
+              fb.db.collection('groupGear').doc(id).collection('gear').get().then((docs) => {
+                //todo, what if no logs, empty array? does for eahc throw something?
+                let waitingGear = []
+                docs.forEach(doc => {
+                  waitingGear.push(fb.db.collection("groupGear")
+                    .doc(id).collection("gear").doc(doc.id)
+                    .delete())
+                })
+                Promise.all(waitingGear).then(() => {
+                  // fb.db.collection('tripActivityLog').doc(id).collection('logs').delete() NOT A FUNCTION/not necessary
+                  console.log('still concerned, TODO check logs collection is not orphaned')
+                  fb.db.collection('groupGear').doc(id).delete()
+                })
+              })
               // delete logs
               console.log('TODO redo trip activity log collection deletion, recursive bad? cloud function?')
               fb.db.collection('tripActivityLog').doc(id).collection('logs').get().then((docs) => {
@@ -555,11 +557,11 @@ export const store = new Vuex.Store({
             if (docs.empty) { console.log("not possible?") } else {
               // DOCS>DOCS funny reminder... get the data to loop
               docs.docs.forEach(doc => {
-                console.log('delete',doc)
+                console.log('delete', doc)
                 prom.push(fb.db.collection('userNotifications').doc(data.cid).collection('notifications').doc(doc.id).delete())
               })
               Promise.all(prom).then((huh) => {
-                console.log('huh',huh)
+                console.log('huh', huh)
                 resolve('removed')
               }).catch(error => {
                 console.log(error.message)
@@ -697,59 +699,57 @@ export const store = new Vuex.Store({
       })
 
     },
-    // PACKING LIST MANIPULATION
-    addToDoAction: (context) => {
-      console.log("Action add: " + context.state.itemInput)
-      context.commit('blankErrors');
-      if (context.state.itemInput !== "") {
-        fb.db.collection("items")
-          .add({
-            title: context.state.itemInput,
-            created_at: Date.now(),
-            status: false
-          })
-          .then(docRef => {
-            console.log("Document written with ID: ", docRef.id);
-            context.commit('blankItemInput');
-          })
-          .catch(error => {
-            // this.errors = error;
-            console.log("Add action error:")
-            console.log(error);
-          });
-      } else {
-        context.commit('updateErrors', { msg: "Enter text." });
-      }
-
+    // PACKING LIST MANIPULATION // GEAR
+    updateGroupGearAction: ({ state }, data) => {
+      console.log("action to update a group gear item")
+      return fb.db.collection('groupGear').doc(state.thisTripID).collection('gear').doc(data.gid).update({
+        title: data.title,
+        category: data.category
+      })
     },
-    deleteItemAction: (context, id) => {
-      if (id) {
-        fb.db.collection("items")
-          .doc(id)
-          .delete()
-          .then(function () {
-            console.log("Document successfully deleted");
-          })
-          .catch(function (error) {
-            this.error = error;
-          });
-      } else {
-        context.commit('updateErrors', { msg: "Invaid ID." });
+    updateGroupGearCampersAction: ({ state }, data) => {
+      // TODO: don't add a anme twice
+      console.log("action to change a group gear item contributor")
+      let pr = []
+      if (data.camperAdd !== '' ) {
+        console.log('Adding a camper', data)
+        pr.push( fb.db.collection('groupGear').doc(state.thisTripID).collection('gear').doc(data.gid).update({
+          campers: firebase.firestore.FieldValue.arrayUnion(data.camperAdd)
+        }) )
+      } 
+      if (data.camperRemove !== '') {
+        console.log('Removing a camper')
+        pr.push( fb.db.collection('groupGear').doc(state.thisTripID).collection('gear').doc(data.gid).update({
+          campers: firebase.firestore.FieldValue.arrayRemove(data.camperRemove)
+        }) )
       }
+      Promise.all(pr).then(() => {
+        return "Updated contributors"
+      }).catch(e => {
+        return e
+      })
     },
-    updateStatusAction: (context, obj) => {
-      fb.db.collection("items").doc(obj.id)
+    addGroupGearItemAction: ({ state }, data) => {
+      console.log("Action add: " + data.title)
+      return fb.db.collection("groupGear").doc(state.thisTripID).collection('gear')
+        .add({
+          title: data.title,
+          // created_at: Date.now(),
+          checked: false,
+          category: data.category,
+          campers: []
+        })
+    },
+    deleteGroupGearItemAction: ({ state }, data) => {
+      return fb.db.collection("groupGear")
+        .doc(state.thisTripID).collection('gear').doc(data.id)
+        .delete()
+    },
+    updateStatusAction: ({ state }, obj) => {
+      return fb.db.collection("groupGear").doc(state.thisTripID).collection('gear').doc(obj.id)
         .update({
-          status: obj.status
+          checked: obj.status
         })
-        .then(() => {
-          console.log("Document updated successfully.");
-        })
-        .catch(error => {
-          // this.errors = error;
-          console.log("Set action error:")
-          console.log(error);
-        });
     },
     // LOGGING IN // AUTH STUFF
     fetchUserProfile({ commit, state }) {

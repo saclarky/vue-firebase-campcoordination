@@ -33,7 +33,7 @@
           </div>
          
 
-          <button @click="login" v-on:keyup.enter="login">Log-In</button>
+          <button @click="login" v-on:keyup.enter="login()">Log-In</button>
 
           <div class="extras formRow">
             <button @click="togglePasswordReset">Forgot Password</button>
@@ -68,7 +68,7 @@
             id="password2"
           />
 </div>
-          <button @click="signup" v-on:keyup.enter="signup">Register</button>
+          <button @click="signup" v-on:keyup.enter="signup()">Register</button>
 
           <div class="extras">
             <button @click="toggleForm">Back to Log-In</button>
@@ -86,7 +86,7 @@
               id="email3"
             />
 
-            <button @click="resetPassword" v-on:keyup.enter="resetPasswordgit">Submit</button>
+            <button @click="resetPassword" v-on:keyup.enter="resetPassword()">Submit</button>
 
             <div class="extras">
               <button @click="togglePasswordReset">Back to Log-In</button>

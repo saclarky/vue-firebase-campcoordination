@@ -39,6 +39,7 @@
         </div>
          <div class='gridItem'>
           <h4>Gear</h4>
+          <router-link to="/gear">Gear Page</router-link>
           <div class='itemBody'></div>
           <i class='plusIcon'></i>
         </div>

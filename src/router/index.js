@@ -8,8 +8,8 @@ import logIn from '../views/logIn'
 import dashboard from '../views/dashboard'
 import trip from '../views/trip.vue'
 import newTrip from '../views/newTrip'
-import notifications from '../views/userNotifications'
 import settings from '../views/settings'
+import gear from '../views/gear'
 console.log('vue use vue router')
 Vue.use(VueRouter)
 console.log('routes obj list')
@@ -64,9 +64,9 @@ meta: {
         requiresAuth: true
     }
 },{
-    path: '/notifications',
-    name: 'notifications',
-    component: notifications,
+    path: '/gear',
+    name: 'gear',
+    component: gear,
     meta: {
         requiresAuth: true
     }

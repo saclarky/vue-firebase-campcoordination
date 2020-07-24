@@ -49,7 +49,8 @@
             <!-- <input type="checkbox" :id="item.id" :value="item.id" :checked="status" @change="updateStatus"> -->
             <!-- <label class="strikethrough" :for="item.id"> {{item.name}} </label> -->
             <!-- TODO: sort checked items to bottom of list? -->
-            <small style="text-decoration:underline;" @click="deleteTrip(item.id)">Delete</small>
+            <!-- <small style="text-decoration:underline;" @click="deleteTrip(item.id)">Delete</small> -->
+            <i class="cell text deleteIcon" @click="deleteTrip(item.id)"></i>
           </div>
         </div>
         <div class="tripBlock">
@@ -201,5 +202,17 @@ div.tripContent > div {
 
 .title {
   text-align: left;
+}
+
+.deleteIcon {
+  background: url("../assets/delete.svg") no-repeat center center;
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.text {
+  text-decoration: underline;
 }
 </style>

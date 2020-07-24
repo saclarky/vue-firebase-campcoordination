@@ -38,10 +38,11 @@
           <div @click="toggleCamperDetails" class='actionRow'> <div class='rightArrowIcon'></div></div>
         </div>
          <div class='gridItem'>
-          <h4>Gear</h4>
-          <router-link to="/gear">Gear Page</router-link>
-          <div class='itemBody'></div>
-          <i class='plusIcon'></i>
+           <h4>Gear </h4>
+         
+          <div class='itemBody'> </div>
+          <div @click="toGear" class='actionRow'> <div class='rightArrowIcon'></div></div>
+          <!-- <i class='plusIcon'></i> -->
         </div>
          <div class='gridItem'>
           <h4>Meals</h4>
@@ -126,6 +127,9 @@ export default {
     toggleDashboard() {
       this.showDashboard = !this.showDashboard
       this.showMessages = !this.showMessages
+    },
+    toGear() {
+      this.$router.push("/gear")
     }
     }  
 }

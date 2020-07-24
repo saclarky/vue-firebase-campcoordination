@@ -3,7 +3,7 @@
     <div class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
-          <div class="modal-header">Update {{itemtitle}} Entry</div>
+          <div class="modal-header">Update {{itemtitle}} </div>
 
           <div class="modal-body">
             <div class="row">
@@ -27,6 +27,18 @@
 
             <button class="rowItem" @click="updateGroupGearItem">Save</button>
           </div>
+          <div class="modal-body">
+             <span :class="{
+      plusShow: !campers.includes(username),
+      plusHide: campers.includes(username)
+    }"><i class='plusIcon' @click="updateGroupGearCampers({gid:itemid,camperAdd:username,camperRemove:''})"
+        ></i><span>Add Self</span></span>
+       <span :class="{
+      plusShow: campers.includes(username),
+      plusHide: !campers.includes(username)
+    }"> <i class='minusIcon' @click="updateGroupGearCampers({gid:itemid,camperRemove:username,camperAdd:''})"
+        ></i><span>Remove Self</span></span>
+          </div>
 
           <div class="modal-footer">
             <button @click="$emit('close')">Cancel</button>
@@ -39,7 +51,7 @@
 
 <script>
 export default {
-  props: ["itemid", "itemtitle", "itemcat"],
+  props: ["itemid", "itemtitle", "itemcat", "username", "campers"],
   data: function () {
     return {
       addGroupGearTitle: "",
@@ -72,7 +84,18 @@ export default {
           this.$toasted.show(e.message);
         });
     },
-  },
+    updateGroupGearCampers: function(data) {
+      this.$store
+        .dispatch("updateGroupGearCampersAction", data)
+        .then(() => {
+          this.$toasted.show("Updated item!");
+          this.$emit("close");
+        })
+        .catch(e => {
+          this.$toasted.show(e.message);
+        });
+    }
+  }
 };
 </script>
 
@@ -156,5 +179,29 @@ button.rowItem {
 .modal-leave-active .modal-container {
   -webkit-transform: scale(1.1);
   transform: scale(1.1);
+}
+.plusHide {
+  display: none;
+}
+.plusShow {
+  display: inline-block;
+} 
+.plusIcon {
+  background: url("../assets/add-plus.svg") no-repeat center center;
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  vertical-align: middle;
+  padding: 10px;
+}
+.minusIcon {
+  background: url("../assets/add-minus.svg") no-repeat center center;
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  vertical-align: middle;
+  padding: 10px;
 }
 </style>

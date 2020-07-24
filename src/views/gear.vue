@@ -50,25 +50,27 @@
         <span class="cell category">{{gear.category}}</span>
         <input type="checkbox" :id="gear.id" :value="gear.id" :checked="gear.checked" @change="updateGroupGearItemStatus" />
         <label class="strikethrough" :for="gear.id">{{gear.title}}</label>
-         <span class="cell">({{gear.campers.join(', ')}})</span>
+         <span class="camperCell">({{gear.campers.join(', ')}})</span>
         <!-- TODO: sort checked items to bottom of list? -->
-        <i class='plusIcon cell' @click="updateGroupGearCampers({gid:gear.id,camperAdd:userProfile.name,camperRemove:''})"
-        :class="{
+        <!-- <span :class="{
       plusShow: !gear.campers.includes(userProfile.name),
       plusHide: gear.campers.includes(userProfile.name)
-    }"></i>
-        <i class='minusIcon cell' @click="updateGroupGearCampers({gid:gear.id,camperRemove:userProfile.name,camperAdd:''})"
-        :class="{
+    }"><i class='plusIcon' @click="updateGroupGearCampers({gid:gear.id,camperAdd:userProfile.name,camperRemove:''})"
+        ></i><span>Add Self</span></span>
+       <span :class="{
       plusShow: gear.campers.includes(userProfile.name),
       plusHide: !gear.campers.includes(userProfile.name)
-    }"></i>
+    }"> <i class='minusIcon' @click="updateGroupGearCampers({gid:gear.id,camperRemove:userProfile.name,camperAdd:''})"
+        ></i><span>Remove Self</span></span> -->
         <!-- MINUS HERE -->
-        <small class="cell text"  @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)">Update</small> 
-        <small class="cell text" @click="deleteGroupGearItem(gear.id)">Delete</small>
+        <!-- <small class="cell text"  @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)">Update</small>  -->
+         <i class="text editIcon" @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)"></i>
+        <!-- <small class="cell text" @click="deleteGroupGearItem(gear.id)">Delete</small> -->
+        <i class="text deleteIcon" @click="deleteGroupGearItem(gear.id)"></i>
       </div>
     </div>
     <updateGearItemPopup v-if="showUpdateItem" @close="toggleUpdateItem()" :itemid="thisItemID" :itemtitle="thisItemTitle"
-    :itemcat="thisItemCat">
+    :itemcat="thisItemCat" :campers="thisCampers" :username="userProfile.name">
       
             <!-- TODO: add a class on items being updated so other users can see? -->
     </updateGearItemPopup>
@@ -114,17 +116,19 @@ export default {
       thisItemID: '', // Pass ID prop into the updateItem popup for DB action
       thisItemTitle: '',
       thisItemCat: '',
+      thisCampers: [],
       groupGearExists: false,
       addGroupGearTitle: "",
       addGroupGearCat: ""
     };
   },
   methods: {
-    toggleUpdateItem(id, title, cat) {
+    toggleUpdateItem(id, title, cat, campers) {
       this.showUpdateItem = !this.showUpdateItem;
       this.thisItemID = id;
       this.thisItemTitle = title;
       this.thisItemCat = cat;
+      this.thisCampers = campers;
     },
     addGroupGearItem: function() {
       if (this.addGroupGearTitle !== "") {
@@ -164,18 +168,8 @@ export default {
         status: item.target.checked
       });
       //TODO: return message (success/fail)
-    },
-    updateGroupGearCampers: function(data) {
-      this.$store
-        .dispatch("updateGroupGearCampersAction", data)
-        .then(() => {
-          this.$toasted.show("Updated item!");
-          this.$emit("close");
-        })
-        .catch(e => {
-          this.$toasted.show(e.message);
-        });
-    },
+    }
+    
   }
 };
 </script>
@@ -265,28 +259,48 @@ h4 {
   flex: 1;
 }
 
-.plusIcon {
+/* .plusIcon {
   background: url("../assets/add-plus.svg") no-repeat center center;
   background-size: contain;
-  width: 25px;
-  height: 25px;
+  width: 24px;
+  height: 24px;
   cursor: pointer;
   vertical-align: middle;
+  padding: 10px;
 }
 .minusIcon {
   background: url("../assets/add-minus.svg") no-repeat center center;
   background-size: contain;
-  width: 25px;
-  height: 25px;
+  width: 24px;
+  height: 24px;
   cursor: pointer;
   vertical-align: middle;
+  padding: 10px;
+} */
+.deleteIcon {
+  background: url("../assets/delete.svg") no-repeat center center;
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  vertical-align: middle;
+  padding: 12px;
 }
-.plusHide {
+.editIcon {
+  background: url("../assets/edit.svg") no-repeat center center;
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  vertical-align: middle;
+  padding: 12px;
+}
+/* .plusHide {
   display: none;
 }
 .plusShow {
   display: inline-block;
-} 
+}  */
 .leftArrowIcon {
   background: url("../assets/rightArrow.svg") no-repeat center center;
   background-size: contain;
@@ -318,6 +332,12 @@ h4 {
 
 .cell {
   padding: 0 10px;
+}
+.camperCell {
+  padding-left:10px;
+  font-size: 0.8rem;
+  color: rgb(65, 65, 65);
+  font-style:italic;
 }
 .text {
   text-decoration: underline;

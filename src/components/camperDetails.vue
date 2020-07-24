@@ -2,7 +2,7 @@
   <div>
     <div class="row actionRow" @click="returnToDashboard()">
       <div class="leftArrowIcon clickable"></div>
-      <p class="clickable">Dashboard</p>
+      <p class="clickable">Trip</p>
       <p>&#47;&#47;</p>
       <p>Camper Details</p>
       <div class="actionRowPlaceholder"></div>

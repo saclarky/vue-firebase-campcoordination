@@ -19,9 +19,9 @@
         </div>
       </div>
     </div>
-    <div class="row actionRow">
+    <div class="actionRow">
       <div class="leftArrowIcon clickable"></div>
-      <router-link to="/dashboard">Dashboard</router-link>
+      <router-link to="/trip">Trip</router-link>
       <p>&#47;&#47;</p>
       <p>Gear</p>
       <div class="actionRowPlaceholder"></div>
@@ -33,10 +33,10 @@
         <div class="rightArrowIcon"></div>
         <div>My Gear</div>
       </div>
-      <div class="gridColumn">
+      
         <div v-show="!groupGearExists">Start a group gear list!</div>
-      </div>
-
+  
+<div class='addSection'>
       <input id="itemTitle" v-model="addGroupGearTitle" />
       <label for="itemTitle">Title:</label>
       <!-- TODO: domain? -->
@@ -44,19 +44,31 @@
       <label for="itemCat">Category:</label>
       <button @click="addGroupGearItem">Add</button>
       <!-- TODO: Add w enter key -->
+      </div>
       <div class="item" v-for="gear in thisTripGroupGear" :key="gear.id">
         <!-- input value isn't title, it's id for syncing data change with store/firestore -->
-        <span style="padding:0 10px;font-size:.8rem;color:gray;">{{gear.category}}</span>
+        <span class="cell category">{{gear.category}}</span>
         <input type="checkbox" :id="gear.id" :value="gear.id" :checked="gear.checked" @change="updateGroupGearItemStatus" />
         <label class="strikethrough" :for="gear.id">{{gear.title}}</label>
-         <span style="padding:0 10px;">({{gear.campers.join(', ')}})</span>
+         <span class="cell">({{gear.campers.join(', ')}})</span>
         <!-- TODO: sort checked items to bottom of list? -->
-        <small style="text-decoration:underline;" @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)">Update</small> 
-        <small style="text-decoration:underline;" @click="deleteGroupGearItem(gear.id)">Delete</small>
+        <i class='plusIcon cell' @click="updateGroupGearCampers({gid:gear.id,camperAdd:userProfile.name,camperRemove:''})"
+        :class="{
+      plusShow: !gear.campers.includes(userProfile.name),
+      plusHide: gear.campers.includes(userProfile.name)
+    }"></i>
+        <i class='minusIcon cell' @click="updateGroupGearCampers({gid:gear.id,camperRemove:userProfile.name,camperAdd:''})"
+        :class="{
+      plusShow: gear.campers.includes(userProfile.name),
+      plusHide: !gear.campers.includes(userProfile.name)
+    }"></i>
+        <!-- MINUS HERE -->
+        <small class="cell text"  @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)">Update</small> 
+        <small class="cell text" @click="deleteGroupGearItem(gear.id)">Delete</small>
       </div>
     </div>
     <updateGearItemPopup v-if="showUpdateItem" @close="toggleUpdateItem()" :itemid="thisItemID" :itemtitle="thisItemTitle"
-    :itemcat="thisItemCat" :itemcampers="thisItemCampers">
+    :itemcat="thisItemCat">
       
             <!-- TODO: add a class on items being updated so other users can see? -->
     </updateGearItemPopup>
@@ -80,9 +92,11 @@ export default {
     this.$store.dispatch("bindTripGroupGear").then(docs => {
       console.log("got gear list", docs);
       if (!docs) {
+        console.log('no docs')
         this.groupGearExists = false;
         //TODO: templates or form for starting a gear list from scratch
       } else {
+        console.log('exists')
         this.groupGearExists = true;
       }
     });
@@ -91,7 +105,8 @@ export default {
     updateGearItemPopup
   },
   computed: {
-    ...mapState(["thisTrip", "thisTripGroupGear"])
+    ...mapState(["thisTrip", "thisTripGroupGear","userProfile"])
+    
   },
   data: function() {
     return {
@@ -99,19 +114,17 @@ export default {
       thisItemID: '', // Pass ID prop into the updateItem popup for DB action
       thisItemTitle: '',
       thisItemCat: '',
-      thisItemCampers: [],
       groupGearExists: false,
       addGroupGearTitle: "",
       addGroupGearCat: ""
     };
   },
   methods: {
-    toggleUpdateItem(id, title, cat, campers) {
+    toggleUpdateItem(id, title, cat) {
       this.showUpdateItem = !this.showUpdateItem;
       this.thisItemID = id;
       this.thisItemTitle = title;
       this.thisItemCat = cat;
-      this.thisItemCampers = campers;
     },
     addGroupGearItem: function() {
       if (this.addGroupGearTitle !== "") {
@@ -151,7 +164,18 @@ export default {
         status: item.target.checked
       });
       //TODO: return message (success/fail)
-    }
+    },
+    updateGroupGearCampers: function(data) {
+      this.$store
+        .dispatch("updateGroupGearCampersAction", data)
+        .then(() => {
+          this.$toasted.show("Updated item!");
+          this.$emit("close");
+        })
+        .catch(e => {
+          this.$toasted.show(e.message);
+        });
+    },
   }
 };
 </script>
@@ -229,27 +253,49 @@ h4 {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
-  width: 100%;
-  cursor: pointer;
-  color: gray;
-  font-size: 0.9rem;
-  font-style: italic;
+  justify-content: left;
+  padding: 10px;
 }
 .actionRow > p {
-  margin-right: 10px;
+  margin-left: 10px;
   font-size: 1rem;
+}
+
+.actionRowPlaceholder {
+  flex: 1;
 }
 
 .plusIcon {
   background: url("../assets/add-plus.svg") no-repeat center center;
   background-size: contain;
-  width: 50px;
-  height: 50px;
-  margin-bottom: 15px;
+  width: 25px;
+  height: 25px;
   cursor: pointer;
+  vertical-align: middle;
 }
-
+.minusIcon {
+  background: url("../assets/add-minus.svg") no-repeat center center;
+  background-size: contain;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.plusHide {
+  display: none;
+}
+.plusShow {
+  display: inline-block;
+} 
+.leftArrowIcon {
+  background: url("../assets/rightArrow.svg") no-repeat center center;
+  background-size: contain;
+  width: 15px;
+  height: 15px;
+  color: black;
+  transform: rotate(180deg); /*TODO in gimp*/
+  cursor:pointer;
+}
 .rightArrowIcon {
   background: url("../assets/rightArrow.svg") no-repeat center center;
   background-size: contain;
@@ -262,10 +308,24 @@ h4 {
   font-size: 1rem;
   line-height: 1.6rem;
   /* text-align: left; */
+  margin: 5px 0;
 }
 
 /* messages section */
 #messages {
   margin-top: 15px;
+}
+
+.cell {
+  padding: 0 10px;
+}
+.text {
+  text-decoration: underline;
+}
+.category {
+font-size:.8rem;color:gray;
+}
+.addSection {
+  margin: 20px 0;
 }
 </style>

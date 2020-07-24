@@ -24,32 +24,9 @@
                 :placeholder="itemcat"
               />
             </div>
-            
+
             <button class="rowItem" @click="updateGroupGearItem">Save</button>
           </div>
-<div class="modal-body">
-          <div class="row">
-              <!-- Add camper -->
-              <label class="rowItem" for="newItemCamper">Add:</label >
-              <input
-                class="rowItem"
-                id="newItemCamper"
-                v-model="addGroupGearCampers"
-                placeholder="First Name"
-              />
-            </div>
-            <div class="row">
-              <!-- Remove camper -->
-              <label class="rowItem" for="newItemCamperR">Remove:</label >
-              <input
-                class="rowItem"
-                id="newItemCamperR"
-                v-model="removeGroupGearCampers"
-                :placeholder="itemcampers.join(', ')"
-              />
-            </div>
-             <button class="rowItem" @click="updateGroupGearCampers">Save</button>
-             </div>
 
           <div class="modal-footer">
             <button @click="$emit('close')">Cancel</button>
@@ -62,64 +39,40 @@
 
 <script>
 export default {
-  props: ["itemid", "itemtitle", "itemcat", "itemcampers"],
-  data: function() {
+  props: ["itemid", "itemtitle", "itemcat"],
+  data: function () {
     return {
       addGroupGearTitle: "",
       addGroupGearCat: "",
-      addGroupGearCampers: "",
-      removeGroupGearCampers: ""
     };
   },
-  methods: { 
-     updateGroupGearCampers: function() {
-      if(this.addGroupGearCampers === '' && this.removeGroupGearCampers === '') {
-        this.$toasted.show("No changes made!")
-        return
+  methods: {
+    updateGroupGearItem: function () {
+      if (this.addGroupGearTitle === "" && this.addGroupGearCat === "") {
+        this.$toasted.show("No changes made!");
+        return;
       }
-      if(this.addGroupGearCampers.includes(',') || this.removeGroupGearCampers.includes(',')) {
-        this.$toasted.show('One name at a time')
+      if (this.addGroupGearTitle === "") {
+        this.addGroupGearTitle = this.itemtitle;
       }
-      this.$store
-        .dispatch("updateGroupGearCampersAction", {
-          gid: this.itemid,
-          camperAdd: this.addGroupGearCampers,
-          camperRemove: this.removeGroupGearCampers
-        })
-        .then(() => {
-          this.$toasted.show("Updated item!");
-          this.$emit("close");
-        })
-        .catch(e => {
-          this.$toasted.show(e.message);
-        });
-    },
-    updateGroupGearItem: function() {
-      if(this.addGroupGearTitle === '' && this.addGroupGearCat === '') {
-        this.$toasted.show("No changes made!")
-        return
-      }
-      if(this.addGroupGearTitle === '') {
-        this.addGroupGearTitle = this.itemtitle
-      }
-        if(this.addGroupGearCat === '') {
-        this.addGroupGearCat = this.itemcat
+      if (this.addGroupGearCat === "") {
+        this.addGroupGearCat = this.itemcat;
       }
       this.$store
         .dispatch("updateGroupGearAction", {
           gid: this.itemid,
           title: this.addGroupGearTitle,
-          category: this.addGroupGearCat
+          category: this.addGroupGearCat,
         })
         .then(() => {
           this.$toasted.show("Updated item!");
           this.$emit("close");
         })
-        .catch(e => {
+        .catch((e) => {
           this.$toasted.show(e.message);
         });
-    }
-  }
+    },
+  },
 };
 </script>
 

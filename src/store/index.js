@@ -171,6 +171,22 @@ export const store = new Vuex.Store({
         'tripInvites': inviteObj,
         'tripResponses': responsesObj
       }
+    },
+    thisTripGroupGearCategorized: state => {
+      let categorizedGear = {}
+      state.thisTripGroupGear.forEach(gearObj => {
+        console.log(gearObj.category)
+        if(!gearObj.category) {
+          gearObj.category = 'Miscellaneous'
+        }
+          if (categorizedGear[gearObj.category] === undefined) {
+            categorizedGear[gearObj.category] = [gearObj]
+          } else {
+            categorizedGear[gearObj.category] = categorizedGear[gearObj.category].push(gearObj)
+          }             
+      })
+      console.log(categorizedGear)
+      return categorizedGear
     }
   },
 

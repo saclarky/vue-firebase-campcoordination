@@ -45,29 +45,21 @@
       <button @click="addGroupGearItem">Add</button>
       <!-- TODO: Add w enter key -->
       </div>
-      <div class="item" v-for="gear in thisTripGroupGear" :key="gear.id">
-        <!-- input value isn't title, it's id for syncing data change with store/firestore -->
-        <span class="cell category">{{gear.category}}</span>
+     <div class="categoryGrid">
+       <div class='categoryTile' v-for="(category, name) in thisTripGroupGearCategorized" :key="name">
+        <div>{{name}}</div>
+        <div class='itme' v-for="gear in thisTripGroupGearCategorized[name]" :key="gear.id">
         <input type="checkbox" :id="gear.id" :value="gear.id" :checked="gear.checked" @change="updateGroupGearItemStatus" />
         <label class="strikethrough" :for="gear.id">{{gear.title}}</label>
-         <span class="camperCell">({{gear.campers.join(', ')}})</span>
-        <!-- TODO: sort checked items to bottom of list? -->
-        <!-- <span :class="{
-      plusShow: !gear.campers.includes(userProfile.name),
-      plusHide: gear.campers.includes(userProfile.name)
-    }"><i class='plusIcon' @click="updateGroupGearCampers({gid:gear.id,camperAdd:userProfile.name,camperRemove:''})"
-        ></i><span>Add Self</span></span>
-       <span :class="{
-      plusShow: gear.campers.includes(userProfile.name),
-      plusHide: !gear.campers.includes(userProfile.name)
-    }"> <i class='minusIcon' @click="updateGroupGearCampers({gid:gear.id,camperRemove:userProfile.name,camperAdd:''})"
-        ></i><span>Remove Self</span></span> -->
-        <!-- MINUS HERE -->
-        <!-- <small class="cell text"  @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)">Update</small>  -->
-         <i class="text editIcon" @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)"></i>
-        <!-- <small class="cell text" @click="deleteGroupGearItem(gear.id)">Delete</small> -->
+        <span class="camperCell">(  {{gear.campers ? gear.campers.join(', ') : 'TBD'}} )</span>
+        <!-- TODO: sort checked items to bottom of list? -->       
+        <i class="text editIcon" @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)"></i>
         <i class="text deleteIcon" @click="deleteGroupGearItem(gear.id)"></i>
+        </div>
       </div>
+     </div>
+      
+      
     </div>
     <updateGearItemPopup v-if="showUpdateItem" @close="toggleUpdateItem()" :itemid="thisItemID" :itemtitle="thisItemTitle"
     :itemcat="thisItemCat" :campers="thisCampers" :username="userProfile.name">
@@ -78,7 +70,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import updateGearItemPopup from '../components/updateGearItemPopup'
 export default {
   name: "gear",
@@ -107,8 +99,8 @@ export default {
     updateGearItemPopup
   },
   computed: {
-    ...mapState(["thisTrip", "thisTripGroupGear","userProfile"])
-    
+    ...mapState(["thisTrip", "thisTripGroupGear","userProfile"]),
+    ...mapGetters(['thisTripGroupGearCategorized'])    
   },
   data: function() {
     return {
@@ -347,5 +339,17 @@ font-size:.8rem;color:gray;
 }
 .addSection {
   margin: 20px 0;
+}
+.categoryGrid {
+  display: flex;
+  flex-direction: row;
+}
+.categoryTile {
+  width: 25%;
+  background: rgb(205 236 215);  
+  box-shadow: 1px 1px 3px 2px rgba(57, 57, 57, 0.2);
+  margin: 24px;
+  /* border: 1px solid rgb(192 192 192); */
+  padding: 15px;
 }
 </style>

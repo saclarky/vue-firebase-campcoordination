@@ -29,13 +29,13 @@
           </div>
           <div class="modal-body">
              <span :class="{
-      plusShow: !campers.includes(username),
-      plusHide: campers.includes(username)
+      plusShow: campers ? !campers.includes(username) : true,
+      plusHide: campers ? campers.includes(username) : false
     }"><i class='plusIcon' @click="updateGroupGearCampers({gid:itemid,camperAdd:username,camperRemove:''})"
         ></i><span>Add Self</span></span>
        <span :class="{
-      plusShow: campers.includes(username),
-      plusHide: !campers.includes(username)
+      plusShow: campers ? campers.includes(username) : false,
+      plusHide: campers ? !campers.includes(username) : true
     }"> <i class='minusIcon' @click="updateGroupGearCampers({gid:itemid,camperRemove:username,camperAdd:''})"
         ></i><span>Remove Self</span></span>
           </div>

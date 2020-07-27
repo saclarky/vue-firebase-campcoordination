@@ -50,6 +50,7 @@ export const store = new Vuex.Store({
 
     //GEAR
     thisTripGroupGear: [],
+    thisTripIndGear: [],
 
     // CAMPERS DOCS DATA BINDS
     thisTripCampers: {},
@@ -187,6 +188,21 @@ export const store = new Vuex.Store({
       })
       console.log(categorizedGear)
       return categorizedGear
+    },
+    thisTripIndGearCategorized: state => {
+      let categorizedGear = {}
+      state.thisTripIndGear.forEach(gearObj => {
+        if(!gearObj.category) {
+          gearObj.category = 'Miscellaneous'
+        }
+          if (categorizedGear[gearObj.category] === undefined) {
+            categorizedGear[gearObj.category] = [gearObj]
+          } else {
+            categorizedGear[gearObj.category] = categorizedGear[gearObj.category].push(gearObj)
+          }             
+      })
+      console.log(categorizedGear)
+      return categorizedGear
     }
   },
 
@@ -291,6 +307,10 @@ export const store = new Vuex.Store({
     bindTripGroupGear: firestoreAction(context => {
       return context.bindFirestoreRef('thisTripGroupGear', fb.db.collection('groupGear').doc(context.state.thisTripID)
         .collection('gear'))
+    }),
+    bindTripIndGear: firestoreAction(context => {
+      return context.bindFirestoreRef('thisTripIndGear', fb.db.collection('individualGear').doc(context.state.currentUser.uid)
+        .collection(context.state.thisTripID))
     }),
     bindUserNotifications: firestoreAction(context => {
       return context.bindFirestoreRef('thisUserNotifications', fb.db.collection('userNotifications')
@@ -763,6 +783,36 @@ export const store = new Vuex.Store({
     },
     updateStatusAction: ({ state }, obj) => {
       return fb.db.collection("groupGear").doc(state.thisTripID).collection('gear').doc(obj.id)
+        .update({
+          checked: obj.status
+        })
+    },
+    // INDIVIDUAL GEAR
+    updateIndGearAction: ({ state }, data) => {
+      console.log("action to update a ind gear item")
+      return fb.db.collection('individualGear').doc(state.currentUser.uid).collection(state.thisTripID).doc(data.gid).update({
+        title: data.title,
+        category: data.category
+      })
+    },
+    addIndGearItemAction: ({ state }, data) => {
+      console.log("Action add: " + data.title)
+      return fb.db.collection("individualGear").doc(state.currentUser.uid).collection(state.thisTripID)
+        .add({
+          title: data.title,
+          // created_at: Date.now(),
+          checked: false,
+          category: data.category,
+          campers: []
+        })
+    },
+    deleteIndGearItemAction: ({ state }, data) => {
+      return fb.db.collection("individualGear").doc(state.currentUser.uid)
+      .collection(state.thisTripID).doc(data.id)
+        .delete()
+    },
+    updateIndStatusAction: ({ state }, obj) => {
+      return fb.db.collection("individualGear").doc(state.currentUser.uid).collection(state.thisTripID).doc(obj.id)
         .update({
           checked: obj.status
         })

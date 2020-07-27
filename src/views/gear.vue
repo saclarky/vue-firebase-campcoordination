@@ -15,8 +15,7 @@
         <div class="hero-icon"></div>
       </div>
       <div class="hero-bottom">
-        <div class="hero-content">
-        </div>
+        <div class="hero-content"></div>
       </div>
     </div>
     <div class="actionRow">
@@ -29,49 +28,116 @@
 
     <div class="content">
       <div class="gridWrapper">
-        <div>Group Gear</div>
-        <div class="rightArrowIcon"></div>
-        <div>My Gear</div>
+        <div id="groupGearButton" :class="groupGear" @click="toggleGearPage($event)">Group Gear</div>
+        <div :class="groupGearArrow"></div>
+        <div :class="myGearArrow"></div>
+        <div id="myGearButton" :class="myGear" @click="toggleGearPage($event)">My Gear</div>
       </div>
-      
-        <div v-show="!groupGearExists">Start a group gear list!</div>
-  
-<div class='addSection'>
-      <input id="itemTitle" v-model="addGroupGearTitle" />
-      <label for="itemTitle">Title:</label>
-      <!-- TODO: domain? -->
-      <input id="itemCat" v-model="addGroupGearCat" />
-      <label for="itemCat">Category:</label>
-      <button @click="addGroupGearItem">Add</button>
-      <!-- TODO: Add w enter key -->
-      </div>
-     <div class="categoryGrid">
-       <div class='categoryTile' v-for="(category, name) in thisTripGroupGearCategorized" :key="name">
-        <div>{{name}}</div>
-        <div class='itme' v-for="gear in thisTripGroupGearCategorized[name]" :key="gear.id">
-        <input type="checkbox" :id="gear.id" :value="gear.id" :checked="gear.checked" @change="updateGroupGearItemStatus" />
-        <label class="strikethrough" :for="gear.id">{{gear.title}}</label>
-        <span class="camperCell">(  {{gear.campers ? gear.campers.join(', ') : 'TBD'}} )</span>
-        <!-- TODO: sort checked items to bottom of list? -->       
-        <i class="text editIcon" @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)"></i>
-        <i class="text deleteIcon" @click="deleteGroupGearItem(gear.id)"></i>
+
+      <!-- <div v-show="!groupGearExists">Start a group gear list!</div> -->
+      <!-- GROUP GEAR VIEW -->
+      <div id="groupGearView" :class="groupGearPage">
+        <div class="addSection">
+          <input id="itemTitle" v-model="addGroupGearTitle" />
+          <label for="itemTitle">Title:</label>
+          <!-- TODO: domain? -->
+          <input id="itemCat" v-model="addGroupGearCat" />
+          <label for="itemCat">Category:</label>
+          <button @click="addGroupGearItem">Add</button>
+          <!-- TODO: Add w enter key -->
+        </div>
+        <div class="categoryGrid">
+          <div
+            class="categoryTile"
+            v-for="(category, name) in thisTripGroupGearCategorized"
+            :key="name"
+          >
+            <div>{{name}}</div>
+            <div class="item" v-for="gear in thisTripGroupGearCategorized[name]" :key="gear.id">
+              <input
+                type="checkbox"
+                :id="gear.id"
+                :value="gear.id"
+                :checked="gear.checked"
+                @change="updateGroupGearItemStatus"
+              />
+              <label class="strikethrough" :for="gear.id">{{gear.title}}</label>
+              <span class="camperCell">( {{gear.campers ? gear.campers.join(', ') : 'TBD'}} )</span>
+              <!-- TODO: sort checked items to bottom of list? -->
+              <i
+                class="text editIcon"
+                @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)"
+              ></i>
+              <i class="text deleteIcon" @click="deleteGroupGearItem(gear.id)"></i>
+            </div>
+          </div>
         </div>
       </div>
-     </div>
-      
-      
+      <div id="myGearView" :class="myGearPage">
+        <div class="addSection">
+          <input id="myItemTitle" v-model="addIndGearTitle" />
+          <label for="myItemTitle">Title:</label>
+          <!-- TODO: domain? -->
+          <input id="myItemCat" v-model="addIndGearCat" />
+          <label for="myItemCat">Category:</label>
+          <button @click="addIndGearItem">Add</button>
+          <!-- TODO: Add w enter key -->
+        </div>
+        <div class="categoryGrid">
+          <div
+            class="categoryTile"
+            v-for="(category, name) in thisTripIndGearCategorized"
+            :key="name"
+          >
+            <div>{{name}}</div>
+            <div class="item" v-for="gear in thisTripIndGearCategorized[name]" :key="gear.id">
+              <input
+                type="checkbox"
+                :id="gear.id"
+                :value="gear.id"
+                :checked="gear.checked"
+                @change="updateIndGearItemStatus"
+              />
+              <label class="strikethrough" :for="gear.id">{{gear.title}}</label>
+              <!-- TODO: sort checked items to bottom of list? -->
+              <i
+                class="text editIcon"
+                @click="toggleUpdateIndItem(gear.id, gear.title, gear.category)"
+              ></i>
+              <i class="text deleteIcon" @click="deleteIndGearItem(gear.id)"></i>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <updateGearItemPopup v-if="showUpdateItem" @close="toggleUpdateItem()" :itemid="thisItemID" :itemtitle="thisItemTitle"
-    :itemcat="thisItemCat" :campers="thisCampers" :username="userProfile.name">
-      
-            <!-- TODO: add a class on items being updated so other users can see? -->
+    <updateGearItemPopup
+      v-if="showUpdateItem"
+      @close="toggleUpdateItem()"
+      :itemid="thisItemID"
+      :itemtitle="thisItemTitle"
+      :itemcat="thisItemCat"
+      :campers="thisCampers"
+      :username="userProfile.name"
+    >
+      <!-- TODO: add a class on items being updated so other users can see? -->
     </updateGearItemPopup>
+    <updateIndGearItemPopup
+      v-if="showUpdateIndItem"
+      @close="toggleUpdateIndItem()"
+      :itemid="thisIndItemID"
+      :itemtitle="thisIndItemTitle"
+      :itemcat="thisIndItemCat"
+      :username="userProfile.name"
+    >
+      <!-- TODO: add a class on items being updated so other users can see? -->
+    </updateIndGearItemPopup>
   </div>
 </template>
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import updateGearItemPopup from '../components/updateGearItemPopup'
+import updateGearItemPopup from "../components/updateGearItemPopup";
+import updateIndGearItemPopup from "../components/updateIndGearItemPopup";
 export default {
   name: "gear",
   created() {
@@ -83,38 +149,85 @@ export default {
     console.log("VUE created");
     //TODO: If not logged in yet does it work?
     // TODO: getter for sorting??
-    this.$store.dispatch("bindTripGroupGear").then(docs => {
+    this.$store.dispatch("bindTripGroupGear").then((docs) => {
       console.log("got gear list", docs);
-      if (!docs) {
-        console.log('no docs')
-        this.groupGearExists = false;
-        //TODO: templates or form for starting a gear list from scratch
-      } else {
-        console.log('exists')
-        this.groupGearExists = true;
-      }
+      this.$store.dispatch("bindTripIndGear")
     });
   },
   components: {
-    updateGearItemPopup
+    updateGearItemPopup,
+    updateIndGearItemPopup
   },
   computed: {
-    ...mapState(["thisTrip", "thisTripGroupGear","userProfile"]),
-    ...mapGetters(['thisTripGroupGearCategorized'])    
+    groupGearPage() {
+      return {
+        displayGear: this.showGroupGear,
+        hideGear: !this.showGroupGear
+      };
+    },
+    myGearPage() {
+      return {
+        displayGear: !this.showGroupGear,
+        hideGear: this.showGroupGear
+      };
+    },
+    groupGear() {
+      return {
+        highlightGear: this.showGroupGear,
+        gearPages: true
+      };
+    },
+    myGear() {
+      return {
+        highlightGear: !this.showGroupGear,
+        gearPages: true
+      };
+    },
+    groupGearArrow() {
+      return {
+        rightArrowIcon: this.showGroupGear,
+      };
+    },
+    myGearArrow() {
+      return {
+        leftArrowIcon: !this.showGroupGear,
+      };
+    },
+    ...mapState(["thisTrip", "thisTripGroupGear", "userProfile"]),
+    ...mapGetters(["thisTripGroupGearCategorized", "thisTripIndGearCategorized"]),
   },
-  data: function() {
+  data: function () {
     return {
       showUpdateItem: false,
-      thisItemID: '', // Pass ID prop into the updateItem popup for DB action
-      thisItemTitle: '',
-      thisItemCat: '',
+      showUpdateIndItem: false,
+      showGroupGear: true,
+      thisItemID: "", // Pass ID prop into the updateItem popup for DB action
+      thisItemTitle: "",
+      thisItemCat: "",
       thisCampers: [],
-      groupGearExists: false,
+       thisIndItemID: "", // Pass ID prop into the updateItem popup for DB action
+      thisIndItemTitle: "",
+      thisIndItemCat: "",
+      // groupGearExists: false,
       addGroupGearTitle: "",
-      addGroupGearCat: ""
+      addGroupGearCat: "",
+      addIndGearTitle: "",
+      addIndGearCat: ""
     };
   },
   methods: {
+    toggleGearPage(event) {
+      if (
+        (event.target.id === "groupGearButton" &&
+          this.showGroupGear === true) ||
+        (event.target.id === "myGearButton" && this.showGroupGear === false)
+      ) {
+        return;
+      } else {
+        this.showGroupGear = !this.showGroupGear;
+      }
+    },
+    // GROUP GEAR
     toggleUpdateItem(id, title, cat, campers) {
       this.showUpdateItem = !this.showUpdateItem;
       this.thisItemID = id;
@@ -122,25 +235,25 @@ export default {
       this.thisItemCat = cat;
       this.thisCampers = campers;
     },
-    addGroupGearItem: function() {
+    addGroupGearItem: function () {
       if (this.addGroupGearTitle !== "") {
         // TODO: injection threat check
         this.$store
           .dispatch("addGroupGearItemAction", {
             title: this.addGroupGearTitle,
-            category: this.addGroupGearCat
+            category: this.addGroupGearCat,
           })
           .then(() => {
             this.$toasted.show("Added item!");
           })
-          .catch(e => {
+          .catch((e) => {
             this.$toasted.show(e.message);
           });
       } else {
         this.$toasted.show("Please enter a title for the item.");
       }
     },
-    deleteGroupGearItem: function(itemID) {
+    deleteGroupGearItem: function (itemID) {
       //TODO: confirm want to delete
       // change from button to top-level delete button that deletes checked boxes?
       // or... edit a template mode? where you can delete rows/add rows etc?
@@ -149,19 +262,64 @@ export default {
         .then(() => {
           this.$toasted.show("Deleted item!");
         })
-        .catch(e => {
+        .catch((e) => {
           this.$toasted.show(e.message);
         });
     },
-    updateGroupGearItemStatus: function(item) {
+    updateGroupGearItemStatus: function (item) {
       // console.log(item.target.value, item.target.checked);
       this.$store.dispatch("updateStatusAction", {
         id: item.target.value,
-        status: item.target.checked
+        status: item.target.checked,
+      });
+      //TODO: return message (success/fail)
+    },
+    // INDIVIDUAL ITEMS
+    toggleUpdateIndItem(id, title, cat) {
+      this.showUpdateIndItem = !this.showUpdateIndItem;
+      this.thisIndItemID = id;
+      this.thisIndItemTitle = title;
+      this.thisIndItemCat = cat;
+    },
+    addIndGearItem: function () {
+      if (this.addIndGearTitle !== "") {
+        // TODO: injection threat check
+        this.$store
+          .dispatch("addIndGearItemAction", {
+            title: this.addIndGearTitle,
+            category: this.addIndGearCat,
+          })
+          .then(() => {
+            this.$toasted.show("Added item!");
+          })
+          .catch((e) => {
+            this.$toasted.show(e.message);
+          });
+      } else {
+        this.$toasted.show("Please enter a title for the item.");
+      }
+    },
+    deleteIndGearItem: function (itemID) {
+      //TODO: confirm want to delete
+      // change from button to top-level delete button that deletes checked boxes?
+      // or... edit a template mode? where you can delete rows/add rows etc?
+      this.$store
+        .dispatch("deleteIndGearItemAction", { id: itemID })
+        .then(() => {
+          this.$toasted.show("Deleted item!");
+        })
+        .catch((e) => {
+          this.$toasted.show(e.message);
+        });
+    },
+     updateIndGearItemStatus: function (item) {
+      // console.log(item.target.value, item.target.checked);
+      this.$store.dispatch("updateIndStatusAction", {
+        id: item.target.value,
+        status: item.target.checked,
       });
       //TODO: return message (success/fail)
     }
-    
   }
 };
 </script>
@@ -220,10 +378,11 @@ h4 {
 
 /* Main Content */
 .gridWrapper {
-  padding: 15px;
+  /* padding: 15px; */
   display: flex;
   flex-direction: row;
   justify-content: center;
+  align-items: center;
 }
 .gridColumn {
   /* width: 150px; */
@@ -240,7 +399,7 @@ h4 {
   flex-direction: row;
   align-items: center;
   justify-content: left;
-  padding: 10px;
+  padding: 10px 0 0 10px;
 }
 .actionRow > p {
   margin-left: 10px;
@@ -300,7 +459,7 @@ h4 {
   height: 15px;
   color: black;
   transform: rotate(180deg); /*TODO in gimp*/
-  cursor:pointer;
+  cursor: pointer;
 }
 .rightArrowIcon {
   background: url("../assets/rightArrow.svg") no-repeat center center;
@@ -326,16 +485,17 @@ h4 {
   padding: 0 10px;
 }
 .camperCell {
-  padding-left:10px;
+  padding-left: 10px;
   font-size: 0.8rem;
   color: rgb(65, 65, 65);
-  font-style:italic;
+  font-style: italic;
 }
 .text {
   text-decoration: underline;
 }
 .category {
-font-size:.8rem;color:gray;
+  font-size: 0.8rem;
+  color: gray;
 }
 .addSection {
   margin: 20px 0;
@@ -346,10 +506,26 @@ font-size:.8rem;color:gray;
 }
 .categoryTile {
   width: 25%;
-  background: rgb(205 236 215);  
+  background: rgb(205 236 215);
   box-shadow: 1px 1px 3px 2px rgba(57, 57, 57, 0.2);
   margin: 24px;
   /* border: 1px solid rgb(192 192 192); */
   padding: 15px;
+}
+.highlightGear {
+  box-shadow: 0px 0px 15px 4px #23df7f;
+}
+.gearPages {
+  border-radius: 2px;
+  padding: 10px;
+  margin: 10px;
+  cursor: pointer;
+  border: 1px solid #bcbcbc;
+}
+.displayGear {
+  display: block;
+}
+.hideGear {
+  display: none;
 }
 </style>

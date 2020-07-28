@@ -10,12 +10,15 @@
                 </slot>
               </div>
 
-              <div class="modal-body">
-                <!-- <slot name="body">
-                  default body
-                </slot> -->                  
+              <div class="modal-body">              
                     <label class='rowItem' for="newTripName">Trip Name: </label>
                     <input class='rowItem' id="newTripName" placeholder="Desert Getaway 2020">
+                    <label class='rowItem' for="templateChoice">Choose a pre-populated gear list:</label>
+                    <select class='rowItem' name="templateChoice" id="templateChoice">
+                      <option selected="None">None</option>
+                      <option>My List</option>
+                      <option>Generic List</option>
+                    </select>
                     <button class='rowItem' @click="saveNewTrip">Save</button>
               </div>
 
@@ -37,9 +40,14 @@ export default {
    
     methods: {
         saveNewTrip() {
-
-            console.log(document.getElementById("newTripName").value)
-            this.$store.dispatch('saveNewTripAction', document.getElementById("newTripName").value).then((res, rej) => {
+          if (!document.getElementById("newTripName").value) {
+            this.$toasted.show("Need a trip name!")
+            return;
+          }
+          let data = {name: document.getElementById("newTripName").value,
+          template:document.getElementById('templateChoice').value}
+            console.log(document.getElementById("templateChoice").value)
+            this.$store.dispatch('saveNewTripAction', data).then((res, rej) => {
                this.$emit('close')
               if(res) {
               

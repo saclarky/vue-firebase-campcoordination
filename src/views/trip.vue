@@ -154,7 +154,7 @@ h4 {
     ),
     url(../assets/ryan-bahm-fMMpsyHCeK0-unsplash.jpg) no-repeat 0 -135px;
   background-size: cover;
-  height: 490px;
+  height: 200px;
   width: 100%;
   /*margin-bottom: 15px;*/
 }

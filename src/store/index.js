@@ -362,19 +362,35 @@ export const store = new Vuex.Store({
         })
     },
 
-    saveNewTripAction: ({ state }, name) => {
+    saveNewTripAction: ({ state }, obj) => {
       return new Promise((resolve, reject) => {
         //TODO: TDB into blank fields?
-        fb.db.collection("trips").add({ 'name': name, 'uid': state.currentUser.uid, 'owner': state.currentUser.displayName })
-          .then(doc => {
-            // Create docs for future camper updates
-            fb.db.collection('groupGear').doc(doc.id).set({})
-            fb.db.collection('campersNo').doc(doc.id).set({})
-            fb.db.collection('campersPending').doc(doc.id).set({})
+        fb.db.collection("trips").add({ 'name': obj.name, 'uid': state.currentUser.uid, 'owner': state.currentUser.displayName })
+          .then(tripDoc => {
+            fb.db.collection('groupGear').doc(tripDoc.id).set({})
+            if(obj.template === "My List") {
+              console.log('copy over users default list')
+              fb.db.collection('individualGear').doc(state.currentUser.uid).collection('default').get().then((results) => {
+                         if(!results.empty) {
+                  results.docs.forEach(doc => {
+                    fb.db.collection('groupGear').doc(tripDoc.id).collection('gear').add(doc.data())
+                  })
+              } })
+            } else if (obj.template === "Generic List") {
+              fb.db.collection('defaultList').get().then((results) => {
+                if(!results.empty) {
+                  //TODO if results.docs.exists
+                  results.docs.forEach(doc => {
+                    fb.db.collection('groupGear').doc(tripDoc.id).collection('gear').add(doc.data())
+                  })
+              } })
+            }  
+            fb.db.collection('campersNo').doc(tripDoc.id).set({})
+            fb.db.collection('campersPending').doc(tripDoc.id).set({})
             //TODO redirect to new trip page?
             // Since it's a new trip use SET because need to also create the document
             // If use update throws an error, no document to update
-            fb.db.collection('campers').doc(doc.id).set({
+            fb.db.collection('campers').doc(tripDoc.id).set({
               [state.currentUser.uid]: state.currentUser.displayName
             })
               .then(() => {
@@ -382,7 +398,7 @@ export const store = new Vuex.Store({
                 console.log('saved current user to trip campers')
                 // Strange issue trying to debug, 'empty' existing collections.
                 // Might be because of not created ancestor first explicity so here...
-                fb.db.collection('tripActivityLog').doc(doc.id).set({ 'null': null })
+                fb.db.collection('tripActivityLog').doc(tripDoc.id).set({ 'null': null })
                 resolve("saved")
               }).catch(e => {
                 console.log("error saving new trip's owner as a camper")
@@ -802,8 +818,7 @@ export const store = new Vuex.Store({
           title: data.title,
           // created_at: Date.now(),
           checked: false,
-          category: data.category,
-          campers: []
+          category: data.category
         })
     },
     deleteIndGearItemAction: ({ state }, data) => {

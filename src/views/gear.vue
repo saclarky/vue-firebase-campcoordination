@@ -38,14 +38,17 @@
       <!-- GROUP GEAR VIEW -->
       <div id="groupGearView" :class="groupGearPage">
         <div class="addSection">
-          <input id="itemTitle" v-model="addGroupGearTitle" />
+          
           <label for="itemTitle">Title:</label>
+          <input id="itemTitle" v-model="addGroupGearTitle" />
           <!-- TODO: domain? -->
-          <input id="itemCat" v-model="addGroupGearCat" />
+          
           <label for="itemCat">Category:</label>
+          <input id="itemCat" v-model="addGroupGearCat" />
           <button @click="addGroupGearItem">Add</button>
           <!-- TODO: Add w enter key -->
         </div>
+       
         <div class="categoryGrid">
           <div
             class="categoryTile"
@@ -75,14 +78,17 @@
       </div>
       <div id="myGearView" :class="myGearPage">
         <div class="addSection">
+           <label for="myItemTitle">Title:</label>
           <input id="myItemTitle" v-model="addIndGearTitle" />
-          <label for="myItemTitle">Title:</label>
+         
           <!-- TODO: domain? -->
-          <input id="myItemCat" v-model="addIndGearCat" />
           <label for="myItemCat">Category:</label>
+          <input id="myItemCat" v-model="addIndGearCat" />
+          
           <button @click="addIndGearItem">Add</button>
           <!-- TODO: Add w enter key -->
         </div>
+        
         <div class="categoryGrid">
           <div
             class="categoryTile"
@@ -346,7 +352,7 @@ h4 {
     ),
     url(../assets/ryan-bahm-fMMpsyHCeK0-unsplash.jpg) no-repeat 0 -135px;
   background-size: cover;
-  height: 490px;
+  height: 200px;
   width: 100%;
   /*margin-bottom: 15px;*/
 }

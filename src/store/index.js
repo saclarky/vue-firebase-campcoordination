@@ -177,12 +177,15 @@ export const store = new Vuex.Store({
       let categorizedGear = {}
       state.thisTripGroupGear.forEach(gearObj => {
         console.log(gearObj.category)
+        console.log(gearObj)
+        console.log(categorizedGear)
         if(!gearObj.category) {
           gearObj.category = 'Miscellaneous'
         }
           if (categorizedGear[gearObj.category] === undefined) {
             categorizedGear[gearObj.category] = [gearObj]
           } else {
+            console.log(categorizedGear[gearObj.category])
             categorizedGear[gearObj.category] = categorizedGear[gearObj.category].push(gearObj)
           }             
       })
@@ -781,6 +784,7 @@ export const store = new Vuex.Store({
         return e
       })
     },
+    
     addGroupGearItemAction: ({ state }, data) => {
       console.log("Action add: " + data.title)
       return fb.db.collection("groupGear").doc(state.thisTripID).collection('gear')
@@ -830,6 +834,16 @@ export const store = new Vuex.Store({
       return fb.db.collection("individualGear").doc(state.currentUser.uid).collection(state.thisTripID).doc(obj.id)
         .update({
           checked: obj.status
+        })
+    },
+    // Edit Default Gear Lists
+    editListGearItemAction: (context, data) => {
+      // for not using to input data to the main defualt list
+      console.log("Action add: " + data.title)
+      return fb.db.collection("defaultList").add({
+          title: data.title,
+          checked: false,
+          category: data.category
         })
     },
     // LOGGING IN // AUTH STUFF

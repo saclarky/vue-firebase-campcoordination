@@ -1,6 +1,17 @@
 <template>
   <div>
     <div>
+    <div class="addSection">
+          
+          <label for="itemTitle">Title:</label>
+          <input id="itemTitle" v-model="addGearTitle" />
+          <!-- TODO: domain? -->
+          
+          <label for="itemCat">Category:</label>
+          <input id="itemCat" v-model="addGearCat" />
+          <button @click="editMyList">Add</button>
+          <!-- TODO: Add w enter key -->
+        </div>
       <div>Notifications</div>
       <!-- TODO filter responded, time frame etc -->
       <div v-for="alert in thisUserNotificationsGetter.tripInvites" :key="alert.id" >
@@ -33,6 +44,12 @@ export default {
     this.$store.dispatch("bindUserNotifications").then(() => {
       console.log("User notifications reference bound.");
     });
+  },
+  data() {
+    return {
+      addGearTitle: '',
+      addGearCat: ''
+    }
   },
   computed: {
 
@@ -72,6 +89,25 @@ export default {
             this.$toasted.show(rej);
           }
         });
+    },
+    editMyList: function() {
+      if (this.addGearTitle !== "") {
+        // TODO: injection threat check
+        this.$store
+          .dispatch("editListGearItemAction", {
+            title: this.addGearTitle,
+            category: this.addGearCat,
+          })
+          .then(() => {
+            this.$toasted.show("Added item!");
+          })
+          .catch((e) => {
+            this.$toasted.show(e.message);
+          });
+      } else {
+        this.$toasted.show("Please enter a title for the item.");
+      }
+    
     }
   }
 };

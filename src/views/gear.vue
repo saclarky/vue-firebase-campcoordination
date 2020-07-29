@@ -49,13 +49,13 @@
           <!-- TODO: Add w enter key -->
         </div>
        
-        <div class="categoryGrid">
+        <div class="categoryGrid paper">
           <div
-            class="categoryTile"
+          class="categoryBlock"
             v-for="(category, name) in thisTripGroupGearCategorized"
             :key="name"
           >
-            <div>{{name}}</div>
+            <div class="categoryTitle">{{name}}</div>
             <div class="item" v-for="gear in thisTripGroupGearCategorized[name]" :key="gear.id">
               <input
                 type="checkbox"
@@ -64,14 +64,15 @@
                 :checked="gear.checked"
                 @change="updateGroupGearItemStatus"
               />
-              <label class="strikethrough" :for="gear.id">{{gear.title}}</label>
-              <span class="camperCell">( {{gear.campers ? gear.campers.join(', ') : 'TBD'}} )</span>
+              <label class="strikethrough itemTitle" :for="gear.id">{{gear.title}}</label>
+              <div class="camperCell">( {{gear.campers ? gear.campers.join(', ') : 'TBD'}} )</div>
               <!-- TODO: sort checked items to bottom of list? -->
-              <i
-                class="text editIcon"
-                @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)"
-              ></i>
-              <i class="text deleteIcon" @click="deleteGroupGearItem(gear.id)"></i>
+              <div class="editIcon"  @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)"><svg >
+                <path fill="#c0c0c0" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+              </svg></div>
+               <div class="deleteIcon"  @click="deleteGroupGearItem(gear.id)"><svg >
+                <path fill="#c0c0c0" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"/>
+              </svg></div>
             </div>
           </div>
         </div>
@@ -89,13 +90,13 @@
           <!-- TODO: Add w enter key -->
         </div>
         
-        <div class="categoryGrid">
+        <div class="categoryGrid paper">
           <div
-            class="categoryTile"
+          class="categoryBlock"
             v-for="(category, name) in thisTripIndGearCategorized"
             :key="name"
           >
-            <div>{{name}}</div>
+            <div class='categoryTitle'>{{name}}</div>
             <div class="item" v-for="gear in thisTripIndGearCategorized[name]" :key="gear.id">
               <input
                 type="checkbox"
@@ -104,13 +105,14 @@
                 :checked="gear.checked"
                 @change="updateIndGearItemStatus"
               />
-              <label class="strikethrough" :for="gear.id">{{gear.title}}</label>
+              <label class="strikethrough itemTitle" :for="gear.id">{{gear.title}}</label>
               <!-- TODO: sort checked items to bottom of list? -->
-              <i
-                class="text editIcon"
-                @click="toggleUpdateIndItem(gear.id, gear.title, gear.category)"
-              ></i>
-              <i class="text deleteIcon" @click="deleteIndGearItem(gear.id)"></i>
+               <div class="editIcon"  @click="toggleUpdateIndItem(gear.id, gear.title, gear.category)"><svg >
+                <path fill="#c0c0c0" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+              </svg></div>
+               <div class="deleteIcon"  @click="deleteIndGearItem(gear.id)"><svg >
+                <path fill="#c0c0c0" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"/>
+              </svg></div>
             </div>
           </div>
         </div>
@@ -435,22 +437,24 @@ h4 {
   padding: 10px;
 } */
 .deleteIcon {
-  background: url("../assets/delete.svg") no-repeat center center;
-  background-size: contain;
+  /* background: url("../assets/delete.svg") no-repeat center center; */
+  /* background-size: contain; */
   width: 24px;
   height: 24px;
   cursor: pointer;
-  vertical-align: middle;
-  padding: 12px;
+  /* vertical-align: middle; */
+  /* padding: 12px; */
+  display: inline-block;
 }
 .editIcon {
-  background: url("../assets/edit.svg") no-repeat center center;
-  background-size: contain;
+  /* background: url("../assets/edit.svg") no-repeat center center; */
+  /* background-size: contain; */
   width: 24px;
   height: 24px;
   cursor: pointer;
-  vertical-align: middle;
-  padding: 12px;
+  /* vertical-align: middle; */
+  margin-left: 20px;
+  display: inline-block;
 }
 /* .plusHide {
   display: none;
@@ -475,13 +479,6 @@ h4 {
   color: gray;
 }
 
-.item {
-  font-size: 1rem;
-  line-height: 1.6rem;
-  /* text-align: left; */
-  margin: 5px 0;
-}
-
 /* messages section */
 #messages {
   margin-top: 15px;
@@ -495,6 +492,7 @@ h4 {
   font-size: 0.8rem;
   color: rgb(65, 65, 65);
   font-style: italic;
+  display: inline-block;
 }
 .text {
   text-decoration: underline;
@@ -505,18 +503,6 @@ h4 {
 }
 .addSection {
   margin: 20px 0;
-}
-.categoryGrid {
-  display: flex;
-  flex-direction: row;
-}
-.categoryTile {
-  width: 25%;
-  background: rgb(205 236 215);
-  box-shadow: 1px 1px 3px 2px rgba(57, 57, 57, 0.2);
-  margin: 24px;
-  /* border: 1px solid rgb(192 192 192); */
-  padding: 15px;
 }
 .highlightGear {
   box-shadow: 0px 0px 15px 4px #23df7f;
@@ -534,4 +520,53 @@ h4 {
 .hideGear {
   display: none;
 }
+.categoryGrid {
+  /* display: flex;
+  flex-direction: row;
+  flex-wrap: wrap; */
+  
+      display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    /* justify-content: center; */
+    justify-content: space-around;
+}
+.categoryBlock {
+  /* width: 50%; */
+  padding: 0 10px;
+}
+.categoryTitle {
+  font-size: 1.3rem;
+  padding: 15px;
+}
+.itemTitle {
+  
+  font-size: 1.2rem;
+}
+.item {
+  /* line-height: 1.6rem; */
+  /* margin: 5px 0; */
+  font-family: 'Kalam', cursive;
+  text-align: left;
+  display: flex;
+  align-items: center;
+}
+.paper {
+  color: #282625; 
+  margin: 0 auto; 
+  /* width: 650px; */
+    padding: 7px 55px 27px;
+    position: relative;
+    border: 1px solid #B5B5B5;
+    background: white;
+    background: -webkit-linear-gradient(0deg, #DFE8EC 0%, white 8%) 0 57px;
+    background: -moz-linear-gradient(0deg, #DFE8EC 0%, white 8%) 0 57px;
+    background: linear-gradient(0deg, #DFE8EC 0%, white 8%) 0 57px;
+    -webkit-background-size: 100% 30px;
+    -moz-background-size: 100% 30px;
+    -ms-background-size: 100% 30px;
+    background-size: 100% 30px;
+}
+.paper::before {content:""; z-index:-1; margin:0 1px; width:706px; height:10px; position:absolute; bottom:-3px; left:0; background:white; border:1px solid #B5B5B5;}
+.paper::after {content:''; position:absolute; width:0px; top:0; left:39px; bottom:0; border-left:1px solid #F8D3D3;}
 </style>

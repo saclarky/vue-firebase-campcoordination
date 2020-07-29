@@ -186,7 +186,8 @@ export const store = new Vuex.Store({
             categorizedGear[gearObj.category] = [gearObj]
           } else {
             console.log(categorizedGear[gearObj.category])
-            categorizedGear[gearObj.category] = categorizedGear[gearObj.category].push(gearObj)
+            // STOPPED HERE< TEST THIS
+            categorizedGear[gearObj.category].push(gearObj)
           }             
       })
       console.log(categorizedGear)

@@ -4,21 +4,18 @@
       <div class="modal-wrapper">
         <div class="modal-container">
           <div class="modal-header">Change Category's Name</div>
-          <div class="modal-body">          
-            <div >
-              <input
-                class="rowItem"
-                id="newItemCat"
-                v-model="addGearCat"
-                :placeholder="itemcat"
-              />
+          <div class="modal-body">
+            <form v-on:submit.prevent>
+            <div>
+              <input type="text" class="rowItem" id="newItemCat" v-model="addGearCat" :placeholder="itemcat" autofocu>
             </div>
-            <div class='row'>
+            <div class="row rowStyle">
               <div class="loader" v-if="showSpinner"></div>
-              <button class="rowItem" @click="updateGearCategory">Save</button>
+              <input type="submit" class="rowItem" @click="updateGearCategory" value="Save" />
               <button class="rowItem" @click="$emit('close')">Cancel</button>
-              </div>
-          </div> 
+            </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -27,15 +24,16 @@
 
 <script>
 export default {
-  props: ["itemcat","itempage"],
+  props: ["itemcat", "itempage"],
   data: function () {
     return {
       addGearCat: "",
-      showSpinner: false
+      showSpinner: false,
     };
   },
   methods: {
-    updateGearCategory: function () {
+    updateGearCategory: function (e) {
+      e.preventDefault();
       if (this.addGearCat === "" || this.addGearCat === this.itemcat) {
         this.$toasted.show("No changes made!");
         return;
@@ -43,29 +41,29 @@ export default {
       this.showSpinner = true;
       let data = {
         newCategory: this.addGearCat,
-        page: this.itempage
-      }
-      if (this.itemcat === 'Miscellaneous') {
-        data.category = ""
+        page: this.itempage,
+      };
+      if (this.itemcat === "Miscellaneous") {
+        data.category = "";
       } else {
-        data.category = this.itemcat
+        data.category = this.itemcat;
       }
       this.$store
         .dispatch("updateGearCategory", data)
         .then((res) => {
           this.showSpinner = false;
           this.$toasted.show(res);
-          if(res === 'Updated category!') {
-          this.$emit("close");
+          if (res === "Updated category!") {
+            this.$emit("close");
           }
         })
         .catch((e) => {
           this.showSpinner = false;
-          console.log(e)
+          console.log(e);
           this.$toasted.show(e.message);
         });
-    }    
-  }
+    },
+  },
 };
 </script>
 
@@ -113,9 +111,8 @@ export default {
   justify-content: center;
   align-items: center;
 }
-.row {
-  display: flex;
-  flex-direction: row;
+.rowStyle {
+  justify-content: center;
   margin: 5px 0;
 }
 .rowItem {
@@ -156,7 +153,7 @@ button.rowItem {
 }
 .plusShow {
   display: inline-block;
-} 
+}
 .plusIcon {
   background: url("../assets/add-plus.svg") no-repeat center center;
   background-size: contain;
@@ -174,19 +171,5 @@ button.rowItem {
   cursor: pointer;
   vertical-align: middle;
   padding: 10px;
-}
-.loader {
-      border: 5px solid #f3f3f3;
-    border-top: 5px solid #34db9b;
-    border-radius: 50%;
-    width: 12px;
-    height: 12px;
-    -webkit-animation: spin 2s linear infinite;
-    animation: spin 2s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
 }
 </style>

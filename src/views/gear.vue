@@ -37,33 +37,44 @@
       <!-- <div v-show="!groupGearExists">Start a group gear list!</div> -->
       <!-- GROUP GEAR VIEW -->
       <div id="groupGearView" :class="groupGearPage">
-        <div class="addSection">          
-          <label for="itemTitle">Title:</label>
-          <input id="itemTitle" v-model="addGroupGearTitle" />
-          <!-- TODO: domain? -->          
-          <label for="itemCat">Category:</label>
-          <input id="itemCat" v-model="addGroupGearCat" />
-          <button @click="addGroupGearItem">Add</button>
-          <!-- TODO: Add w enter key -->
+        <div class="addSection">
+          <form v-on:submit.prevent>
+            <label for="itemTitle">Title:</label>
+            <input type="text" id="itemTitle" v-model="addGroupGearTitle" />
+            <!-- TODO: domain? -->
+            <label for="itemCat">Category:</label>
+            <input type="text" id="itemCat" v-model="addGroupGearCat" />
+            <input type="submit" @click="addGroupGearItem" value="Add" />
+          </form>
         </div>
-       
+
         <div class="categoryGrid paper">
           <div
-          class="categoryBlock"
+            class="categoryBlock"
             v-for="(category, name) in thisTripGroupGearCategorized"
             :key="name"
           >
-          <div class='categoryHeader'>
-            <div class="categoryTitle">{{name}}</div>
-            <!-- Ability to edit/delete categorie text -->
-            <div class="editIcon"  @click="toggleEditCategory(name, 'group')"><svg >
-                <path fill="#c0c0c0" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-              </svg></div>
-              <!-- TODO: Warn will delete all gear in this category/section -->
-               <div class="deleteIcon"  @click="toggleDeleteCategory(name, 'group')"><svg >
-                <path fill="#c0c0c0" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"/>
-              </svg></div>
+            <div class="categoryHeader">
+              <div class="categoryTitle">{{name}}</div>
+              <!-- Ability to edit/delete categorie text -->
+              <div class="editIcon" @click="toggleEditCategory(name, 'group')">
+                <svg>
+                  <path
+                    fill="#c0c0c0"
+                    d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                  />
+                </svg>
               </div>
+              <!-- TODO: Warn will delete all gear in this category/section -->
+              <div class="deleteIcon" @click="toggleDeleteCategory(name, 'group')">
+                <svg>
+                  <path
+                    fill="#c0c0c0"
+                    d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"
+                  />
+                </svg>
+              </div>
+            </div>
             <!-- Display all gear items in this category -->
             <div class="item" v-for="gear in thisTripGroupGearCategorized[name]" :key="gear.id">
               <input
@@ -76,51 +87,98 @@
               <label class="strikethrough itemTitle" :for="gear.id">{{gear.title}}</label>
               <div class="camperCell">( {{gear.campers ? gear.campers.join(', ') : 'TBD'}} )</div>
               <!-- TODO: sort checked items to bottom of list? -->
-              <div class="editIcon"  @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)"><svg>
-                <path fill="#c0c0c0" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-              </svg></div>
-               <div class="deleteIcon"  @click="deleteGroupGearItem(gear.id)"><svg >
-                <path fill="#c0c0c0" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"/>
-              </svg></div>
+              <div
+                class="editIcon"
+                @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)"
+              >
+                <svg>
+                  <path
+                    fill="#c0c0c0"
+                    d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                  />
+                </svg>
+              </div>
+              <div class="deleteIcon" @click="deleteGroupGearItem(gear.id)">
+                <svg>
+                  <path
+                    fill="#c0c0c0"
+                    d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"
+                  />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
       </div>
       <div id="myGearView" :class="myGearPage">
         <div class="addSection">
-           <label for="myItemTitle">Title:</label>
-          <input id="myItemTitle" v-model="addIndGearTitle" />         
-          <!-- TODO: domain? -->
-          <label for="myItemCat">Category:</label>
-          <input id="myItemCat" v-model="addIndGearCat" />          
-          <button @click="addIndGearItem">Add</button>
-          <!-- TODO: Add w enter key - try the 'submit' type instead an djust preventDefault for no refresh form.onsubmit()-->
+          <form v-on:submit.prevent>
+            <label for="myItemTitle">Title:</label>
+            <input type="text" id="myItemTitle" v-model="addIndGearTitle" />
+            <!-- TODO: domain? -->
+            <label for="myItemCat">Category:</label>
+            <input type="text" id="myItemCat" v-model="addIndGearCat" />
+            <input type="submit" @click="addIndGearItem" value="Add" />
+          </form>
         </div>
-        
+
         <div class="categoryGrid paper">
-          <div  class="categoryBlock" v-for="(category, name) in thisTripIndGearCategorized" :key="name" >
-             <div class='categoryHeader'>
-            <div class='categoryTitle'>{{name}}</div>
-            <!-- Ability to edit/delete categorie text -->
-            <div class="editIcon"  @click="toggleEditCategory(name, 'ind')"><svg >
-                <path fill="#c0c0c0" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-              </svg></div>
+          <div
+            class="categoryBlock"
+            v-for="(category, name) in thisTripIndGearCategorized"
+            :key="name"
+          >
+            <div class="categoryHeader">
+              <div class="categoryTitle">{{name}}</div>
+              <!-- Ability to edit/delete categorie text -->
+              <div class="editIcon" @click="toggleEditCategory(name, 'ind')">
+                <svg>
+                  <path
+                    fill="#c0c0c0"
+                    d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                  />
+                </svg>
+              </div>
               <!-- TODO: Warn will delete all gear in this category/section -->
-               <div class="deleteIcon"  @click="toggleDeleteCategory(name, 'ind')"><svg >
-                <path fill="#c0c0c0" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"/>
-              </svg></div>
-             </div>
+              <div class="deleteIcon" @click="toggleDeleteCategory(name, 'ind')">
+                <svg>
+                  <path
+                    fill="#c0c0c0"
+                    d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"
+                  />
+                </svg>
+              </div>
+            </div>
             <!-- Display all gear items in this category -->
             <div class="item" v-for="gear in thisTripIndGearCategorized[name]" :key="gear.id">
-              <input type="checkbox" :id="gear.id" :value="gear.id" :checked="gear.checked" @change="updateIndGearItemStatus" />
+              <input
+                type="checkbox"
+                :id="gear.id"
+                :value="gear.id"
+                :checked="gear.checked"
+                @change="updateIndGearItemStatus"
+              />
               <label class="strikethrough itemTitle" :for="gear.id">{{gear.title}}</label>
               <!-- TODO: sort checked items to bottom of list? -->
-               <div class="editIcon"  @click="toggleUpdateIndItem(gear.id, gear.title, gear.category)"><svg >
-                <path fill="#c0c0c0" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-              </svg></div>
-               <div class="deleteIcon"  @click="deleteIndGearItem(gear.id)"><svg >
-                <path fill="#c0c0c0" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"/>
-              </svg></div>
+              <div
+                class="editIcon"
+                @click="toggleUpdateIndItem(gear.id, gear.title, gear.category)"
+              >
+                <svg>
+                  <path
+                    fill="#c0c0c0"
+                    d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                  />
+                </svg>
+              </div>
+              <div class="deleteIcon" @click="deleteIndGearItem(gear.id)">
+                <svg>
+                  <path
+                    fill="#c0c0c0"
+                    d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"
+                  />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
@@ -147,20 +205,18 @@
     >
       <!-- TODO: add a class on items being updated so other users can see? -->
     </updateIndGearItemPopup>
-     <editGearCategory
+    <editGearCategory
       v-if="showEditCat"
       @close="toggleEditCategory('','')"
       :itemcat="thisCategory"
-      :itempage ="whichPage"
-    >
-    </editGearCategory>
-     <deleteGearCategory
+      :itempage="whichPage"
+    ></editGearCategory>
+    <deleteGearCategory
       v-if="showDeleteCat"
       @close="toggleDeleteCategory('','')"
       :itemcat="thisCategory"
-      :itempage ="whichPage"
-    >
-    </deleteGearCategory>
+      :itempage="whichPage"
+    ></deleteGearCategory>
   </div>
 </template>
 
@@ -169,54 +225,53 @@ import { mapState, mapGetters } from "vuex";
 import updateGearItemPopup from "../components/updateGearItemPopup";
 import updateIndGearItemPopup from "../components/updateIndGearItemPopup";
 import editGearCategory from "../components/editGearCategory";
-import deleteGearCategory from "../components/deleteGearCategory"
+import deleteGearCategory from "../components/deleteGearCategory";
 export default {
   name: "gear",
   created() {
-    console.log('gear page created: ', this.$store.state.thisTrip)
+    console.log("gear page created: ", this.$store.state.thisTrip);
     // TODO: if trip object empty route to trips
-    if (this.$store.state.thisTrip.id === undefined ) {
+    if (this.$store.state.thisTrip.id === undefined) {
       console.log("no trip, pushing to trips");
       this.$router.push({ path: "/trips" });
     } else {
       //TODO: If not logged in yet does it work?
-    // TODO: getter for sorting??
-    this.$store.dispatch("bindTripGroupGear").then((docs) => {
-      console.log("got gear list", docs);
-      this.$store.dispatch("bindTripIndGear")
-    });
+      // TODO: getter for sorting??
+      this.$store.dispatch("bindTripGroupGear").then((docs) => {
+        console.log("got gear list", docs);
+        this.$store.dispatch("bindTripIndGear");
+      });
     }
-    
   },
   components: {
     updateGearItemPopup,
     updateIndGearItemPopup,
     editGearCategory,
-    deleteGearCategory
+    deleteGearCategory,
   },
   computed: {
     groupGearPage() {
       return {
         displayGear: this.showGroupGear,
-        hideGear: !this.showGroupGear
+        hideGear: !this.showGroupGear,
       };
     },
     myGearPage() {
       return {
         displayGear: !this.showGroupGear,
-        hideGear: this.showGroupGear
+        hideGear: this.showGroupGear,
       };
     },
     groupGear() {
       return {
         highlightGear: this.showGroupGear,
-        gearPages: true
+        gearPages: true,
       };
     },
     myGear() {
       return {
         highlightGear: !this.showGroupGear,
-        gearPages: true
+        gearPages: true,
       };
     },
     groupGearArrow() {
@@ -230,11 +285,14 @@ export default {
       };
     },
     ...mapState(["thisTrip", "thisTripGroupGear", "userProfile"]),
-    ...mapGetters(["thisTripGroupGearCategorized", "thisTripIndGearCategorized"]),
+    ...mapGetters([
+      "thisTripGroupGearCategorized",
+      "thisTripIndGearCategorized",
+    ]),
   },
   data: function () {
     return {
-      whichPage: '',
+      whichPage: "",
       showUpdateItem: false,
       showUpdateIndItem: false,
       showGroupGear: true,
@@ -243,16 +301,16 @@ export default {
       thisItemID: "", // Pass ID prop into the updateItem popup for DB action
       thisItemTitle: "",
       thisItemCat: "",
-      thisCategory: '',
+      thisCategory: "",
       thisCampers: [],
-       thisIndItemID: "", // Pass ID prop into the updateItem popup for DB action
+      thisIndItemID: "", // Pass ID prop into the updateItem popup for DB action
       thisIndItemTitle: "",
       thisIndItemCat: "",
       // groupGearExists: false,
       addGroupGearTitle: "",
       addGroupGearCat: "",
       addIndGearTitle: "",
-      addIndGearCat: ""
+      addIndGearCat: "",
     };
   },
   methods: {
@@ -352,7 +410,7 @@ export default {
           this.$toasted.show(e.message);
         });
     },
-     updateIndGearItemStatus: function (item) {
+    updateIndGearItemStatus: function (item) {
       // console.log(item.target.value, item.target.checked);
       this.$store.dispatch("updateIndStatusAction", {
         id: item.target.value,
@@ -361,17 +419,17 @@ export default {
       //TODO: return message (success/fail)
     },
     // CATEGORIES
-    toggleEditCategory: function(type, page) {
+    toggleEditCategory: function (type, page) {
       this.whichPage = page;
       this.thisCategory = type;
       this.showEditCat = !this.showEditCat;
     },
-    toggleDeleteCategory: function(type, page) {      
+    toggleDeleteCategory: function (type, page) {
       this.whichPage = page;
       this.thisCategory = type;
       this.showDeleteCat = !this.showDeleteCat;
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -488,8 +546,8 @@ h4 {
   /* vertical-align: middle; */
   /* padding: 12px; */
   display: inline-block;
-  
-    padding: 0 9px 9px 9px;
+
+  padding: 0 9px 9px 9px;
 }
 .editIcon {
   /* background: url("../assets/edit.svg") no-repeat center center; */
@@ -499,8 +557,8 @@ h4 {
   cursor: pointer;
   /* vertical-align: middle; */
   /* margin-left: 20px; */
-  
-    padding: 0 9px 9px 9px;
+
+  padding: 0 9px 9px 9px;
   display: inline-block;
 }
 /* .plusHide {
@@ -571,12 +629,12 @@ h4 {
   /* display: flex;
   flex-direction: row;
   flex-wrap: wrap; */
-  
-      display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    /* justify-content: center; */
-    justify-content: space-around;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  /* justify-content: center; */
+  justify-content: space-around;
 }
 .categoryBlock {
   /* width: 50%; */
@@ -595,33 +653,52 @@ h4 {
   font-size: 1.3rem;
   padding: 15px 5px;
 }
-.itemTitle {  
+.itemTitle {
   font-size: 1.2rem;
 }
 .item {
   /* line-height: 1.6rem; */
   /* margin: 5px 0; */
-  font-family: 'Kalam', cursive;
+  font-family: "Kalam", cursive;
   text-align: left;
   display: flex;
   align-items: center;
 }
 .paper {
-  color: #282625; 
-  margin: 0 auto; 
+  color: #282625;
+  margin: 0 auto;
   width: 850px;
-    padding: 7px 55px 27px;
-    position: relative;
-    border: 1px solid #B5B5B5;
-    background: white;
-    background: -webkit-linear-gradient(0deg, #DFE8EC 0%, white 8%) 0 57px;
-    background: -moz-linear-gradient(0deg, #DFE8EC 0%, white 8%) 0 57px;
-    background: linear-gradient(0deg, #DFE8EC 0%, white 8%) 0 57px;
-    -webkit-background-size: 100% 30px;
-    -moz-background-size: 100% 30px;
-    -ms-background-size: 100% 30px;
-    background-size: 100% 30px;
+  padding: 7px 55px 27px;
+  position: relative;
+  border: 1px solid #b5b5b5;
+  background: white;
+  background: -webkit-linear-gradient(0deg, #dfe8ec 0%, white 8%) 0 57px;
+  background: -moz-linear-gradient(0deg, #dfe8ec 0%, white 8%) 0 57px;
+  background: linear-gradient(0deg, #dfe8ec 0%, white 8%) 0 57px;
+  -webkit-background-size: 100% 30px;
+  -moz-background-size: 100% 30px;
+  -ms-background-size: 100% 30px;
+  background-size: 100% 30px;
 }
-.paper::before {content:""; z-index:-1; margin:0 1px; width:706px; height:10px; position:absolute; bottom:-3px; left:0; background:white; border:1px solid #B5B5B5;}
-.paper::after {content:''; position:absolute; width:0px; top:0; left:39px; bottom:0; border-left:1px solid #F8D3D3;}
+.paper::before {
+  content: "";
+  z-index: -1;
+  margin: 0 1px;
+  width: 706px;
+  height: 10px;
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  background: white;
+  border: 1px solid #b5b5b5;
+}
+.paper::after {
+  content: "";
+  position: absolute;
+  width: 0px;
+  top: 0;
+  left: 39px;
+  bottom: 0;
+  border-left: 1px solid #f8d3d3;
+}
 </style>

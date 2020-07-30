@@ -3,9 +3,10 @@
     <div class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
-          <div class="modal-header">Update {{itemtitle}} </div>
+          <div class="modal-header">Update {{itemtitle}}</div>
 
           <div class="modal-body">
+            <form v-on:submit.prevent>
             <div class="row">
               <label class="rowItem" for="newItemTitle">Update Title:</label>
               <input
@@ -13,7 +14,7 @@
                 id="newItemTitle"
                 v-model="addGroupGearTitle"
                 :placeholder="itemtitle"
-              />
+              autofocus />
             </div>
             <div class="row">
               <label class="rowItem" for="newItemCat">Update Category:</label>
@@ -24,20 +25,37 @@
                 :placeholder="itemcat"
               />
             </div>
-
-            <button class="rowItem" @click="updateGroupGearItem">Save</button>
+            <div class="row rowStyle">
+              <div class="loader" v-if="showSpinner"></div>
+            <input type="submit" class="rowItem" @click="updateGroupGearItem" value="Save"/>
+            </div>
+            </form>
           </div>
           <div class="modal-body">
-             <span :class="{
+            <span
+              :class="{
       plusShow: campers ? !campers.includes(username) : true,
       plusHide: campers ? campers.includes(username) : false
-    }"><i class='plusIcon' @click="updateGroupGearCampers({gid:itemid,camperAdd:username,camperRemove:''})"
-        ></i><span>Add Self</span></span>
-       <span :class="{
+    }"
+            >
+              <i
+                class="plusIcon"
+                @click="updateGroupGearCampers({gid:itemid,camperAdd:username,camperRemove:''})"
+              ></i>
+              <span>Add Self</span>
+            </span>
+            <span
+              :class="{
       plusShow: campers ? campers.includes(username) : false,
       plusHide: campers ? !campers.includes(username) : true
-    }"> <i class='minusIcon' @click="updateGroupGearCampers({gid:itemid,camperRemove:username,camperAdd:''})"
-        ></i><span>Remove Self</span></span>
+    }"
+            >
+              <i
+                class="minusIcon"
+                @click="updateGroupGearCampers({gid:itemid,camperRemove:username,camperAdd:''})"
+              ></i>
+              <span>Remove Self</span>
+            </span>
           </div>
 
           <div class="modal-footer">
@@ -54,14 +72,18 @@ export default {
   props: ["itemid", "itemtitle", "itemcat", "username", "campers"],
   data: function () {
     return {
+      showSpinner: false,
       addGroupGearTitle: "",
       addGroupGearCat: "",
     };
   },
   methods: {
-    updateGroupGearItem: function () {
+    updateGroupGearItem: function (e) {
+      e.preventDefault()
+       this.showSpinner = true;
       if (this.addGroupGearTitle === "" && this.addGroupGearCat === "") {
         this.$toasted.show("No changes made!");
+         this.showSpinner = false;
         return;
       }
       if (this.addGroupGearTitle === "") {
@@ -78,24 +100,26 @@ export default {
         })
         .then(() => {
           this.$toasted.show("Updated item!");
+           this.showSpinner = false;
           this.$emit("close");
         })
         .catch((e) => {
           this.$toasted.show(e.message);
+           this.showSpinner = false;
         });
     },
-    updateGroupGearCampers: function(data) {
+    updateGroupGearCampers: function (data) {
       this.$store
         .dispatch("updateGroupGearCampersAction", data)
         .then(() => {
           this.$toasted.show("Updated item!");
           this.$emit("close");
         })
-        .catch(e => {
+        .catch((e) => {
           this.$toasted.show(e.message);
         });
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -143,9 +167,9 @@ export default {
   justify-content: center;
   align-items: center;
 }
-.row {
-  display: flex;
-  flex-direction: row;
+.rowStyle {  
+  justify-content: center;
+  margin: 5px 0;
 }
 .rowItem {
   padding: 0 5px;
@@ -185,7 +209,7 @@ button.rowItem {
 }
 .plusShow {
   display: inline-block;
-} 
+}
 .plusIcon {
   background: url("../assets/add-plus.svg") no-repeat center center;
   background-size: contain;

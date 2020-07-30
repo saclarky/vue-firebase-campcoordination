@@ -4,15 +4,15 @@
       <div class="modal-wrapper">
         <div class="modal-container">
           <div class="modal-header">Are you Sure?</div>
-          <div class="modal-body">          
-            <div >
-              This will delete all the gear in this category.
+          <div class="modal-body">
+            <div>This will delete all the gear in this category.</div>
+            <form v-on:submit.prevent>
+            <div class="row rowStyle">
+              <div class="loader" v-if="showSpinner"></div>
+              <button class="rowItem" @click="deleteGearCategory">Delete</button>
+              <button class="rowItem" @click="$emit('close')">Cancel</button>
             </div>
-            <div class='row'>
-              <div class="loader" v-if="showSpinner">
-                </div><button class="rowItem" @click="deleteGearCategory">Delete</button>
-                 <button  class="rowItem" @click="$emit('close')">Cancel</button>
-                 </div>
+            </form>
           </div>
         </div>
       </div>
@@ -22,40 +22,39 @@
 
 <script>
 export default {
-  props: ["itemcat","itempage"],
+  props: ["itemcat", "itempage"],
   data: function () {
     return {
-      showSpinner: false
+      showSpinner: false,
     };
   },
   methods: {
     deleteGearCategory: function () {
       this.showSpinner = true;
       let data = {
-        page: this.itempage
-      }
-      if (this.itemcat === 'Miscellaneous') {
-        data.category = ""
+        page: this.itempage,
+      };
+      if (this.itemcat === "Miscellaneous") {
+        data.category = "";
       } else {
-        data.category = this.itemcat
+        data.category = this.itemcat;
       }
       this.$store
         .dispatch("deleteGearCategory", data)
         .then((res) => {
           this.showSpinner = false;
           this.$toasted.show(res);
-          if (res === 'Deleted category!') {
- this.$emit("close");
+          if (res === "Deleted category!") {
+            this.$emit("close");
           }
-         
         })
         .catch((e) => {
           this.showSpinner = false;
-          console.log(e)
+          console.log(e);
           this.$toasted.show(e.message);
         });
-    }    
-  }
+    },
+  },
 };
 </script>
 
@@ -103,9 +102,8 @@ export default {
   justify-content: center;
   align-items: center;
 }
-.row {
-  display: flex;
-  flex-direction: row;
+.rowStyle {  
+  justify-content: center;
   margin: 5px 0;
 }
 .rowItem {
@@ -146,7 +144,7 @@ button.rowItem {
 }
 .plusShow {
   display: inline-block;
-} 
+}
 .plusIcon {
   background: url("../assets/add-plus.svg") no-repeat center center;
   background-size: contain;
@@ -165,18 +163,5 @@ button.rowItem {
   vertical-align: middle;
   padding: 10px;
 }
-.loader {
-      border: 5px solid #f3f3f3;
-    border-top: 5px solid #34db9b;
-    border-radius: 50%;
-    width: 12px;
-    height: 12px;
-    -webkit-animation: spin 2s linear infinite;
-    animation: spin 2s linear infinite;
-}
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
 </style>

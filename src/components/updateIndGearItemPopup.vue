@@ -3,12 +3,13 @@
     <div class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
-          <div class="modal-header">Update {{itemtitle}} </div>
+          <div class="modal-header">Update {{itemtitle}}</div>
 
           <div class="modal-body">
+            <form v-on:submit.prevent>
             <div class="row">
               <label class="rowItem" for="newItemTitle">Update Title:</label>
-              <input
+              <input type="text"
                 class="rowItem"
                 id="newItemTitle"
                 v-model="addGroupGearTitle"
@@ -17,21 +18,22 @@
             </div>
             <div class="row">
               <label class="rowItem" for="newItemCat">Update Category:</label>
-              <input
+              <input type="text"
                 class="rowItem"
                 id="newItemCat"
                 v-model="addGroupGearCat"
                 :placeholder="itemcat"
               />
             </div>
-
-            <button class="rowItem" @click="updateIndGearItem">Save</button>
+            <div class="row rowStyle">
+              <div class="loader" v-if="showSpinner"></div>
+              <input type="submit" class="rowItem" @click="updateIndGearItem" value="Save" />
+               <button @click="$emit('close')">Cancel</button>
+            </div>
+            </form>
           </div>
+
          
-
-          <div class="modal-footer">
-            <button @click="$emit('close')">Cancel</button>
-          </div>
         </div>
       </div>
     </div>
@@ -43,14 +45,18 @@ export default {
   props: ["itemid", "itemtitle", "itemcat", "username"],
   data: function () {
     return {
+      showSpinner: false,
       addGroupGearTitle: "",
       addGroupGearCat: "",
     };
   },
   methods: {
-    updateIndGearItem: function () {
+    updateIndGearItem: function (e) {
+      e.preventDefault();
+      this.showSpinner = true;
       if (this.addGroupGearTitle === "" && this.addGroupGearCat === "") {
         this.$toasted.show("No changes made!");
+        this.showSpinner = false;
         return;
       }
       if (this.addGroupGearTitle === "") {
@@ -67,14 +73,16 @@ export default {
         })
         .then(() => {
           this.$toasted.show("Updated item!");
+          this.showSpinner = false;
           this.$emit("close");
         })
         .catch((e) => {
-          console.log(e)
+          console.log(e);
+          this.showSpinner = false;
           this.$toasted.show(e.message);
         });
-    }    
-  }
+    },
+  },
 };
 </script>
 
@@ -122,9 +130,9 @@ export default {
   justify-content: center;
   align-items: center;
 }
-.row {
-  display: flex;
-  flex-direction: row;
+.rowStyle {
+  justify-content: center;
+  margin: 5px 0;
 }
 .rowItem {
   padding: 0 5px;
@@ -164,7 +172,7 @@ button.rowItem {
 }
 .plusShow {
   display: inline-block;
-} 
+}
 .plusIcon {
   background: url("../assets/add-plus.svg") no-repeat center center;
   background-size: contain;

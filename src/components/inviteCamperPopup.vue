@@ -11,19 +11,20 @@
           <div class="sidenote">and the email you search must match their account</div>
 <!-- TODO invite them to create Campers account-->
           <div class="modal-body">
+            <form v-on:submit.prevent>
             <!-- TODO   explain you already have to be friends and they have an account, pass tid prop               -->
             <label class="rowItem" for="newCamperEmail">Camper's Registered Email:</label>
-            <input class="rowItem" id="newCamperEmail" placeholder="Summer" />
-            <button class="rowItem button grow" @click="sendNewInvite">Invite</button>
+            <input type='text' class="rowItem" id="newCamperEmail" placeholder="friend@email.com" />
+             <div class="row rowStyle">
+              <div class="loader" v-if="showSpinner"></div>
+            <input type="submit" class="rowItem button grow" @click="sendNewInvite" value="Invite" />
+             <button class='hero-cta-button button grow' @click="$emit('closeInvite')" :disabled="disableClose">Cancel</button>
+             </div>
+            </form>
           </div>
-          
-
-          <div class="modal-footer">
-            <button class='hero-cta-button button grow' @click="$emit('closeInvite')" :disabled="disableClose">Close</button>
           </div>
         </div>
       </div>
-    </div>
   </transition>
 </template>
 
@@ -32,6 +33,7 @@ export default {
   props: ["tripid"],
   data: function() {
     return {
+      showSpinner: false,
       disableClose: false
     }
   },
@@ -39,8 +41,10 @@ export default {
     toggleDisableClose() {
 this.disableClose = !this.disableClose
     },
-    sendNewInvite() {
+    sendNewInvite(e) {
+      e.preventDefault()
       this.toggleDisableClose();
+      this.showSpinner = true;
       console.log(document.getElementById("newCamperEmail").value);
       // TODO: grab friends UID, grab trip id prop, and dispatch
       this.$store
@@ -49,7 +53,8 @@ this.disableClose = !this.disableClose
           tid: this.tripid
         })
         .then((res, rej) => {  
-          this.$emit('closeInvite');       
+          this.showSpinner = false;
+               
           if (!res) {
             this.$toasted.show("No registered account.")
             console.log("no user found with that email");
@@ -58,12 +63,17 @@ this.disableClose = !this.disableClose
             console.log("This user was already invited");
           } else if (res === "invited") {            
             this.$toasted.show('Success! User invited.')
+             this.$emit('closeInvite'); 
             console.log(res);
           } else {
             this.$toasted.show('Error: '+ rej)
             console.log("error?", rej);
           }
            
+        }).catch(e => {
+          this.showSpinner = false;
+          console.log(e)
+          this.$toasted.show(e.message)
         });
     }
   }
@@ -150,5 +160,9 @@ button.rowItem {
 .modal-leave-active .modal-container {
   -webkit-transform: scale(1.1);
   transform: scale(1.1);
+}
+.rowStyle {
+  justify-content: center;
+  margin: 5px 0;
 }
 </style>

@@ -1,67 +1,64 @@
 <template>
-     <transition name="modal">
-        <div class="modal-mask">
-          <div class="modal-wrapper">
-            <div class="modal-container">
+  <transition name="modal">
+    <div class="modal-mask">
+      <div class="modal-wrapper">
+        <div class="modal-container">
+          <div class="modal-header">
+            <slot name="header">
+              <!-- default header -->
+            </slot>
+          </div>
 
-              <div class="modal-header">
-                <slot name="header">
-                  <!-- default header -->
-                </slot>
+          <div class="modal-body">
+            <form v-on:submit.prevent>
+              <label class="rowItem" for="newTripName">Trip Name:</label>
+              <input type="text" class="rowItem" id="newTripName" placeholder="Desert Getaway 2020" />
+              <label class="rowItem" for="templateChoice">Choose a pre-populated gear list:</label>
+              <select class="rowItem" name="templateChoice" id="templateChoice">
+                <option selected="None">None</option>
+                <option>My List</option>
+                <option>Generic List</option>
+              </select>
+              <!-- TODO: choose list categories? -->
+              <div class="row rowStyle">
+                <input type="submit" class="rowItem" @click="saveNewTrip" value="Save" />
+                <button @click="$emit('close')">Cancel</button>
               </div>
-
-              <div class="modal-body">              
-                    <label class='rowItem' for="newTripName">Trip Name: </label>
-                    <input class='rowItem' id="newTripName" placeholder="Desert Getaway 2020">
-                    <label class='rowItem' for="templateChoice">Choose a pre-populated gear list:</label>
-                    <select class='rowItem' name="templateChoice" id="templateChoice">
-                      <option selected="None">None</option>
-                      <option>My List</option>
-                      <option>Generic List</option>
-                    </select>
-                    <button class='rowItem' @click="saveNewTrip">Save</button>
-              </div>
-
-              <div class="modal-footer">
-                
-                  <button @click="$emit('close')">
-                    Cancel
-                  </button>
-                
-              </div>
-            </div>
+            </form>
           </div>
         </div>
-      </transition>
+      </div>
+    </div>
+  </transition>
 </template>
 
 <script>
 export default {
-   
-    methods: {
-        saveNewTrip() {
-          if (!document.getElementById("newTripName").value) {
-            this.$toasted.show("Need a trip name!")
-            return;
-          }
-          let data = {name: document.getElementById("newTripName").value,
-          template:document.getElementById('templateChoice').value}
-            console.log(document.getElementById("templateChoice").value)
-            this.$store.dispatch('saveNewTripAction', data).then((res, rej) => {
-               this.$emit('close')
-              if(res) {
-              
-                this.$toasted.show('Success! Trip Saved.')
-            console.log(res);
-          } else {
-            this.$toasted.show('Error: '+ rej)
-            console.log("error?", rej);
-          }
-            })
-           
+  methods: {
+    saveNewTrip(e) {
+      e.preventDefault();
+      if (!document.getElementById("newTripName").value) {
+        this.$toasted.show("Need a trip name!");
+        return;
+      }
+      let data = {
+        name: document.getElementById("newTripName").value,
+        template: document.getElementById("templateChoice").value,
+      };
+      console.log(document.getElementById("templateChoice").value);
+      this.$store.dispatch("saveNewTripAction", data).then((res, rej) => {
+        this.$emit("close");
+        if (res) {
+          this.$toasted.show("Success! Trip Saved.");
+          console.log(res);
+        } else {
+          this.$toasted.show("Error: " + rej);
+          console.log("error?", rej);
         }
-    }
-}
+      });
+    },
+  },
+};
 </script>
 
 <style>
@@ -78,7 +75,7 @@ export default {
 }
 
 .modal-wrapper {
-    height: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -108,11 +105,11 @@ export default {
   justify-content: center;
   align-items: center;
 }
-.rowItem  {
-    padding: 0 5px;
+.rowItem {
+  padding: 0 5px;
 }
 button.rowItem {
-    margin-left: 10px;
+  margin-left: 10px;
 }
 
 /* .modal-default-button {
@@ -140,5 +137,9 @@ button.rowItem {
 .modal-leave-active .modal-container {
   -webkit-transform: scale(1.1);
   transform: scale(1.1);
+}
+.rowStyle {
+  justify-content: center;
+  margin: 5px 0;
 }
 </style>

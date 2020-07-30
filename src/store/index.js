@@ -174,21 +174,18 @@ export const store = new Vuex.Store({
       }
     },
     thisTripGroupGearCategorized: state => {
+      console.log("gear getter")
       let categorizedGear = {}
       state.thisTripGroupGear.forEach(gearObj => {
-        console.log(gearObj.category)
-        console.log(gearObj)
-        console.log(categorizedGear)
-        if(!gearObj.category) {
+        if (!gearObj.category) {
           gearObj.category = 'Miscellaneous'
         }
-          if (categorizedGear[gearObj.category] === undefined) {
-            categorizedGear[gearObj.category] = [gearObj]
-          } else {
-            console.log(categorizedGear[gearObj.category])
-            // STOPPED HERE< TEST THIS
-            categorizedGear[gearObj.category].push(gearObj)
-          }             
+        if (categorizedGear[gearObj.category] === undefined) {
+          categorizedGear[gearObj.category] = [gearObj]
+        } else {
+          // STOPPED HERE< TEST THIS
+          categorizedGear[gearObj.category].push(gearObj)
+        }
       })
       console.log(categorizedGear)
       return categorizedGear
@@ -196,14 +193,14 @@ export const store = new Vuex.Store({
     thisTripIndGearCategorized: state => {
       let categorizedGear = {}
       state.thisTripIndGear.forEach(gearObj => {
-        if(!gearObj.category) {
+        if (!gearObj.category) {
           gearObj.category = 'Miscellaneous'
         }
-          if (categorizedGear[gearObj.category] === undefined) {
-            categorizedGear[gearObj.category] = [gearObj]
-          } else {
-            categorizedGear[gearObj.category] = categorizedGear[gearObj.category].push(gearObj)
-          }             
+        if (categorizedGear[gearObj.category] === undefined) {
+          categorizedGear[gearObj.category] = [gearObj]
+        } else {
+          categorizedGear[gearObj.category] = categorizedGear[gearObj.category].push(gearObj)
+        }
       })
       console.log(categorizedGear)
       return categorizedGear
@@ -372,23 +369,25 @@ export const store = new Vuex.Store({
         fb.db.collection("trips").add({ 'name': obj.name, 'uid': state.currentUser.uid, 'owner': state.currentUser.displayName })
           .then(tripDoc => {
             fb.db.collection('groupGear').doc(tripDoc.id).set({})
-            if(obj.template === "My List") {
+            if (obj.template === "My List") {
               console.log('copy over users default list')
               fb.db.collection('individualGear').doc(state.currentUser.uid).collection('default').get().then((results) => {
-                         if(!results.empty) {
+                if (!results.empty) {
                   results.docs.forEach(doc => {
                     fb.db.collection('groupGear').doc(tripDoc.id).collection('gear').add(doc.data())
                   })
-              } })
+                }
+              })
             } else if (obj.template === "Generic List") {
               fb.db.collection('defaultList').get().then((results) => {
-                if(!results.empty) {
+                if (!results.empty) {
                   //TODO if results.docs.exists
                   results.docs.forEach(doc => {
                     fb.db.collection('groupGear').doc(tripDoc.id).collection('gear').add(doc.data())
                   })
-              } })
-            }  
+                }
+              })
+            }
             fb.db.collection('campersNo').doc(tripDoc.id).set({})
             fb.db.collection('campersPending').doc(tripDoc.id).set({})
             //TODO redirect to new trip page?
@@ -767,17 +766,17 @@ export const store = new Vuex.Store({
       // TODO: don't add a anme twice
       console.log("action to change a group gear item contributor")
       let pr = []
-      if (data.camperAdd !== '' ) {
+      if (data.camperAdd !== '') {
         console.log('Adding a camper', data)
-        pr.push( fb.db.collection('groupGear').doc(state.thisTripID).collection('gear').doc(data.gid).update({
+        pr.push(fb.db.collection('groupGear').doc(state.thisTripID).collection('gear').doc(data.gid).update({
           campers: firebase.firestore.FieldValue.arrayUnion(data.camperAdd)
-        }) )
-      } 
+        }))
+      }
       if (data.camperRemove !== '') {
         console.log('Removing a camper')
-        pr.push( fb.db.collection('groupGear').doc(state.thisTripID).collection('gear').doc(data.gid).update({
+        pr.push(fb.db.collection('groupGear').doc(state.thisTripID).collection('gear').doc(data.gid).update({
           campers: firebase.firestore.FieldValue.arrayRemove(data.camperRemove)
-        }) )
+        }))
       }
       Promise.all(pr).then(() => {
         return "Updated contributors"
@@ -785,7 +784,7 @@ export const store = new Vuex.Store({
         return e
       })
     },
-    
+
     addGroupGearItemAction: ({ state }, data) => {
       console.log("Action add: " + data.title)
       return fb.db.collection("groupGear").doc(state.thisTripID).collection('gear')
@@ -828,7 +827,7 @@ export const store = new Vuex.Store({
     },
     deleteIndGearItemAction: ({ state }, data) => {
       return fb.db.collection("individualGear").doc(state.currentUser.uid)
-      .collection(state.thisTripID).doc(data.id)
+        .collection(state.thisTripID).doc(data.id)
         .delete()
     },
     updateIndStatusAction: ({ state }, obj) => {
@@ -842,10 +841,56 @@ export const store = new Vuex.Store({
       // for not using to input data to the main defualt list
       console.log("Action add: " + data.title)
       return fb.db.collection("defaultList").add({
-          title: data.title,
-          checked: false,
-          category: data.category
-        })
+        title: data.title,
+        checked: false,
+        category: data.category
+      })
+    },
+    updateGearCategory: ({ state }, data) => {
+      console.log(data)
+      return new Promise((resolve) => {
+        // if group
+        if (data.page === 'group') {
+          // TODO - timiing issue, too many updates in a row? How pause the getter?? 
+          let promises = []
+          fb.db.collection('groupGear').doc(state.thisTripID).collection('gear').where('category', '==', data.category)
+            .get().then(docs => {
+              if (!docs.empty) {
+                docs.forEach(doc => {
+                  promises.push(fb.db.collection('groupGear').doc(state.thisTripID).collection('gear').doc(doc.id).update({
+                    category: data.newCategory
+                  }))
+                })
+                Promise.all(promises).then(() => {
+                  console.log('end promise array')
+                  resolve('Updated category!')
+                })
+              } else {
+                resolve('No category items returned.')
+              }
+            })
+        } else {
+          // if individual
+          fb.db.collection('individualGear').doc(state.currentUser.uid).collection(state.thisTripID).where('category', '==', data.category)
+            .get().then(docs => {
+              if (!docs.empty) {
+                let promises = []
+                docs.forEach(doc => {
+                    promises.push(fb.db.collection('individualGear').doc(state.currentUser.uid).collection(state.thisTripID).doc(doc.id).update({
+                      category: data.newCategory
+                    }))
+                })
+                Promise.all(promises).then(() => {
+                  resolve('Updated category!')
+                })
+              } else {
+                console.log('No category items returned.')
+                resolve('No category items returned.')
+              }
+            })
+
+        }
+      })
     },
     // LOGGING IN // AUTH STUFF
     fetchUserProfile({ commit, state }) {

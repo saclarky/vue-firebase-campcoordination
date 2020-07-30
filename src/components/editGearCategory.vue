@@ -1,0 +1,188 @@
+<template>
+  <transition name="modal">
+    <div class="modal-mask">
+      <div class="modal-wrapper">
+        <div class="modal-container">
+          <div class="modal-header">Change Category's Name</div>
+          <div class="modal-body">          
+            <div >
+              <!-- <label class="rowItem" for="newItemCat">Update Category:</label> -->
+              <input
+                class="rowItem"
+                id="newItemCat"
+                v-model="addGearCat"
+                :placeholder="itemcat"
+              />
+            </div>
+
+            <div class='row'><div class="loader" v-if="showSpinner"></div><button class="rowItem" @click="updateGearCategory">Save</button></div>
+          </div>
+         
+
+          <div class="modal-footer">
+            <button @click="$emit('close')">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </transition>
+</template>
+
+<script>
+export default {
+  props: ["itemcat","itempage"],
+  data: function () {
+    return {
+      addGearCat: "",
+      showSpinner: false
+    };
+  },
+  methods: {
+    updateGearCategory: function () {
+      if (this.addGearCat === "" || this.addGearCat === this.itemcat) {
+        this.$toasted.show("No changes made!");
+        return;
+      }
+      this.showSpinner = true;
+      this.$store
+        .dispatch("updateGearCategory", {
+          category: this.itemcat,
+          newCategory: this.addGearCat,
+          page: this.itempage
+        })
+        .then((res) => {
+          this.showSpinner = false;
+          this.$toasted.show(res);
+          this.$emit("close");
+        })
+        .catch((e) => {
+          this.showSpinner = false;
+          console.log(e)
+          this.$toasted.show(e.message);
+        });
+    }    
+  }
+};
+</script>
+
+<style>
+.modal-mask {
+  position: fixed;
+  z-index: 9998;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: table;
+  transition: opacity 0.3s ease;
+}
+
+.modal-wrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-container {
+  /* width: 300px; */
+  margin: 0px auto;
+  padding: 20px 30px;
+  background-color: #fff;
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
+  transition: all 0.3s ease;
+  /* font-family: Helvetica, Arial, sans-serif; */
+}
+
+.modal-header {
+  margin-top: 0;
+  color: #42b983;
+}
+
+.modal-body {
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.row {
+  display: flex;
+  flex-direction: row;
+  margin: 5px 0;
+}
+.rowItem {
+  padding: 0 5px;
+}
+button.rowItem {
+  margin-left: 10px;
+}
+
+/* .modal-default-button {
+  float: right;
+} */
+
+/*
+ * The following styles are auto-applied to elements with
+ * transition="modal" when their visibility is toggled
+ * by Vue.js.
+ *
+ * You can easily play with the modal transition by editing
+ * these styles.
+ */
+
+.modal-enter {
+  opacity: 0;
+}
+
+.modal-leave-active {
+  opacity: 0;
+}
+
+.modal-enter .modal-container,
+.modal-leave-active .modal-container {
+  -webkit-transform: scale(1.1);
+  transform: scale(1.1);
+}
+.plusHide {
+  display: none;
+}
+.plusShow {
+  display: inline-block;
+} 
+.plusIcon {
+  background: url("../assets/add-plus.svg") no-repeat center center;
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  vertical-align: middle;
+  padding: 10px;
+}
+.minusIcon {
+  background: url("../assets/add-minus.svg") no-repeat center center;
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  vertical-align: middle;
+  padding: 10px;
+}
+.loader {
+      border: 5px solid #f3f3f3;
+    border-top: 5px solid #34db9b;
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>

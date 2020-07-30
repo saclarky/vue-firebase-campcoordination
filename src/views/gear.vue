@@ -55,7 +55,18 @@
             v-for="(category, name) in thisTripGroupGearCategorized"
             :key="name"
           >
+          <div class='categoryHeader'>
             <div class="categoryTitle">{{name}}</div>
+            <!-- Ability to edit/delete categorie text -->
+            <div class="editIcon"  @click="toggleEditCategory(name, 'group')"><svg >
+                <path fill="#c0c0c0" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+              </svg></div>
+              <!-- TODO: Warn will delete all gear in this category/section -->
+               <!-- <div class="deleteIcon"  @click="deleteIndCategory(gear.id)"><svg >
+                <path fill="#c0c0c0" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"/>
+              </svg></div> -->
+              </div>
+            <!-- Display all gear items in this category -->
             <div class="item" v-for="gear in thisTripGroupGearCategorized[name]" :key="gear.id">
               <input
                 type="checkbox"
@@ -67,7 +78,7 @@
               <label class="strikethrough itemTitle" :for="gear.id">{{gear.title}}</label>
               <div class="camperCell">( {{gear.campers ? gear.campers.join(', ') : 'TBD'}} )</div>
               <!-- TODO: sort checked items to bottom of list? -->
-              <div class="editIcon"  @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)"><svg >
+              <div class="editIcon"  @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)"><svg>
                 <path fill="#c0c0c0" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
               </svg></div>
                <div class="deleteIcon"  @click="deleteGroupGearItem(gear.id)"><svg >
@@ -80,31 +91,30 @@
       <div id="myGearView" :class="myGearPage">
         <div class="addSection">
            <label for="myItemTitle">Title:</label>
-          <input id="myItemTitle" v-model="addIndGearTitle" />
-         
+          <input id="myItemTitle" v-model="addIndGearTitle" />         
           <!-- TODO: domain? -->
           <label for="myItemCat">Category:</label>
-          <input id="myItemCat" v-model="addIndGearCat" />
-          
+          <input id="myItemCat" v-model="addIndGearCat" />          
           <button @click="addIndGearItem">Add</button>
-          <!-- TODO: Add w enter key -->
+          <!-- TODO: Add w enter key - try the 'submit' type instead an djust preventDefault for no refresh form.onsubmit()-->
         </div>
         
         <div class="categoryGrid paper">
-          <div
-          class="categoryBlock"
-            v-for="(category, name) in thisTripIndGearCategorized"
-            :key="name"
-          >
+          <div  class="categoryBlock" v-for="(category, name) in thisTripIndGearCategorized" :key="name" >
+             <div class='categoryHeader'>
             <div class='categoryTitle'>{{name}}</div>
+            <!-- Ability to edit/delete categorie text -->
+            <div class="editIcon"  @click="toggleEditCategory(name, 'ind')"><svg >
+                <path fill="#c0c0c0" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+              </svg></div>
+              <!-- TODO: Warn will delete all gear in this category/section -->
+               <!-- <div class="deleteIcon"  @click="deleteIndCategory(gear.id)"><svg >
+                <path fill="#c0c0c0" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"/>
+              </svg></div> -->
+             </div>
+            <!-- Display all gear items in this category -->
             <div class="item" v-for="gear in thisTripIndGearCategorized[name]" :key="gear.id">
-              <input
-                type="checkbox"
-                :id="gear.id"
-                :value="gear.id"
-                :checked="gear.checked"
-                @change="updateIndGearItemStatus"
-              />
+              <input type="checkbox" :id="gear.id" :value="gear.id" :checked="gear.checked" @change="updateIndGearItemStatus" />
               <label class="strikethrough itemTitle" :for="gear.id">{{gear.title}}</label>
               <!-- TODO: sort checked items to bottom of list? -->
                <div class="editIcon"  @click="toggleUpdateIndItem(gear.id, gear.title, gear.category)"><svg >
@@ -139,6 +149,14 @@
     >
       <!-- TODO: add a class on items being updated so other users can see? -->
     </updateIndGearItemPopup>
+     <editGearCategory
+      v-if="showEditCat"
+      @close="toggleEditCategory('','')"
+      :itemcat="thisCategory"
+      :itempage ="whichPage"
+    >
+      <!-- TODO: add a class on items being updated so other users can see? -->
+    </editGearCategory>
   </div>
 </template>
 
@@ -146,15 +164,15 @@
 import { mapState, mapGetters } from "vuex";
 import updateGearItemPopup from "../components/updateGearItemPopup";
 import updateIndGearItemPopup from "../components/updateIndGearItemPopup";
+import editGearCategory from "../components/editGearCategory";
 export default {
   name: "gear",
   created() {
     // TODO: if trip object empty route to trips
-    if (this.thisTrip == {}) {
+    if (this.$store.state.thisTrip == {}) {
       console.log("no trip, pushing to trips");
       this.$router.push({ path: "/trips" });
     }
-    console.log("VUE created");
     //TODO: If not logged in yet does it work?
     // TODO: getter for sorting??
     this.$store.dispatch("bindTripGroupGear").then((docs) => {
@@ -164,7 +182,8 @@ export default {
   },
   components: {
     updateGearItemPopup,
-    updateIndGearItemPopup
+    updateIndGearItemPopup,
+    editGearCategory
   },
   computed: {
     groupGearPage() {
@@ -206,12 +225,15 @@ export default {
   },
   data: function () {
     return {
+      whichPage: '',
       showUpdateItem: false,
       showUpdateIndItem: false,
       showGroupGear: true,
+      showEditCat: false,
       thisItemID: "", // Pass ID prop into the updateItem popup for DB action
       thisItemTitle: "",
       thisItemCat: "",
+      thisCategory: '',
       thisCampers: [],
        thisIndItemID: "", // Pass ID prop into the updateItem popup for DB action
       thisIndItemTitle: "",
@@ -327,6 +349,17 @@ export default {
         status: item.target.checked,
       });
       //TODO: return message (success/fail)
+    },
+    // CATEGORIES
+    toggleEditCategory: function(type, page) {
+      // DIsplay an input field with category value pre-populated + save button
+      
+      this.whichPage = page;
+      // V-model edits
+      this.thisCategory = type;
+      this.showEditCat = !this.showEditCat;
+      // On save submit grab v-model in data and dispatch action
+      
     }
   }
 };
@@ -439,21 +472,25 @@ h4 {
 .deleteIcon {
   /* background: url("../assets/delete.svg") no-repeat center center; */
   /* background-size: contain; */
-  width: 24px;
-  height: 24px;
+  width: 12px;
+  height: 12px;
   cursor: pointer;
   /* vertical-align: middle; */
   /* padding: 12px; */
   display: inline-block;
+  
+    padding: 0 9px 9px 9px;
 }
 .editIcon {
   /* background: url("../assets/edit.svg") no-repeat center center; */
   /* background-size: contain; */
-  width: 24px;
-  height: 24px;
+  width: 12px;
+  height: 12px;
   cursor: pointer;
   /* vertical-align: middle; */
-  margin-left: 20px;
+  /* margin-left: 20px; */
+  
+    padding: 0 9px 9px 9px;
   display: inline-block;
 }
 /* .plusHide {
@@ -535,12 +572,20 @@ h4 {
   /* width: 50%; */
   padding: 0 10px;
 }
+.categoryHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+.categoryHeader > .editIcon {
+  margin: 0;
+}
 .categoryTitle {
   font-size: 1.3rem;
-  padding: 15px;
+  padding: 15px 5px;
 }
-.itemTitle {
-  
+.itemTitle {  
   font-size: 1.2rem;
 }
 .item {
@@ -554,7 +599,7 @@ h4 {
 .paper {
   color: #282625; 
   margin: 0 auto; 
-  /* width: 650px; */
+  width: 850px;
     padding: 7px 55px 27px;
     position: relative;
     border: 1px solid #B5B5B5;

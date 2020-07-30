@@ -3,22 +3,17 @@
     <div class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
-          <div class="modal-header">Change Category's Name</div>
+          <div class="modal-header">Are you Sure?</div>
           <div class="modal-body">          
             <div >
-              <input
-                class="rowItem"
-                id="newItemCat"
-                v-model="addGearCat"
-                :placeholder="itemcat"
-              />
+              This will delete all the gear in this category.
             </div>
             <div class='row'>
-              <div class="loader" v-if="showSpinner"></div>
-              <button class="rowItem" @click="updateGearCategory">Save</button>
-              <button @click="$emit('close')">Cancel</button>
-              </div>
-          </div> 
+              <div class="loader" v-if="showSpinner">
+                </div><button class="rowItem" @click="deleteGearCategory">Delete</button>
+                 <button  class="rowItem" @click="$emit('close')">Cancel</button>
+                 </div>
+          </div>
         </div>
       </div>
     </div>
@@ -30,19 +25,13 @@ export default {
   props: ["itemcat","itempage"],
   data: function () {
     return {
-      addGearCat: "",
       showSpinner: false
     };
   },
   methods: {
-    updateGearCategory: function () {
-      if (this.addGearCat === "" || this.addGearCat === this.itemcat) {
-        this.$toasted.show("No changes made!");
-        return;
-      }
+    deleteGearCategory: function () {
       this.showSpinner = true;
       let data = {
-        newCategory: this.addGearCat,
         page: this.itempage
       }
       if (this.itemcat === 'Miscellaneous') {
@@ -51,13 +40,14 @@ export default {
         data.category = this.itemcat
       }
       this.$store
-        .dispatch("updateGearCategory", data)
+        .dispatch("deleteGearCategory", data)
         .then((res) => {
           this.showSpinner = false;
           this.$toasted.show(res);
-          if(res === 'Updated category!') {
-          this.$emit("close");
+          if (res === 'Deleted category!') {
+ this.$emit("close");
           }
+         
         })
         .catch((e) => {
           this.showSpinner = false;

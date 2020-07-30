@@ -191,6 +191,7 @@ export const store = new Vuex.Store({
       return categorizedGear
     },
     thisTripIndGearCategorized: state => {
+      console.log("ind gear getter")
       let categorizedGear = {}
       state.thisTripIndGear.forEach(gearObj => {
         if (!gearObj.category) {
@@ -199,10 +200,9 @@ export const store = new Vuex.Store({
         if (categorizedGear[gearObj.category] === undefined) {
           categorizedGear[gearObj.category] = [gearObj]
         } else {
-          categorizedGear[gearObj.category] = categorizedGear[gearObj.category].push(gearObj)
+          categorizedGear[gearObj.category].push(gearObj)
         }
       })
-      console.log(categorizedGear)
       return categorizedGear
     }
   },
@@ -862,7 +862,6 @@ export const store = new Vuex.Store({
                   }))
                 })
                 Promise.all(promises).then(() => {
-                  console.log('end promise array')
                   resolve('Updated category!')
                 })
               } else {
@@ -886,6 +885,48 @@ export const store = new Vuex.Store({
               } else {
                 console.log('No category items returned.')
                 resolve('No category items returned.')
+              }
+            })
+
+        }
+      })
+    },
+    deleteGearCategory: ({ state }, data) => {
+      console.log(data)
+      return new Promise((resolve) => {
+        // if group
+        if (data.page === 'group') {
+          // TODO - timiing issue, too many updates in a row? How pause the getter?? 
+          let promises = []
+          fb.db.collection('groupGear').doc(state.thisTripID).collection('gear').where('category', '==', data.category)
+            .get().then(docs => {
+              if (!docs.empty) {
+                docs.forEach(doc => {
+                  promises.push(fb.db.collection('groupGear').doc(state.thisTripID).collection('gear').doc(doc.id).delete())
+                })
+                Promise.all(promises).then(() => {
+                  resolve('Deleted category!')
+                })
+              } else {
+                resolve('No items in this category.')
+              }
+            })
+        } else {
+          // if individual
+          fb.db.collection('individualGear').doc(state.currentUser.uid).collection(state.thisTripID).where('category', '==', data.category)
+            .get().then(docs => {
+              if (!docs.empty) {
+                let promises = []
+                docs.forEach(doc => {
+                    promises.push(fb.db.collection('individualGear').doc(state.currentUser.uid).collection(state.thisTripID)
+                    .doc(doc.id).delete())
+                })
+                Promise.all(promises).then(() => {
+                  resolve('Deleted category!')
+                })
+              } else {
+                console.log('No category items returned.')
+                resolve('No items in this category.')
               }
             })
 

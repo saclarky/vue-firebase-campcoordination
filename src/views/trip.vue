@@ -93,9 +93,9 @@ export default {
   name: "trip",
   created() {
     // TODO: if trip object empty route to trips
-    if(this.thisTrip == {}) {
-      console.log('no trip, pushing to trips')
-      this.$router.push({path: '/trips'})
+     if (this.$store.state.thisTrip.id === undefined ) {
+      console.log("no trip, pushing to trips");
+      this.$router.push({ path: "/trips" });
     }
     console.log('VUE created')
     //TODO: If not logged in yet does it work?

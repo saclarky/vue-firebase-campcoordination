@@ -37,12 +37,10 @@
       <!-- <div v-show="!groupGearExists">Start a group gear list!</div> -->
       <!-- GROUP GEAR VIEW -->
       <div id="groupGearView" :class="groupGearPage">
-        <div class="addSection">
-          
+        <div class="addSection">          
           <label for="itemTitle">Title:</label>
           <input id="itemTitle" v-model="addGroupGearTitle" />
-          <!-- TODO: domain? -->
-          
+          <!-- TODO: domain? -->          
           <label for="itemCat">Category:</label>
           <input id="itemCat" v-model="addGroupGearCat" />
           <button @click="addGroupGearItem">Add</button>
@@ -62,9 +60,9 @@
                 <path fill="#c0c0c0" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
               </svg></div>
               <!-- TODO: Warn will delete all gear in this category/section -->
-               <!-- <div class="deleteIcon"  @click="deleteIndCategory(gear.id)"><svg >
+               <div class="deleteIcon"  @click="toggleDeleteCategory(name, 'group')"><svg >
                 <path fill="#c0c0c0" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"/>
-              </svg></div> -->
+              </svg></div>
               </div>
             <!-- Display all gear items in this category -->
             <div class="item" v-for="gear in thisTripGroupGearCategorized[name]" :key="gear.id">
@@ -108,9 +106,9 @@
                 <path fill="#c0c0c0" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
               </svg></div>
               <!-- TODO: Warn will delete all gear in this category/section -->
-               <!-- <div class="deleteIcon"  @click="deleteIndCategory(gear.id)"><svg >
+               <div class="deleteIcon"  @click="toggleDeleteCategory(name, 'ind')"><svg >
                 <path fill="#c0c0c0" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"/>
-              </svg></div> -->
+              </svg></div>
              </div>
             <!-- Display all gear items in this category -->
             <div class="item" v-for="gear in thisTripIndGearCategorized[name]" :key="gear.id">
@@ -155,8 +153,14 @@
       :itemcat="thisCategory"
       :itempage ="whichPage"
     >
-      <!-- TODO: add a class on items being updated so other users can see? -->
     </editGearCategory>
+     <deleteGearCategory
+      v-if="showDeleteCat"
+      @close="toggleDeleteCategory('','')"
+      :itemcat="thisCategory"
+      :itempage ="whichPage"
+    >
+    </deleteGearCategory>
   </div>
 </template>
 
@@ -165,25 +169,30 @@ import { mapState, mapGetters } from "vuex";
 import updateGearItemPopup from "../components/updateGearItemPopup";
 import updateIndGearItemPopup from "../components/updateIndGearItemPopup";
 import editGearCategory from "../components/editGearCategory";
+import deleteGearCategory from "../components/deleteGearCategory"
 export default {
   name: "gear",
   created() {
+    console.log('gear page created: ', this.$store.state.thisTrip)
     // TODO: if trip object empty route to trips
-    if (this.$store.state.thisTrip == {}) {
+    if (this.$store.state.thisTrip.id === undefined ) {
       console.log("no trip, pushing to trips");
       this.$router.push({ path: "/trips" });
-    }
-    //TODO: If not logged in yet does it work?
+    } else {
+      //TODO: If not logged in yet does it work?
     // TODO: getter for sorting??
     this.$store.dispatch("bindTripGroupGear").then((docs) => {
       console.log("got gear list", docs);
       this.$store.dispatch("bindTripIndGear")
     });
+    }
+    
   },
   components: {
     updateGearItemPopup,
     updateIndGearItemPopup,
-    editGearCategory
+    editGearCategory,
+    deleteGearCategory
   },
   computed: {
     groupGearPage() {
@@ -230,6 +239,7 @@ export default {
       showUpdateIndItem: false,
       showGroupGear: true,
       showEditCat: false,
+      showDeleteCat: false,
       thisItemID: "", // Pass ID prop into the updateItem popup for DB action
       thisItemTitle: "",
       thisItemCat: "",
@@ -352,14 +362,14 @@ export default {
     },
     // CATEGORIES
     toggleEditCategory: function(type, page) {
-      // DIsplay an input field with category value pre-populated + save button
-      
       this.whichPage = page;
-      // V-model edits
       this.thisCategory = type;
       this.showEditCat = !this.showEditCat;
-      // On save submit grab v-model in data and dispatch action
-      
+    },
+    toggleDeleteCategory: function(type, page) {      
+      this.whichPage = page;
+      this.thisCategory = type;
+      this.showDeleteCat = !this.showDeleteCat;
     }
   }
 };

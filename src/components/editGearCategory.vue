@@ -16,7 +16,7 @@
             <div class='row'>
               <div class="loader" v-if="showSpinner"></div>
               <button class="rowItem" @click="updateGearCategory">Save</button>
-              <button @click="$emit('close')">Cancel</button>
+              <button class="rowItem" @click="$emit('close')">Cancel</button>
               </div>
           </div> 
         </div>

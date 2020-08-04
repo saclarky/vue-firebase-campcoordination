@@ -56,13 +56,17 @@
             >{{name}}</a>
           </div>
           <div class="categoryButtons">
-            <button @click="collapseAllCategories" > Collapse All </button>
-             <button @click="expandAllCategories" > Expand All </button>
+            <button @click="collapseAllCategories">Collapse All</button>
+            <button @click="expandAllCategories">Expand All</button>
           </div>
-          <div class="categoryGrid" >
-            <div class="categoryBlock" v-for="(category, name) in thisTripGroupGearCategorized" :key="name"  >
+          <div class="categoryGrid">
+            <div
+              class="categoryBlock"
+              v-for="(category, name) in thisTripGroupGearCategorized"
+              :key="name"
+            >
               <div class="categoryHeader">
-                <div :class='icons' @click="toggleCategory"></div>
+                <div :class="icons" @click="toggleCategory"></div>
                 <div class="categoryTitle" :id="name">{{name}}</div>
                 <!-- Ability to edit/delete categorie text -->
                 <div class="editIcon" @click="toggleEditCategory(name, 'group')">
@@ -85,40 +89,41 @@
               </div>
               <!-- Display all gear items in this category -->
               <!-- <div> wrapper is just for show/hide -->
-                <div :class="{collapse: collapseClass}">
-                  <div class="item" v-for="gear in thisTripGroupGearCategorized[name]" :key="gear.id">
-                <input
-                  type="checkbox"
-                  :id="gear.id"
-                  :value="gear.id"
-                  :checked="gear.checked"
-                  @change="updateGroupGearItemStatus"
-                />
-                <label class="strikethrough itemTitle" :for="gear.id">{{gear.title}}</label>
-                <div
-                  class="camperCell"
-                >( {{Array.isArray(gear.campers) ? gear.campers.join(', ') : gear.campers}} )</div>
-                <!-- TODO: sort checked items to bottom of list? -->
-                <div
-                  class="editIcon"
-                  @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)"
-                >
-                  <svg>
-                    <path
-                      fill="#c0c0c0"
-                      d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
-                    />
-                  </svg>
+              <div :class="{collapse: collapseClass, collapseWrapper: true}">
+                <div class="item" v-for="gear in thisTripGroupGearCategorized[name]" :key="gear.id">
+                  <input
+                    type="checkbox"
+                    :id="gear.id"
+                    :value="gear.id"
+                    :checked="gear.checked"
+                    @change="updateGroupGearItemStatus"
+                  />
+                  <label class="strikethrough itemTitle" :for="gear.id">{{gear.title}}</label>
+                  <div
+                    class="camperCell"
+                  >( {{Array.isArray(gear.campers) ? gear.campers.join(', ') : gear.campers}} )</div>
+                  <!-- TODO: sort checked items to bottom of list? -->
+                  <div
+                    class="editIcon"
+                    @click="toggleUpdateItem(gear.id, gear.title, gear.category, gear.campers)"
+                  >
+                    <svg>
+                      <path
+                        fill="#c0c0c0"
+                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                      />
+                    </svg>
+                  </div>
+                  <div class="deleteIcon" @click="deleteGroupGearItem(gear.id)">
+                    <svg>
+                      <path
+                        fill="#c0c0c0"
+                        d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"
+                      />
+                    </svg>
+                  </div>
                 </div>
-                <div class="deleteIcon" @click="deleteGroupGearItem(gear.id)">
-                  <svg>
-                    <path
-                      fill="#c0c0c0"
-                      d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"
-                    />
-                  </svg>
-                </div>
-              </div> </div>
+              </div>
             </div>
           </div>
         </div>
@@ -145,6 +150,10 @@
               :href="'#'+name"
             >{{name}}</a>
           </div>
+           <div class="categoryButtons">
+            <button @click="collapseAllCategories">Collapse All</button>
+            <button @click="expandAllCategories">Expand All</button>
+          </div>
           <div class="categoryGrid">
             <div
               class="categoryBlock"
@@ -152,7 +161,7 @@
               :key="name"
             >
               <div class="categoryHeader">
-                <div class='upArrowIcon' @click="toggleCategory"></div>
+                <div :class="icons" @click="toggleCategory"></div>
                 <div class="categoryTitle">{{name}}</div>
                 <!-- Ability to edit/delete categorie text -->
                 <div class="editIcon" @click="toggleEditCategory(name, 'ind')">
@@ -174,36 +183,38 @@
                 </div>
               </div>
               <!-- Display all gear items in this category -->
-            <div>  <div class="item" v-for="gear in thisTripIndGearCategorized[name]" :key="gear.id">
-                <input
-                  type="checkbox"
-                  :id="gear.id"
-                  :value="gear.id"
-                  :checked="gear.checked"
-                  @change="updateIndGearItemStatus"
-                />
-                <label class="strikethrough itemTitle" :for="gear.id">{{gear.title}}</label>
-                <!-- TODO: sort checked items to bottom of list? -->
-                <div
-                  class="editIcon"
-                  @click="toggleUpdateIndItem(gear.id, gear.title, gear.category)"
-                >
-                  <svg>
-                    <path
-                      fill="#c0c0c0"
-                      d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
-                    />
-                  </svg>
+              <div :class="{collapse: collapseClass, collapseWrapper: true}">
+                <div class="item" v-for="gear in thisTripIndGearCategorized[name]" :key="gear.id">
+                  <input
+                    type="checkbox"
+                    :id="gear.id"
+                    :value="gear.id"
+                    :checked="gear.checked"
+                    @change="updateIndGearItemStatus"
+                  />
+                  <label class="strikethrough itemTitle" :for="gear.id">{{gear.title}}</label>
+                  <!-- TODO: sort checked items to bottom of list? -->
+                  <div
+                    class="editIcon"
+                    @click="toggleUpdateIndItem(gear.id, gear.title, gear.category)"
+                  >
+                    <svg>
+                      <path
+                        fill="#c0c0c0"
+                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                      />
+                    </svg>
+                  </div>
+                  <div class="deleteIcon" @click="deleteIndGearItem(gear.id)">
+                    <svg>
+                      <path
+                        fill="#c0c0c0"
+                        d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"
+                      />
+                    </svg>
+                  </div>
                 </div>
-                <div class="deleteIcon" @click="deleteIndGearItem(gear.id)">
-                  <svg>
-                    <path
-                      fill="#c0c0c0"
-                      d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"
-                    />
-                  </svg>
-                </div>
-              </div></div>
+              </div>
             </div>
           </div>
         </div>
@@ -275,7 +286,6 @@ export default {
     deleteGearCategory,
   },
   computed: {
-    
     groupGearPage() {
       return {
         displayGear: this.showGroupGear,
@@ -321,7 +331,7 @@ export default {
       whichPage: "",
       icons: {
         upArrowIcon: true,
-        downArrowIcon: false
+        downArrowIcon: false,
       },
       collapseClass: false,
       showUpdateItem: false,
@@ -357,26 +367,34 @@ export default {
       }
     },
     toggleCategory(e) {
-      console.log(e)
-    var content = e.target.parentNode.nextElementSibling
-  if (content.classList.contains('collapse')) {
-    content.classList.remove('collapse')
-  } else {
-    content.classList.add('collapse')
-    }
-    // TODO this messes up expand all buttton, no class?
-    e.target.classList.toggle("downArrowIcon")
-    e.target.classList.toggle("upArrowIcon")
+      var content = e.target.parentNode.nextElementSibling;
+      if (content.classList.contains("collapse")) {
+        content.classList.remove("collapse");
+      } else {
+        content.classList.add("collapse");
+      }
+      // TODO this messes up expand all buttton, no class?
+      e.target.classList.toggle("downArrowIcon");
+      e.target.classList.toggle("upArrowIcon");
     },
     expandAllCategories() {
-      // TODO: for every wrapper, add the class if it's missing
-        this.collapseClass = false;
-         this.icons = {upArrowIcon: true, downArrowIcon: false}
+      // for every wrapper, add the class if it's missing from previous function :/ this could be much better
+      let els = document.getElementsByClassName("collapseWrapper");
+      for (let i = 0; i < els.length; i++) {
+        if (els[i].classList) {
+          if (els[i].classList.contains("collapse")) {
+            console.log("collapse get out");
+            els[i].classList.remove("collapse");
+            els[i].previousElementSibling.children[0].classList.replace('downArrowIcon','upArrowIcon')
+          }
+        }
+      }
+      this.collapseClass = false;
+      this.icons = { upArrowIcon: true, downArrowIcon: false };
     },
-    collapseAllCategories() {       
-        this.collapseClass = true;
-       this.icons = {upArrowIcon: false, downArrowIcon: true}
-    
+    collapseAllCategories() {
+      this.collapseClass = true;
+      this.icons = { upArrowIcon: false, downArrowIcon: true };
     },
     // GROUP GEAR
     toggleUpdateItem(id, title, cat, campers) {
@@ -385,7 +403,7 @@ export default {
       this.thisItemTitle = title;
       this.thisItemCat = cat;
       this.thisCampers = campers;
-    },    
+    },
     addGroupGearItem: function () {
       if (this.addGroupGearTitle !== "") {
         // TODO: injection threat check
@@ -572,7 +590,6 @@ h4 {
   flex: 1;
 }
 
-
 .deleteIcon {
   /* background: url("../assets/delete.svg") no-repeat center center; */
   /* background-size: contain; */
@@ -602,7 +619,7 @@ h4 {
 }
 .plusShow {
   display: inline-block;
-} 
+}
 .collapse {
   display: none;
 }
@@ -672,7 +689,7 @@ h4 {
   font-size: 0.8rem;
 }
 .categoryButtons {
-display: flex;
+  display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;

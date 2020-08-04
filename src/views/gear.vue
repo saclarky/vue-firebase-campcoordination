@@ -48,14 +48,20 @@
           </form>
         </div>
 
-        <div class="categoryGrid paper">
+<!-- GROUP -->
+
+        <div class="paper">
+          <div class="categoryMenu">
+            <a v-for="(category, name) in thisTripGroupGearCategorized"
+            :key="name+'-anchor'" :href="'#'+name">{{name}}</a></div>
+                    <div class='categoryGrid'>
           <div
             class="categoryBlock"
             v-for="(category, name) in thisTripGroupGearCategorized"
             :key="name"
           >
             <div class="categoryHeader">
-              <div class="categoryTitle">{{name}}</div>
+              <div class="categoryTitle" :id="name">{{name}}</div>
               <!-- Ability to edit/delete categorie text -->
               <div class="editIcon" @click="toggleEditCategory(name, 'group')">
                 <svg>
@@ -85,7 +91,7 @@
                 @change="updateGroupGearItemStatus"
               />
               <label class="strikethrough itemTitle" :for="gear.id">{{gear.title}}</label>
-              <div class="camperCell">( {{gear.campers ? gear.campers.join(', ') : 'TBD'}} )</div>
+              <div class="camperCell">( {{Array.isArray(gear.campers) ? gear.campers.join(', ') : gear.campers}} )</div>
               <!-- TODO: sort checked items to bottom of list? -->
               <div
                 class="editIcon"
@@ -108,8 +114,11 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
       </div>
+
+      <!-- INDIVIDUAL -->
       <div id="myGearView" :class="myGearPage">
         <div class="addSection">
           <form v-on:submit.prevent>
@@ -122,7 +131,10 @@
           </form>
         </div>
 
-        <div class="categoryGrid paper">
+        <div class="paper">
+           <div class="categoryMenu"> <a v-for="(category, name) in thisTripIndGearCategorized"
+            :key="name+'-anchor'" :href="'#'+name">{{name}}</a> </div>
+        <div class='categoryGrid'>
           <div
             class="categoryBlock"
             v-for="(category, name) in thisTripIndGearCategorized"
@@ -180,6 +192,7 @@
                 </svg>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>
@@ -601,6 +614,19 @@ h4 {
 }
 .text {
   text-decoration: underline;
+}
+.categoryMenu {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  font-size: .8rem;
+
+}
+.categoryMenu > a {
+ padding: 5px;
+    color: #7591db;
+    font-size: .8rem;
 }
 .category {
   font-size: 0.8rem;

@@ -177,13 +177,15 @@ export const store = new Vuex.Store({
       console.log("gear getter")
       let categorizedGear = {}
       state.thisTripGroupGear.forEach(gearObj => {
-        if (!gearObj.category) {
-          gearObj.category = 'Miscellaneous'
+        // if (!gearObj.category) {
+        //   gearObj.category = 'Miscellaneous'
+        // }
+        if(!gearObj.campers || gearObj.campers.length === 0) {
+          gearObj.campers = "TBD"
         }
         if (categorizedGear[gearObj.category] === undefined) {
           categorizedGear[gearObj.category] = [gearObj]
         } else {
-          // STOPPED HERE< TEST THIS
           categorizedGear[gearObj.category].push(gearObj)
         }
       })
@@ -194,9 +196,9 @@ export const store = new Vuex.Store({
       console.log("ind gear getter")
       let categorizedGear = {}
       state.thisTripIndGear.forEach(gearObj => {
-        if (!gearObj.category) {
-          gearObj.category = 'Miscellaneous'
-        }
+        // if (!gearObj.category) {
+        //   gearObj.category = 'Miscellaneous'
+        // }
         if (categorizedGear[gearObj.category] === undefined) {
           categorizedGear[gearObj.category] = [gearObj]
         } else {
@@ -757,6 +759,9 @@ export const store = new Vuex.Store({
     // PACKING LIST MANIPULATION // GEAR
     updateGroupGearAction: ({ state }, data) => {
       console.log("action to update a group gear item")
+      if(!data.category) {
+        data.category = 'Miscellaneous'
+      }
       return fb.db.collection('groupGear').doc(state.thisTripID).collection('gear').doc(data.gid).update({
         title: data.title,
         category: data.category
@@ -766,13 +771,13 @@ export const store = new Vuex.Store({
       // TODO: don't add a anme twice
       console.log("action to change a group gear item contributor")
       let pr = []
-      if (data.camperAdd !== '') {
+      if (data.camperAdd) {
         console.log('Adding a camper', data)
         pr.push(fb.db.collection('groupGear').doc(state.thisTripID).collection('gear').doc(data.gid).update({
           campers: firebase.firestore.FieldValue.arrayUnion(data.camperAdd)
         }))
       }
-      if (data.camperRemove !== '') {
+      if (data.camperRemove) {
         console.log('Removing a camper')
         pr.push(fb.db.collection('groupGear').doc(state.thisTripID).collection('gear').doc(data.gid).update({
           campers: firebase.firestore.FieldValue.arrayRemove(data.camperRemove)
@@ -787,6 +792,9 @@ export const store = new Vuex.Store({
 
     addGroupGearItemAction: ({ state }, data) => {
       console.log("Action add: " + data.title)
+      if(!data.category) {
+        data.category = 'Miscellaneous'
+      }
       return fb.db.collection("groupGear").doc(state.thisTripID).collection('gear')
         .add({
           title: data.title,
@@ -810,6 +818,9 @@ export const store = new Vuex.Store({
     // INDIVIDUAL GEAR
     updateIndGearAction: ({ state }, data) => {
       console.log("action to update a ind gear item")
+      if(!data.category) {
+        data.category = "Miscellaneous"
+      }
       return fb.db.collection('individualGear').doc(state.currentUser.uid).collection(state.thisTripID).doc(data.gid).update({
         title: data.title,
         category: data.category
@@ -817,6 +828,9 @@ export const store = new Vuex.Store({
     },
     addIndGearItemAction: ({ state }, data) => {
       console.log("Action add: " + data.title)
+      if(!data.category) {
+        data.category = "Miscellaneous"
+      }
       return fb.db.collection("individualGear").doc(state.currentUser.uid).collection(state.thisTripID)
         .add({
           title: data.title,
@@ -840,6 +854,9 @@ export const store = new Vuex.Store({
     editListGearItemAction: (context, data) => {
       // for not using to input data to the main defualt list
       console.log("Action add: " + data.title)
+      if(!data.category) {
+        data.category = "Miscellaneous"
+      }
       return fb.db.collection("defaultList").add({
         title: data.title,
         checked: false,
@@ -887,7 +904,6 @@ export const store = new Vuex.Store({
                 resolve('No category items returned.')
               }
             })
-
         }
       })
     },

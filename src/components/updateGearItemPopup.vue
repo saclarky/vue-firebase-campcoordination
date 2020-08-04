@@ -5,14 +5,14 @@
         <div class="modal-container">
           <div class="modal-header">Update {{itemtitle}}</div>
 
-          <div class="modal-body">
+          <div class="modalBody">
             <form v-on:submit.prevent>
             <div class="row">
               <label class="rowItem" for="newItemTitle">Update Title:</label>
               <input
                 class="rowItem"
                 id="newItemTitle"
-                v-model="addGroupGearTitle"
+                v-model="addGearTitle"
                 :placeholder="itemtitle"
               autofocus />
             </div>
@@ -21,17 +21,17 @@
               <input
                 class="rowItem"
                 id="newItemCat"
-                v-model="addGroupGearCat"
+                v-model="addGearCat"
                 :placeholder="itemcat"
               />
             </div>
             <div class="row rowStyle">
               <div class="loader" v-if="showSpinner"></div>
-            <input type="submit" class="rowItem" @click="updateGroupGearItem" value="Save"/>
+            <input type="submit" class="rowItem" @click="updateGearItem" value="Save"/>
             </div>
             </form>
           </div>
-          <div class="modal-body">
+          <div :class="campersDiv">
             <span
               :class="{
       plusShow: campers ? !campers.includes(username) : true,
@@ -69,34 +69,44 @@
 
 <script>
 export default {
-  props: ["itemid", "itemtitle", "itemcat", "username", "campers"],
+  props: ["itemid", "itemtitle", "itemcat", "username", "campers", "page"],
   data: function () {
     return {
       showSpinner: false,
-      addGroupGearTitle: "",
-      addGroupGearCat: "",
+      addGearTitle: "",
+      addGearCat: "",
     };
   },
+  computed: {
+    campersDiv() {
+      return {
+        modalBody:true,
+        plusHide: this.page=='ind',
+        plusShow: this.page === 'group'
+      }
+    }
+  },
   methods: {
-    updateGroupGearItem: function (e) {
+    updateGearItem: function (e) {
       e.preventDefault()
        this.showSpinner = true;
-      if (this.addGroupGearTitle === "" && this.addGroupGearCat === "") {
+      if (this.addGearTitle === "" && this.addGearCat === "") {
         this.$toasted.show("No changes made!");
          this.showSpinner = false;
         return;
       }
-      if (this.addGroupGearTitle === "") {
-        this.addGroupGearTitle = this.itemtitle;
+      if (this.addGearTitle === "") {
+        this.addGearTitle = this.itemtitle;
       }
-      if (this.addGroupGearCat === "") {
-        this.addGroupGearCat = this.itemcat;
+      if (this.addGearCat === "") {
+        this.addGearCat = this.itemcat;
       }
       this.$store
-        .dispatch("updateGroupGearAction", {
+        .dispatch("updateGearAction", {
+          page: this.page,
           gid: this.itemid,
-          title: this.addGroupGearTitle,
-          category: this.addGroupGearCat,
+          title: this.addGearTitle,
+          category: this.addGearCat,
         })
         .then(() => {
           this.$toasted.show("Updated item!");
@@ -160,7 +170,7 @@ export default {
   color: #42b983;
 }
 
-.modal-body {
+.modalBody {
   margin: 20px 0;
   display: flex;
   flex-direction: column;
@@ -177,19 +187,6 @@ export default {
 button.rowItem {
   margin-left: 10px;
 }
-
-/* .modal-default-button {
-  float: right;
-} */
-
-/*
- * The following styles are auto-applied to elements with
- * transition="modal" when their visibility is toggled
- * by Vue.js.
- *
- * You can easily play with the modal transition by editing
- * these styles.
- */
 
 .modal-enter {
   opacity: 0;

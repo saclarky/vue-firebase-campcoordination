@@ -35,22 +35,22 @@
       </div>
 
       <!-- GROUP GEAR VIEW -->
-      <div id="groupGearView" :class="groupGearPage">
+      <div>
         <div class="addSection">
           <form v-on:submit.prevent>
             <label for="itemTitle">Title:</label>
-            <input type="text" id="itemTitle" v-model="addGroupGearTitle" />
+            <input type="text" id="itemTitle" v-model="addGearTitle" />
             <!-- TODO: domain? -->
             <label for="itemCat">Category:</label>
-            <input type="text" id="itemCat" v-model="addGroupGearCat" />
-            <input type="submit" @click="addGroupGearItem" value="Add" />
+            <input type="text" id="itemCat" v-model="addGearCat" />
+            <input type="submit" @click="addGearItem" value="Add" />
           </form>
         </div>
         <!-- GROUP -->
         <div class="paper">
           <div class="categoryMenu">
             <a
-              v-for="(category, name) in thisTripGroupGearCategorized"
+              v-for="(category, name) in thisTripGearCategorized"
               :key="name+'-anchor'"
               :href="'#'+name"
             >{{name}}</a>
@@ -62,14 +62,14 @@
           <div class="categoryGrid">
             <div
               class="categoryBlock"
-              v-for="(category, name) in thisTripGroupGearCategorized"
+              v-for="(category, name) in thisTripGearCategorized"
               :key="name"
             >
               <div class="categoryHeader">
                 <div :class="icons" @click="toggleCategory"></div>
                 <div class="categoryTitle" :id="name">{{name}}</div>
                 <!-- Ability to edit/delete categorie text -->
-                <div class="editIcon" @click="toggleEditCategory(name, 'group')">
+                <div class="editIcon" @click="toggleEditCategory(name)">
                   <svg>
                     <path
                       fill="#c0c0c0"
@@ -78,7 +78,7 @@
                   </svg>
                 </div>
                 <!-- TODO: Warn will delete all gear in this category/section -->
-                <div class="deleteIcon" @click="toggleDeleteCategory(name, 'group')">
+                <div class="deleteIcon" @click="toggleDeleteCategory(name)">
                   <svg>
                     <path
                       fill="#c0c0c0"
@@ -90,17 +90,17 @@
               <!-- Display all gear items in this category -->
               <!-- <div> wrapper is just for show/hide -->
               <div :class="{collapse: collapseClass, collapseWrapper: true}">
-                <div class="item" v-for="gear in thisTripGroupGearCategorized[name]" :key="gear.id">
+                <div class="item" v-for="gear in thisTripGearCategorized[name]" :key="gear.id">
                   <input
                     type="checkbox"
                     :id="gear.id"
                     :value="gear.id"
                     :checked="gear.checked"
-                    @change="updateGroupGearItemStatus"
+                    @change="updateGearItemStatus"
                   />
                   <label class="strikethrough itemTitle" :for="gear.id">{{gear.title}}</label>
                   <div
-                    class="camperCell"
+                    :class="{camperCell: true, plusShow: showGroupGear, plusHide: !showGroupGear}"
                   >( {{Array.isArray(gear.campers) ? gear.campers.join(', ') : gear.campers}} )</div>
                   <!-- TODO: sort checked items to bottom of list? -->
                   <div
@@ -114,7 +114,7 @@
                       />
                     </svg>
                   </div>
-                  <div class="deleteIcon" @click="deleteGroupGearItem(gear.id)">
+                  <div class="deleteIcon" @click="deleteGearItem(gear.id)">
                     <svg>
                       <path
                         fill="#c0c0c0"
@@ -130,95 +130,7 @@
       </div>
 
       <!-- INDIVIDUAL -->
-      <div id="myGearView" :class="myGearPage">
-        <div class="addSection">
-          <form v-on:submit.prevent>
-            <label for="myItemTitle">Title:</label>
-            <input type="text" id="myItemTitle" v-model="addIndGearTitle" />
-            <!-- TODO: domain? -->
-            <label for="myItemCat">Category:</label>
-            <input type="text" id="myItemCat" v-model="addIndGearCat" />
-            <input type="submit" @click="addIndGearItem" value="Add" />
-          </form>
-        </div>
-
-        <div class="paper">
-          <div class="categoryMenu">
-            <a
-              v-for="(category, name) in thisTripIndGearCategorized"
-              :key="name+'-anchor'"
-              :href="'#'+name"
-            >{{name}}</a>
-          </div>
-           <div class="categoryButtons">
-            <button @click="collapseAllCategories">Collapse All</button>
-            <button @click="expandAllCategories">Expand All</button>
-          </div>
-          <div class="categoryGrid">
-            <div
-              class="categoryBlock"
-              v-for="(category, name) in thisTripIndGearCategorized"
-              :key="name"
-            >
-              <div class="categoryHeader">
-                <div :class="icons" @click="toggleCategory"></div>
-                <div class="categoryTitle">{{name}}</div>
-                <!-- Ability to edit/delete categorie text -->
-                <div class="editIcon" @click="toggleEditCategory(name, 'ind')">
-                  <svg>
-                    <path
-                      fill="#c0c0c0"
-                      d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
-                    />
-                  </svg>
-                </div>
-                <!-- TODO: Warn will delete all gear in this category/section -->
-                <div class="deleteIcon" @click="toggleDeleteCategory(name, 'ind')">
-                  <svg>
-                    <path
-                      fill="#c0c0c0"
-                      d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <!-- Display all gear items in this category -->
-              <div :class="{collapse: collapseClass, collapseWrapper: true}">
-                <div class="item" v-for="gear in thisTripIndGearCategorized[name]" :key="gear.id">
-                  <input
-                    type="checkbox"
-                    :id="gear.id"
-                    :value="gear.id"
-                    :checked="gear.checked"
-                    @change="updateIndGearItemStatus"
-                  />
-                  <label class="strikethrough itemTitle" :for="gear.id">{{gear.title}}</label>
-                  <!-- TODO: sort checked items to bottom of list? -->
-                  <div
-                    class="editIcon"
-                    @click="toggleUpdateIndItem(gear.id, gear.title, gear.category)"
-                  >
-                    <svg>
-                      <path
-                        fill="#c0c0c0"
-                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
-                      />
-                    </svg>
-                  </div>
-                  <div class="deleteIcon" @click="deleteIndGearItem(gear.id)">
-                    <svg>
-                      <path
-                        fill="#c0c0c0"
-                        d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+     
     </div>
     <updateGearItemPopup
       v-if="showUpdateItem"
@@ -228,19 +140,11 @@
       :itemcat="thisItemCat"
       :campers="thisCampers"
       :username="userProfile.name"
+      :page="whichPage"
     >
       <!-- TODO: add a class on items being updated so other users can see? -->
     </updateGearItemPopup>
-    <updateIndGearItemPopup
-      v-if="showUpdateIndItem"
-      @close="toggleUpdateIndItem()"
-      :itemid="thisIndItemID"
-      :itemtitle="thisIndItemTitle"
-      :itemcat="thisIndItemCat"
-      :username="userProfile.name"
-    >
-      <!-- TODO: add a class on items being updated so other users can see? -->
-    </updateIndGearItemPopup>
+ 
     <editGearCategory
       v-if="showEditCat"
       @close="toggleEditCategory('','')"
@@ -259,7 +163,6 @@
 <script>
 import { mapState, mapGetters } from "vuex";
 import updateGearItemPopup from "../components/updateGearItemPopup";
-import updateIndGearItemPopup from "../components/updateIndGearItemPopup";
 import editGearCategory from "../components/editGearCategory";
 import deleteGearCategory from "../components/deleteGearCategory";
 export default {
@@ -275,29 +178,18 @@ export default {
       // TODO: getter for sorting??
       this.$store.dispatch("bindTripGroupGear").then((docs) => {
         console.log("got gear list", docs);
-        this.$store.dispatch("bindTripIndGear");
+        this.$store.dispatch("bindTripIndGear").then(() => {
+          this.thisTripGearCategorized = this.thisTripGroupGearCategorized
+        })
       });
     }
   },
   components: {
     updateGearItemPopup,
-    updateIndGearItemPopup,
     editGearCategory,
     deleteGearCategory,
   },
   computed: {
-    groupGearPage() {
-      return {
-        displayGear: this.showGroupGear,
-        hideGear: !this.showGroupGear,
-      };
-    },
-    myGearPage() {
-      return {
-        displayGear: !this.showGroupGear,
-        hideGear: this.showGroupGear,
-      };
-    },
     groupGear() {
       return {
         highlightGear: this.showGroupGear,
@@ -328,14 +220,14 @@ export default {
   },
   data: function () {
     return {
-      whichPage: "",
+      thisTripGearCategorized: [], // Data source for the gear list
+      whichPage: "group", // tell component if this is group gear or ind. page
       icons: {
         upArrowIcon: true,
         downArrowIcon: false,
       },
       collapseClass: false,
       showUpdateItem: false,
-      showUpdateIndItem: false,
       showGroupGear: true,
       showEditCat: false,
       showDeleteCat: false,
@@ -344,26 +236,23 @@ export default {
       thisItemCat: "",
       thisCategory: "",
       thisCampers: [],
-      thisIndItemID: "", // Pass ID prop into the updateItem popup for DB action
-      thisIndItemTitle: "",
-      thisIndItemCat: "",
-      // groupGearExists: false,
-      addGroupGearTitle: "",
-      addGroupGearCat: "",
-      addIndGearTitle: "",
-      addIndGearCat: "",
+      addGearTitle: "",
+      addGearCat: ""
     };
   },
   methods: {
+    // UX
     toggleGearPage(event) {
-      if (
-        (event.target.id === "groupGearButton" &&
-          this.showGroupGear === true) ||
-        (event.target.id === "myGearButton" && this.showGroupGear === false)
-      ) {
-        return;
-      } else {
+      if ( (event.target.id === "groupGearButton" && this.showGroupGear === false)    ) {
         this.showGroupGear = !this.showGroupGear;
+        this.whichPage = 'group'
+        this.thisTripGearCategorized = this.thisTripGroupGearCategorized
+      } else if ( (event.target.id === "myGearButton" && this.showGroupGear === true)) {
+        this.showGroupGear = !this.showGroupGear;
+        this.whichPage = 'ind'
+        this.thisTripGearCategorized = this.thisTripIndGearCategorized
+        // hide cmaper class div --> with class booleans
+
       }
     },
     toggleCategory(e) {
@@ -385,7 +274,10 @@ export default {
           if (els[i].classList.contains("collapse")) {
             console.log("collapse get out");
             els[i].classList.remove("collapse");
-            els[i].previousElementSibling.children[0].classList.replace('downArrowIcon','upArrowIcon')
+            els[i].previousElementSibling.children[0].classList.replace(
+              "downArrowIcon",
+              "upArrowIcon"
+            );
           }
         }
       }
@@ -396,7 +288,8 @@ export default {
       this.collapseClass = true;
       this.icons = { upArrowIcon: false, downArrowIcon: true };
     },
-    // GROUP GEAR
+
+    // GEAR
     toggleUpdateItem(id, title, cat, campers) {
       this.showUpdateItem = !this.showUpdateItem;
       this.thisItemID = id;
@@ -404,14 +297,16 @@ export default {
       this.thisItemCat = cat;
       this.thisCampers = campers;
     },
-    addGroupGearItem: function () {
-      if (this.addGroupGearTitle !== "") {
+    addGearItem: function () {
+      if (this.addGearTitle !== "") {
         // TODO: injection threat check
+        let data = {
+          page: this.whichPage,
+            title: this.addGearTitle,
+            category: this.addGearCat,
+          };       
         this.$store
-          .dispatch("addGroupGearItemAction", {
-            title: this.addGroupGearTitle,
-            category: this.addGroupGearCat,
-          })
+          .dispatch("addGearItemAction", data)
           .then(() => {
             this.$toasted.show("Added item!");
           })
@@ -422,81 +317,42 @@ export default {
         this.$toasted.show("Please enter a title for the item.");
       }
     },
-    deleteGroupGearItem: function (itemID) {
-      //TODO: confirm want to delete
+    deleteGearItem: function (itemID) {      
       // change from button to top-level delete button that deletes checked boxes?
       // or... edit a template mode? where you can delete rows/add rows etc?
+      if(confirm("Did you mean to delete this item?")) {
+      let data = { 
+        page: this.whichPage,
+        id: itemID }      
       this.$store
-        .dispatch("deleteGroupGearItemAction", { id: itemID })
+        .dispatch("deleteGearItemAction", data)
         .then(() => {
           this.$toasted.show("Deleted item!");
         })
         .catch((e) => {
           this.$toasted.show(e.message);
         });
-    },
-    updateGroupGearItemStatus: function (item) {
-      // console.log(item.target.value, item.target.checked);
-      this.$store.dispatch("updateStatusAction", {
-        id: item.target.value,
-        status: item.target.checked,
-      });
-      //TODO: return message (success/fail)
-    },
-    // INDIVIDUAL ITEMS
-    toggleUpdateIndItem(id, title, cat) {
-      this.showUpdateIndItem = !this.showUpdateIndItem;
-      this.thisIndItemID = id;
-      this.thisIndItemTitle = title;
-      this.thisIndItemCat = cat;
-    },
-    addIndGearItem: function () {
-      if (this.addIndGearTitle !== "") {
-        // TODO: injection threat check
-        this.$store
-          .dispatch("addIndGearItemAction", {
-            title: this.addIndGearTitle,
-            category: this.addIndGearCat,
-          })
-          .then(() => {
-            this.$toasted.show("Added item!");
-          })
-          .catch((e) => {
-            this.$toasted.show(e.message);
-          });
       } else {
-        this.$toasted.show("Please enter a title for the item.");
+        return;
       }
     },
-    deleteIndGearItem: function (itemID) {
-      //TODO: confirm want to delete
-      // change from button to top-level delete button that deletes checked boxes?
-      // or... edit a template mode? where you can delete rows/add rows etc?
-      this.$store
-        .dispatch("deleteIndGearItemAction", { id: itemID })
-        .then(() => {
-          this.$toasted.show("Deleted item!");
-        })
-        .catch((e) => {
-          this.$toasted.show(e.message);
-        });
-    },
-    updateIndGearItemStatus: function (item) {
-      // console.log(item.target.value, item.target.checked);
-      this.$store.dispatch("updateIndStatusAction", {
+    updateGearItemStatus: function (item) {
+      let data = {
+        page: this.whichPage,
         id: item.target.value,
         status: item.target.checked,
-      });
-      //TODO: return message (success/fail)
-    },
+      }
+      this.$store.dispatch("updateStatusAction", data).catch(e => {
+        this.$toasted.show(e.message)
+      })
+    },  
+
     // CATEGORIES
-    toggleEditCategory: function (type, page) {
-      this.whichPage = page;
+    toggleEditCategory: function (type) {
       this.thisCategory = type;
       this.showEditCat = !this.showEditCat;
     },
-    toggleDeleteCategory: function (type, page) {
-      this.whichPage = page;
+    toggleDeleteCategory: function (type) {
       this.thisCategory = type;
       this.showDeleteCat = !this.showDeleteCat;
     },
@@ -671,7 +527,7 @@ h4 {
   font-size: 0.8rem;
   color: rgb(65, 65, 65);
   font-style: italic;
-  display: inline-block;
+  /* display: inline-block; */
 }
 .text {
   text-decoration: underline;

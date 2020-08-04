@@ -757,15 +757,22 @@ export const store = new Vuex.Store({
 
     },
     // PACKING LIST MANIPULATION // GEAR
-    updateGroupGearAction: ({ state }, data) => {
+    updateGearAction: ({ state }, data) => {
       console.log("action to update a group gear item")
       if(!data.category) {
         data.category = 'Miscellaneous'
       }
-      return fb.db.collection('groupGear').doc(state.thisTripID).collection('gear').doc(data.gid).update({
-        title: data.title,
-        category: data.category
-      })
+      if (data.page === 'group') {
+        return fb.db.collection('groupGear').doc(state.thisTripID).collection('gear').doc(data.gid).update({
+          title: data.title,
+          category: data.category
+        })
+      } else {
+        return fb.db.collection('individualGear').doc(state.currentUser.uid).collection(state.thisTripID).doc(data.gid).update({
+          title: data.title,
+          category: data.category
+        })
+      }      
     },
     updateGroupGearCampersAction: ({ state }, data) => {
       // TODO: don't add a anme twice
@@ -790,12 +797,13 @@ export const store = new Vuex.Store({
       })
     },
 
-    addGroupGearItemAction: ({ state }, data) => {
+    addGearItemAction: ({ state }, data) => {
       console.log("Action add: " + data.title)
       if(!data.category) {
         data.category = 'Miscellaneous'
       }
-      return fb.db.collection("groupGear").doc(state.thisTripID).collection('gear')
+      if(data.page === ' group') {
+        return fb.db.collection("groupGear").doc(state.thisTripID).collection('gear')
         .add({
           title: data.title,
           // created_at: Date.now(),
@@ -803,53 +811,44 @@ export const store = new Vuex.Store({
           category: data.category,
           campers: []
         })
-    },
-    deleteGroupGearItemAction: ({ state }, data) => {
-      return fb.db.collection("groupGear")
-        .doc(state.thisTripID).collection('gear').doc(data.id)
-        .delete()
-    },
-    updateStatusAction: ({ state }, obj) => {
-      return fb.db.collection("groupGear").doc(state.thisTripID).collection('gear').doc(obj.id)
-        .update({
-          checked: obj.status
-        })
-    },
-    // INDIVIDUAL GEAR
-    updateIndGearAction: ({ state }, data) => {
-      console.log("action to update a ind gear item")
-      if(!data.category) {
-        data.category = "Miscellaneous"
-      }
-      return fb.db.collection('individualGear').doc(state.currentUser.uid).collection(state.thisTripID).doc(data.gid).update({
-        title: data.title,
-        category: data.category
-      })
-    },
-    addIndGearItemAction: ({ state }, data) => {
-      console.log("Action add: " + data.title)
-      if(!data.category) {
-        data.category = "Miscellaneous"
-      }
-      return fb.db.collection("individualGear").doc(state.currentUser.uid).collection(state.thisTripID)
+      } else {
+        return fb.db.collection("individualGear").doc(state.currentUser.uid).collection(state.thisTripID)
         .add({
           title: data.title,
           // created_at: Date.now(),
           checked: false,
           category: data.category
         })
+      }
+      
     },
-    deleteIndGearItemAction: ({ state }, data) => {
-      return fb.db.collection("individualGear").doc(state.currentUser.uid)
+    deleteGearItemAction: ({ state }, data) => {
+      if (data.page === 'group') {
+        return fb.db.collection("groupGear")
+        .doc(state.thisTripID).collection('gear').doc(data.id)
+        .delete()
+      } else {
+        return fb.db.collection("individualGear").doc(state.currentUser.uid)
         .collection(state.thisTripID).doc(data.id)
         .delete()
+      }
+      
     },
-    updateIndStatusAction: ({ state }, obj) => {
-      return fb.db.collection("individualGear").doc(state.currentUser.uid).collection(state.thisTripID).doc(obj.id)
+    updateStatusAction: ({ state }, data) => {
+      if (data.page === 'group') {
+        return fb.db.collection("groupGear").doc(state.thisTripID).collection('gear').doc(data.id)
         .update({
-          checked: obj.status
+          checked: data.status
         })
+      } else {
+        return fb.db.collection("individualGear").doc(state.currentUser.uid).collection(state.thisTripID).doc(data.id)
+        .update({
+          checked: data.status
+        })
+      }      
     },
+    // INDIVIDUAL GEAR
+  
     // Edit Default Gear Lists
     editListGearItemAction: (context, data) => {
       // for not using to input data to the main defualt list

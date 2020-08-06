@@ -16,9 +16,9 @@
                 />
               </div>
                <div class="row rowStyle">
-                 <input type="radio" name="dateFlex" value="flex" id="flex" v-model="radioFlex" selected>
+                 <input type="radio" name="dateFlex" value="true" id="flex" v-model="radioFlex" selected>
                  <label class="rowItem smText" for="flex">Flexible Dates</label>
-                 <input type="radio" name="dateFlex" value="hard" id="hard" v-model="radioFlex">
+                 <input type="radio" name="dateFlex" value="false" id="hard" v-model="radioFlex">
                  <label class="rowItem smText" for="hard">Fixed Dates</label>
               </div>
               <div class="row rowStyle">
@@ -30,24 +30,24 @@
               <div class='column columnStyle'>
                 <div class='teal'>Trip Type:</div>
                 <div class="row rowStyle">
-                 <input type="radio" name="tripType" value="group" id="group" v-model="radioType" selected>
+                 <input type="radio" name="tripType" value="true" id="group" v-model="group" selected>
                  <label class="rowItem smText" for="group">Group</label>
-                 <input type="radio" name="tripType" value="ind" id="ind" v-model="radioType">
+                 <input type="radio" name="tripType" value="false" id="ind" v-model="group">
                  <label class="rowItem smText" for="ind">Individual</label>
               </div></div>
               <div class='column leftColumn'>
-              <div :class="{row:true, rowStyle:true, hidden:this.radioType=='ind'}">
+              <div :class="{row:true, rowStyle:true, hidden:this.group=='false'}">
                 <label class="rowItem smText" for="templateChoice">Group gear list:</label>
-                <select class="rowItem" name="templateChoice" id="templateChoice">
-                  <option selected="None">None</option>
+                <select class="rowItem" name="templateChoice" id="templateChoice" v-model="groupGearTemplate">
+                  <option >None</option>
                   <option>My Group List</option>
                   <option>Generic List</option>
                 </select>
               </div>
                <div class="row rowStyle">
                 <label class="rowItem smText" for="templateChoiceI">Individual gear list:</label>
-                <select class="rowItem" name="templateChoiceI" id="templateChoiceI">
-                  <option selected="None">None</option>
+                <select class="rowItem" name="templateChoiceI" id="templateChoiceI" v-model="indGearTemplate">
+                  <option >None</option>
                   <option>My List</option>
                   <option>Generic List</option>
                 </select>
@@ -76,8 +76,10 @@ export default {
         start: new Date(),
         end: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+2)
       },
-      radioType: 'group',
-      radioFlex: 'flex'
+      group: true,
+      radioFlex: true,
+      groupGearTemplate: 'None',
+      indGearTemplate: 'None'
     }
   },
   
@@ -88,21 +90,20 @@ export default {
         this.$toasted.show("Need a trip name!");
         return;
       }
+      // DEFAULTS: flexible dates, today's dates, group trip, no gear list
       let data = {
         name: this.title,
-        template: document.getElementById("templateChoice").value,
         dateStart: this.range.start,
         dateEnd: this.range.end,
+        flexible: this.radioFlex,
+        group: this.group,
+        template: this.groupGearTemplate,
+        indTemplate: this.indGearTemplate,
       };
-      this.$store.dispatch("saveNewTripAction", data).then((res, rej) => {
+      console.log(data)
+      this.$store.dispatch("saveNewTripAction", data).then(() => {
         this.$emit("close");
-        if (res) {
-          this.$toasted.show("Success! Trip Saved.");
-          console.log(res);
-        } else {
-          this.$toasted.show("Error: " + rej);
-          console.log("error?", rej);
-        }
+          this.$toasted.show("Success! Trip Saved.");      
       }).catch(e => {
         console.log(e)
         this.$toasted.show(e.message)

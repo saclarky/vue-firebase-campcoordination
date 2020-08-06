@@ -1,17 +1,5 @@
 <template>
   <div class="main">
-    <!-- <div class="header2">
-      <div class="subNavMenuLeft"></div>
-      <div class="subNavMenu">
-        <div class="menu-item">
-          <router-link to="/list">Lists</router-link>
-        </div>
-        <div class="menu-item">
-          <router-link to="/newTrip">New Trip</router-link>
-        </div>
-      </div>
-    </div> -->
-
     <div class="hero">
       <div class="hero-top" id="nav-bar">
         <h1 class="hero-title">Trips</h1>
@@ -23,14 +11,7 @@
           <a id="show-modal" @click="toggleAddTrip()" class="hero-cta-button button grow">New Trip</a>
           <!-- use the modal component, pass in the prop -->
           <newTripPopup v-if="showAddTrip" @close="toggleAddTrip()">
-            <!--
-      you can use custom content here to overwrite
-      default content
-            -->
-            <!-- <template v-slot:header>
-              <h3>Start New Trip</h3>
-            </template> -->
-            <!-- <h3 slot="header">custom header</h3> -->
+           
           </newTripPopup>
         </div>
 

@@ -180,7 +180,7 @@ export const store = new Vuex.Store({
         // if (!gearObj.category) {
         //   gearObj.category = 'Miscellaneous'
         // }
-        if(!gearObj.campers || gearObj.campers.length === 0) {
+        if (!gearObj.campers || gearObj.campers.length === 0) {
           gearObj.campers = "TBD"
         }
         if (categorizedGear[gearObj.category] === undefined) {
@@ -366,56 +366,135 @@ export const store = new Vuex.Store({
     },
 
     saveNewTripAction: ({ state }, obj) => {
-      return new Promise((resolve, reject) => {
-        fb.db.collection("trips").add({ 'name': obj.name, 'uid': state.currentUser.uid, 'owner': state.currentUser.displayName })
+      console.log('Save new trip action.')
+      var subPromises = []
+      return new Promise((resolve) => {
+        console.log('New promise')
+        // trip document
+        fb.db.collection("trips").add({ 'name': obj.name, 'uid': state.currentUser.uid, 'owner': state.currentUser.displayName,
+      'group': obj.group })
           .then(tripDoc => {
-            fb.db.collection('groupGear').doc(tripDoc.id).set({})
-            if (obj.template === "My List") {
-              console.log('copy over users default list')
-              // fb.db.collection('individualGear').doc(state.currentUser.uid).collection('default').get().then((results) => {
-              //   if (!results.empty) {
-              //     results.docs.forEach(doc => {
-              //       fb.db.collection('groupGear').doc(tripDoc.id).collection('gear').add(doc.data())
-              //     })
-              //   }
-              // })
-            } else if (obj.template === "Generic List") {
-              fb.db.collection('defaultList').get().then((results) => {
-                if (!results.empty) {
-                  //TODO if results.docs.exists
-                  results.docs.forEach(doc => {
-                    fb.db.collection('groupGear').doc(tripDoc.id).collection('gear').add(doc.data())
-                  })
-                }
-              })
-            }
-            fb.db.collection('campersNo').doc(tripDoc.id).set({})
-            fb.db.collection('campersPending').doc(tripDoc.id).set({})
+            console.log('Saved trip document')
+            subPromises.push(fb.db.collection('campersNo').doc(tripDoc.id).set({}))
+            subPromises.push(fb.db.collection('campersPending').doc(tripDoc.id).set({}))
             //TODO redirect to new trip page?
             // Since it's a new trip use SET because need to also create the document
             // If use update throws an error, no document to update
-            fb.db.collection('campers').doc(tripDoc.id).set({
+            subPromises.push(fb.db.collection('campers').doc(tripDoc.id).set({
               [state.currentUser.uid]: state.currentUser.displayName
-            })
-              .then(() => {
+            }))
+            console.log('end campers sub-promises')
+            subPromises.push( fb.db.collection('tripActivityLog').doc(tripDoc.id).set({ 'null': null }))
+            console.log('end activiity log sub-promise')
 
-                console.log('saved current user to trip campers')
-                // Strange issue trying to debug, 'empty' existing collections.
-                // Might be because of not created ancestor first explicity so here...
-                fb.db.collection('tripActivityLog').doc(tripDoc.id).set({ 'null': null })
-                resolve("saved")
-              }).catch(e => {
-                console.log("error saving new trip's owner as a camper")
-                console.log(e.message)
-                reject(e.message)
+            // Dates
+            fb.db.collection('tripDates').doc(tripDoc.id).set({}).then(() => {
+              console.log('created empty dates doc')
+              console.log(obj.dateStart)
+              console.log(typeof obj.dateStart)
+              subPromises.push(fb.db.collection('tripDates').doc(tripDoc.id).collection('dates').add({
+                startDate: obj.dateStart,
+                endDate: obj.dateEnd,
+                flexible: obj.flexible,
+                user: state.currentUser.displayName,
+                votes: {[state.currentUser.displayName]: true}
+              }))
+              console.log('pushed date subpromise')
+            })
+        
+              console.log('run individual gear for group or ind trip now')
+              // Individual trip
+              if (obj.indTemplate === "My List") {
+                console.log('copy over users default ind list')
+                fb.db.collection('individualGear').doc(state.currentUser.uid).collection('default').get().then((results) => {
+                  if (!results.empty) {
+                    console.log('ind not empty')
+                    results.docs.forEach(doc => {
+                      subPromises.push(fb.db.collection('individualGear').doc(state.currentUser.uid).collection(tripDoc.id).add(doc.data()))
+                      
+                    })
+                  } else {
+                    console.log('no ind docs')
+                   
+                  }
+                })
+              } else if (obj.indTemplate === "Generic List") {
+                console.log('copy generic ind list')
+                fb.db.collection('defaultList').get().then((results) => {
+                  if (!results.empty) {
+                    console.log('generic ind nto empty')
+                    //TODO if results.docs.exists
+                   subPromises.push(results.docs.forEach(doc => {
+                    fb.db.collection('individualGear').doc(state.currentUser.uid).collection(tripDoc.id).add(doc.data())
+                    }))
+                   
+                  } else {
+                    console.log('no generic ind docs')
+                    
+                  }
+                })
+              } else {
+                console.log('no ind template selected')                
+              }
+            // group
+            if (obj.group) {
+              console.log('Group data')
+              // set empty group gear so collection isn't a ghost
+              fb.db.collection('groupGear').doc(tripDoc.id).set({}).then(() => {
+                console.log('set empty group gear doc')
+                // fill with a template
+                if (obj.template === "My Group List") {
+                  console.log('copy over users default group list')
+                  fb.db.collection('individualGear').doc(state.currentUser.uid).collection('myDefaultGroup').get().then((results) => {
+                    if (!results.empty) {
+                      console.log('results not empty')
+                      results.docs.forEach(doc => {
+                        console.log('push doc promise')
+                        subPromises.push(fb.db.collection('groupGear').doc(tripDoc.id).collection('gear').add(doc.data()))
+                      })
+                      Promise.all(subPromises).then(() => {
+                        console.log('promises resolved')
+                        resolve('Saved trip!')
+                      })
+                    } else {
+                      console.log('no user list')
+                      Promise.all(subPromises).then(() => {
+                        console.log('promises resolved')
+                        resolve('Saved trip!')
+                      })
+                    }
+                  })
+                } else if (obj.template === "Generic List") {
+                  console.log('copy over generic group gear list')
+                  fb.db.collection('defaultGroupGear').get().then((results) => {
+                    if (!results.empty) {
+                      console.log('not empty')
+                      //TODO if results.docs.exists
+                     subPromises.push(results.docs.forEach(doc => {
+                        fb.db.collection('groupGear').doc(tripDoc.id).collection('gear').add(doc.data())
+                      }))
+                      Promise.all(subPromises).then(() => {
+                        console.log('promises resolved')
+                        resolve('Saved trip!')
+                      })
+                    } else {
+                      console.log('no generic group docs')
+                      Promise.all(subPromises).then(() => {
+                        console.log('promises resolved')
+                        resolve('Saved trip!')
+                      })
+                    }
+                  })
+                } else {
+                  console.log('no group gear template selected')
+                  Promise.all(subPromises).then(() => {
+                    console.log('promises resolved')
+                    resolve('Saved trip!')
+                  })
+                }
               })
-          })
-          .catch(error => {
-            // this.errors = error;
-            console.log("Save new trip error:")
-            console.log(error);
-            reject(error.message)
-          });
+            } 
+          })          
       })
     },
     deleteTripAction: (context, id) => {
@@ -443,20 +522,61 @@ export const store = new Vuex.Store({
               let delC = fb.db.collection('campers').doc(id).delete()
               let delCP = fb.db.collection('campersPending').doc(id).delete()
               let delN = fb.db.collection('campersNo').doc(id).delete()
+
+              // Delete dates
+              fb.db.collection('tripDates').doc(id).collection('dates').get().then((docs) => {
+                if(!docs.empty) {
+                  let waitingDates = []
+                  docs.forEach(doc => {
+                    waitingDates.push(fb.db.collection("tripDates")
+                      .doc(id).collection("dates").doc(doc.id)
+                      .delete())
+                  })
+                  Promise.all(waitingDates).then(() => {
+                    // fb.db.collection('tripActivityLog').doc(id).collection('logs').delete() NOT A FUNCTION/not necessary
+                    console.log('still concerned, TODO check logs collection is not orphaned')
+                    fb.db.collection('tripDates').doc(id).delete()
+                  })
+                } else {
+                  fb.db.collection('tripDates').doc(id).delete()
+                }               
+              })
               // Delete group gear
               fb.db.collection('groupGear').doc(id).collection('gear').get().then((docs) => {
-                //todo, what if no logs, empty array? does for eahc throw something?
-                let waitingGear = []
-                docs.forEach(doc => {
-                  waitingGear.push(fb.db.collection("groupGear")
-                    .doc(id).collection("gear").doc(doc.id)
-                    .delete())
-                })
-                Promise.all(waitingGear).then(() => {
-                  // fb.db.collection('tripActivityLog').doc(id).collection('logs').delete() NOT A FUNCTION/not necessary
-                  console.log('still concerned, TODO check logs collection is not orphaned')
+                if(!docs.empty) {
+                  let waitingGear = []
+                  docs.forEach(doc => {
+                    waitingGear.push(fb.db.collection("groupGear")
+                      .doc(id).collection("gear").doc(doc.id)
+                      .delete())
+                  })
+                  Promise.all(waitingGear).then(() => {
+                    // fb.db.collection('tripActivityLog').doc(id).collection('logs').delete() NOT A FUNCTION/not necessary
+                    console.log('still concerned, TODO check logs collection is not orphaned')
+                    fb.db.collection('groupGear').doc(id).delete()
+                  })
+                } else {
                   fb.db.collection('groupGear').doc(id).delete()
-                })
+                }                
+              })
+              // Delete Ind Gear
+              fb.db.collection('individualGear').doc(context.state.currentUser.uid).collection(id).get().then((docs) => {
+                if(!docs.empty) {
+                  let waitingIGear = []
+                  docs.forEach(doc => {
+                    waitingIGear.push(fb.db.collection('individualGear').doc(context.state.currentUser.uid).collection(id).doc(doc.id)
+                      .delete())
+                  })
+                  Promise.all(waitingIGear).then(() => {
+                    // fb.db.collection('tripActivityLog').doc(id).collection('logs').delete() NOT A FUNCTION/not necessary
+                    console.log('individual gear all goob?')
+                    // fb.db.collection('individualGear').doc(state.currentUser.uid)
+                    // fb.db.collection('groupGear').doc(id).delete()
+                  })
+                } else {
+                  console.log('need?')
+                  // fb.db.collection('groupGear').doc(id).delete()
+                }                
               })
               // delete logs
               console.log('TODO redo trip activity log collection deletion, recursive bad? cloud function?')
@@ -503,6 +623,7 @@ export const store = new Vuex.Store({
       })
 
     },
+   
     inviteCamper: ({ state, dispatch }, data) => {
       console.log('invite camper')
       return new Promise((resolve, reject) => {
@@ -758,7 +879,7 @@ export const store = new Vuex.Store({
     // PACKING LIST MANIPULATION // GEAR
     updateGearAction: ({ state }, data) => {
       console.log("action to update a group gear item")
-      if(!data.category) {
+      if (!data.category) {
         data.category = 'Miscellaneous'
       }
       if (data.page === 'group') {
@@ -771,7 +892,7 @@ export const store = new Vuex.Store({
           title: data.title,
           category: data.category
         })
-      }      
+      }
     },
     updateGroupGearCampersAction: ({ state }, data) => {
       // TODO: don't add a anme twice
@@ -798,61 +919,61 @@ export const store = new Vuex.Store({
 
     addGearItemAction: ({ state }, data) => {
       console.log("Action add: " + data.title)
-      if(!data.category) {
+      if (!data.category) {
         data.category = 'Miscellaneous'
       }
-      if(data.page === ' group') {
+      if (data.page === ' group') {
         return fb.db.collection("groupGear").doc(state.thisTripID).collection('gear')
-        .add({
-          title: data.title,
-          // created_at: Date.now(),
-          checked: false,
-          category: data.category,
-          campers: []
-        })
+          .add({
+            title: data.title,
+            // created_at: Date.now(),
+            checked: false,
+            category: data.category,
+            campers: []
+          })
       } else {
         return fb.db.collection("individualGear").doc(state.currentUser.uid).collection(state.thisTripID)
-        .add({
-          title: data.title,
-          // created_at: Date.now(),
-          checked: false,
-          category: data.category
-        })
+          .add({
+            title: data.title,
+            // created_at: Date.now(),
+            checked: false,
+            category: data.category
+          })
       }
-      
+
     },
     deleteGearItemAction: ({ state }, data) => {
       if (data.page === 'group') {
         return fb.db.collection("groupGear")
-        .doc(state.thisTripID).collection('gear').doc(data.id)
-        .delete()
+          .doc(state.thisTripID).collection('gear').doc(data.id)
+          .delete()
       } else {
         return fb.db.collection("individualGear").doc(state.currentUser.uid)
-        .collection(state.thisTripID).doc(data.id)
-        .delete()
+          .collection(state.thisTripID).doc(data.id)
+          .delete()
       }
-      
+
     },
     updateStatusAction: ({ state }, data) => {
       if (data.page === 'group') {
         return fb.db.collection("groupGear").doc(state.thisTripID).collection('gear').doc(data.id)
-        .update({
-          checked: data.status
-        })
+          .update({
+            checked: data.status
+          })
       } else {
         return fb.db.collection("individualGear").doc(state.currentUser.uid).collection(state.thisTripID).doc(data.id)
-        .update({
-          checked: data.status
-        })
-      }      
+          .update({
+            checked: data.status
+          })
+      }
     },
     // INDIVIDUAL GEAR
-  
+
     // Edit Default Gear Lists
     editListGearItemAction: (context, data) => {
       // for not using to input data to the main defualt list
       console.log("Action add: " + data.title)
-      if(!data.category) {
+      if (!data.category) {
         data.category = "Miscellaneous"
       }
       return fb.db.collection("defaultList").add({
@@ -863,6 +984,9 @@ export const store = new Vuex.Store({
     },
     updateGearCategory: ({ state }, data) => {
       console.log(data)
+      if(data.category === undefined) {
+        console.log("ERROR: can't have an undefined category, no way to edit it because firestore cannot search for nonexistent fields.")
+      } 
       return new Promise((resolve) => {
         // if group
         if (data.page === 'group') {
@@ -885,14 +1009,15 @@ export const store = new Vuex.Store({
             })
         } else {
           // if individual
+          
           fb.db.collection('individualGear').doc(state.currentUser.uid).collection(state.thisTripID).where('category', '==', data.category)
             .get().then(docs => {
               if (!docs.empty) {
                 let promises = []
                 docs.forEach(doc => {
-                    promises.push(fb.db.collection('individualGear').doc(state.currentUser.uid).collection(state.thisTripID).doc(doc.id).update({
-                      category: data.newCategory
-                    }))
+                  promises.push(fb.db.collection('individualGear').doc(state.currentUser.uid).collection(state.thisTripID).doc(doc.id).update({
+                    category: data.newCategory
+                  }))
                 })
                 Promise.all(promises).then(() => {
                   resolve('Updated category!')
@@ -932,7 +1057,7 @@ export const store = new Vuex.Store({
               if (!docs.empty) {
                 let promises = []
                 docs.forEach(doc => {
-                    promises.push(fb.db.collection('individualGear').doc(state.currentUser.uid).collection(state.thisTripID)
+                  promises.push(fb.db.collection('individualGear').doc(state.currentUser.uid).collection(state.thisTripID)
                     .doc(doc.id).delete())
                 })
                 Promise.all(promises).then(() => {

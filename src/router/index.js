@@ -7,7 +7,6 @@ import list from '../views/list'
 import logIn from '../views/logIn'
 import dashboard from '../views/dashboard'
 import trip from '../views/trip.vue'
-import newTrip from '../views/newTrip'
 import settings from '../views/settings'
 import gear from '../views/gear'
 console.log('vue use vue router')
@@ -50,13 +49,6 @@ meta: {
         requiresAuth: true
     }
     },{
-        path: '/newTrip',
-        name: "newTrip",
-        component: newTrip,
-        meta: {
-            requiresAuth: true
-        }
-        },{
     path: '/list',
     name: 'list',
     component: list,

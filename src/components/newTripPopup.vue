@@ -3,22 +3,51 @@
     <div class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
-          <div class="modal-header">
-            <slot name="header">
-              <!-- default header -->
-            </slot>
-          </div>
-
           <div class="modal-body">
-            <form v-on:submit.prevent>
-              <label class="rowItem" for="newTripName">Trip Name:</label>
-              <input type="text" class="rowItem" id="newTripName" placeholder="Desert Getaway 2020" />
-              <label class="rowItem" for="templateChoice">Choose a pre-populated gear list:</label>
-              <select class="rowItem" name="templateChoice" id="templateChoice">
-                <option selected="None">None</option>
-                <option>My List</option>
-                <option>Generic List</option>
-              </select>
+            <form v-on:submit.prevent class="column columnStyle">
+              <div class="row header rowStyle teal">
+                <label class="rowItem" for="newTripName">Trip Name:</label>
+                <input
+                  type="text"
+                  class="rowItem"
+                  id="newTripName"
+                  placeholder="Desert Getaway 2020"
+                  v-model="title"
+                />
+              </div>
+              <div class="row rowStyle">
+                <!-- <div style="font-size:.8rem; color:red;"> Required: </div> -->
+                <v-date-picker mode="range" v-model="range" is-inline />
+              </div>
+
+              
+              <div class='column columnStyle'>
+                <div class='teal'>Trip Type:</div>
+                <div class="row rowStyle">
+                 <input type="radio" name="tripType" value="group" id="group" v-model="radioType" selected>
+                 <label class="rowItem smText" for="group">Group</label>
+                 <input type="radio" name="tripType" value="ind" id="ind" v-model="radioType">
+                 <label class="rowItem smText" for="ind">Individual</label>
+              </div></div>
+              <div class='column leftColumn'>
+              <div :class="{row:true, rowStyle:true, hidden:this.radioType=='ind'}">
+                <label class="rowItem smText" for="templateChoice">Group gear list:</label>
+                <select class="rowItem" name="templateChoice" id="templateChoice">
+                  <option selected="None">None</option>
+                  <option>My Group List</option>
+                  <option>Generic List</option>
+                </select>
+              </div>
+               <div class="row rowStyle">
+                <label class="rowItem smText" for="templateChoiceI">Individual gear list:</label>
+                <select class="rowItem" name="templateChoiceI" id="templateChoiceI">
+                  <option selected="None">None</option>
+                  <option>My List</option>
+                  <option>Generic List</option>
+                </select>
+              </div>
+              </div>
+
               <!-- TODO: choose list categories? -->
               <div class="row rowStyle">
                 <input type="submit" class="rowItem" @click="saveNewTrip" value="Save" />
@@ -34,18 +63,30 @@
 
 <script>
 export default {
+  data() {
+    return {
+      title: "",
+      range: {
+        start: new Date(),
+        end: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+2)
+      },
+      radioType: 'group'
+    }
+  },
+  
   methods: {
     saveNewTrip(e) {
       e.preventDefault();
-      if (!document.getElementById("newTripName").value) {
+      if (!this.title) {
         this.$toasted.show("Need a trip name!");
         return;
       }
       let data = {
-        name: document.getElementById("newTripName").value,
+        name: this.title,
         template: document.getElementById("templateChoice").value,
+        dateStart: this.range.start,
+        dateEnd: this.range.end,
       };
-      console.log(document.getElementById("templateChoice").value);
       this.$store.dispatch("saveNewTripAction", data).then((res, rej) => {
         this.$emit("close");
         if (res) {
@@ -55,13 +96,22 @@ export default {
           this.$toasted.show("Error: " + rej);
           console.log("error?", rej);
         }
-      });
+      }).catch(e => {
+        console.log(e)
+        this.$toasted.show(e.message)
+      })
     },
   },
 };
 </script>
 
-<style>
+<style scoped>
+.columnStyle {
+  justify-content: center;
+}
+.leftColumn {
+  align-items: flex-start;
+}
 .modal-mask {
   position: fixed;
   z-index: 9998;
@@ -80,26 +130,22 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  overflow: auto;
 }
 
 .modal-container {
   /* width: 300px; */
+  max-height: 80%;
   margin: 0px auto;
   padding: 20px 30px;
   background-color: #fff;
   border-radius: 2px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
   transition: all 0.3s ease;
-  /* font-family: Helvetica, Arial, sans-serif; */
-}
-
-.modal-header {
-  margin-top: 0;
-  color: #42b983;
+  overflow-y: scroll;
 }
 
 .modal-body {
-  margin: 20px 0;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -140,6 +186,24 @@ button.rowItem {
 }
 .rowStyle {
   justify-content: center;
-  margin: 5px 0;
+  align-items: center;
+  margin: 10px 0;
+}
+input,
+button {
+  margin: 5px;
+}
+.header {
+  margin-bottom: 15px;
+ 
+}
+.teal {
+   color: #42b983;
+}
+.smText {
+  font-size: 1rem;
+}
+.hidden {
+  display: none;
 }
 </style>

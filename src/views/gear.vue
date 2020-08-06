@@ -127,10 +127,7 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- INDIVIDUAL -->
-     
+      </div>     
     </div>
     <updateGearItemPopup
       v-if="showUpdateItem"

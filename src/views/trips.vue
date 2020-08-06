@@ -27,9 +27,9 @@
       you can use custom content here to overwrite
       default content
             -->
-            <template v-slot:header>
+            <!-- <template v-slot:header>
               <h3>Start New Trip</h3>
-            </template>
+            </template> -->
             <!-- <h3 slot="header">custom header</h3> -->
           </newTripPopup>
         </div>
@@ -162,6 +162,9 @@ export default {
   /* padding: 15px 0; */
   color: #f7ffff;
   padding: 10px 5px 30px 5px;
+}
+.hero-cta-button {
+  padding: 10px;
 }
 .hero-content {
   margin-bottom: 30px;

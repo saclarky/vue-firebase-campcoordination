@@ -12,6 +12,14 @@ Vue.use(Toasted, {
     theme: "bubble"
 })
 
+import VCalendar from 'v-calendar';
+Vue.use(VCalendar);
+// Use v-calendar & v-date-picker components
+// Vue.use(VCalendar, {
+//   componentPrefix: 'vc',  // Use <vc-calendar /> instead of <v-calendar />
+//   ...,                // ...other defaults
+// });
+
 Vue.config.productionTip = false
 console.log('new view')
 // new Vue({

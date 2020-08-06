@@ -367,19 +367,18 @@ export const store = new Vuex.Store({
 
     saveNewTripAction: ({ state }, obj) => {
       return new Promise((resolve, reject) => {
-        //TODO: TDB into blank fields?
         fb.db.collection("trips").add({ 'name': obj.name, 'uid': state.currentUser.uid, 'owner': state.currentUser.displayName })
           .then(tripDoc => {
             fb.db.collection('groupGear').doc(tripDoc.id).set({})
             if (obj.template === "My List") {
               console.log('copy over users default list')
-              fb.db.collection('individualGear').doc(state.currentUser.uid).collection('default').get().then((results) => {
-                if (!results.empty) {
-                  results.docs.forEach(doc => {
-                    fb.db.collection('groupGear').doc(tripDoc.id).collection('gear').add(doc.data())
-                  })
-                }
-              })
+              // fb.db.collection('individualGear').doc(state.currentUser.uid).collection('default').get().then((results) => {
+              //   if (!results.empty) {
+              //     results.docs.forEach(doc => {
+              //       fb.db.collection('groupGear').doc(tripDoc.id).collection('gear').add(doc.data())
+              //     })
+              //   }
+              // })
             } else if (obj.template === "Generic List") {
               fb.db.collection('defaultList').get().then((results) => {
                 if (!results.empty) {

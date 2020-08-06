@@ -94,6 +94,7 @@ a {
 .hero-cta-button {
     background-color: rgba(245, 245, 245, 0.9);
     font-size: 1.2rem;
+    cursor: pointer;
 }
 
 .wrap {
@@ -138,6 +139,10 @@ a {
 .row {
     display: flex;
     flex-direction: row;
+}
+.column {
+  display: flex;
+  flex-direction: column;
 }
 .loader {
   border: 5px solid #f3f3f3;

@@ -187,7 +187,7 @@ export default {
           // Sign-in triggers auth state change to save user and get profile into state
           // https://stackoverflow.com/questions/45204288/initialize-vue-app-after-firebase-auth-state-changed
           this.performingRequest = false;
-          this.$router.push("/dashboard");
+          this.$router.push("/trips");
         })
         .catch(err => {
           this.$toasted.show(err.message);

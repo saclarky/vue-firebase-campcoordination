@@ -1,6 +1,6 @@
 <template>
   <div class="main">
-    <div class="header2">
+    <!-- <div class="header2">
       <div class="subNavMenuLeft"></div>
       <div class="subNavMenu">
         <div class="menu-item">
@@ -10,7 +10,7 @@
           <router-link to="/newTrip">New Trip</router-link>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <div class="hero">
       <div class="hero-top" id="nav-bar">

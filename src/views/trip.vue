@@ -1,12 +1,14 @@
 <template>
+
   <div class="main">
-    <div class="header2">
+    <subnav></subnav>
+    <!-- <div class="header2">
       <div class='subNavMenuLeft'></div>
       <div class="subNavMenu">
        <div class="menu-item"><router-link to="/list">Lists</router-link></div>
             
     </div>
-    </div>
+    </div> -->
     
   <div class="hero">
       <div class="hero-top" id="nav-bar">
@@ -88,6 +90,7 @@
 <script>
 import {mapState} from 'vuex'
 import camperDetails from '../components/camperDetails'
+import subnav from "../components/subnav";
 
 export default {
   name: "trip",
@@ -103,7 +106,8 @@ export default {
    
   },
   components: {
-    camperDetails
+    camperDetails,
+    subnav
   },
     computed: {
 //       camperYes: function() {

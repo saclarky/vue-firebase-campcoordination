@@ -76,7 +76,8 @@ export default {
         start: new Date(),
         end: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+2)
       },
-      radioType: 'group'
+      radioType: 'group',
+      radioFlex: 'flex'
     }
   },
   

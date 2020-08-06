@@ -1,35 +1,30 @@
 <template>
   <header>
     <section>
-      <div class="col1">
+      <div>
         <!-- <div class="logo-wrap"><i class="material-icons"> near_me </i>	</div> -->
         <router-link to="home" class="hero-icon"></router-link>
       </div>
-      <div class="col2">
+      <div class='row rowStyle'>
         <div v-if="!currentUser">
           <router-link to="/login">Login</router-link>
-        </div>
-
-        <div v-if="currentUser" class="nav-menu" >
-          <div  v-on:click='toggleAccount'>Hi, {{currentUser.displayName}}!</div>
+        </div>        
+        <div v-if="currentUser" class="nav-menu">
+          <div v-on:click="toggleAccount">Hi, {{currentUser.displayName}}!</div>
           <div v-show="accountShow" class="menu">
-            <div class="menu-item" v-on:click='toggleAccount'>
+            <div class="menu-item" v-on:click="toggleAccount">
+              <router-link to="/dashboard">Dashboard</router-link>
+            </div>
+            <div class="menu-item" v-on:click="toggleAccount">
               <router-link to="/settings">Settings</router-link>
             </div>
-            <div class="menu-item" v-on:click='toggleAccount'>
+            <div class="menu-item" v-on:click="toggleAccount">
               <a @click="logout">Logout</a>
             </div>
           </div>
         </div>
-
-        <div v-if="currentUser" class="nav-menu">
-          <div  v-on:click='toggleDashboard'>Dashboard</div>
-          <div v-show="dashboardShow" class="menu">
-            
-                <div class="menu-item" v-on:click='toggleDashboard'><router-link to="/trips">Trips</router-link></div>
-              <div class="menu-item" v-on:click='toggleDashboard'><router-link to="/list">Lists</router-link></div>
-            
-          </div>
+        <div v-if="currentUser">
+          <router-link to="/trips">Trips</router-link>
         </div>
       </div>
     </section>
@@ -41,36 +36,40 @@ const fb = require("../firebaseConfig.js");
 import { mapState } from "vuex";
 
 export default {
-  data: function() {
+  data: function () {
     return {
-        accountShow: false,
-        dashboardShow: false
+      accountShow: false,
+      dashboardShow: false,
     };
   },
   computed: {
-    ...mapState(["currentUser"])
+    ...mapState(["currentUser"]),
   },
   methods: {
-      toggleAccount() {
-this.accountShow = !this.accountShow;
-if(this.dashboardShow==true) {this.dashboardShow=false;}
-      },
-      toggleDashboard() {
-this.dashboardShow = !this.dashboardShow;
-if(this.accountShow==true){this.accountShow=false;}
-      },
+    toggleAccount() {
+      this.accountShow = !this.accountShow;
+      if (this.dashboardShow == true) {
+        this.dashboardShow = false;
+      }
+    },
+    toggleDashboard() {
+      this.dashboardShow = !this.dashboardShow;
+      if (this.accountShow == true) {
+        this.accountShow = false;
+      }
+    },
     logout() {
       fb.auth
         .signOut()
         .then(() => {
-          this.$store.dispatch("clearData"); // authStateChange actually can do this? 
+          this.$store.dispatch("clearData"); // authStateChange actually can do this?
           this.$router.push("/login");
         })
-        .catch(err => {
+        .catch((err) => {
           console.log(err);
         });
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -81,6 +80,9 @@ section {
   align-items: center;
   justify-content: space-between;
   padding: 10px 30px;
+}
+.rowStyle {
+  align-items:center;
 }
 .nav-menu {
   padding: 0 15px;
@@ -93,7 +95,7 @@ section {
   /* padding-top: 15px; */
   background-color: #f7f7f7;
   width: inherit;
-  
+
   box-shadow: 1px 1px 3px 1px rgba(57, 57, 57, 0.2);
 }
 /* .selected-menu-class {    
@@ -102,9 +104,9 @@ section {
   font-size: 1.1rem;
   padding: 15px;
 }
-.col2 {
+.col {
   display: flex;
-  align-items: baseline;
+  margin: 0 10px;
 }
 a {
   color: #09709a;

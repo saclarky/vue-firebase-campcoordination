@@ -47,6 +47,7 @@ export const store = new Vuex.Store({
     thisTrip: {},
     thisTripID: '',
     thisTripOwner: '',
+    thisTripDates: [],
 
     //GEAR
     thisTripGroupGear: [],
@@ -67,7 +68,7 @@ export const store = new Vuex.Store({
     thisUserNotifications: []
   },
   getters: {
-    // TRIP LOGS
+    // TRIP 
     thisTripInviteLogs: state => {
       let tripInviteLogs = [];
       if (!state.thisTripActivityLog || state.thisTripActivityLog.length == 0) {
@@ -115,7 +116,30 @@ export const store = new Vuex.Store({
         return tripInviteLogs;
       }
     },
+    thisTripDatesGetter: state => {
+      function formatTime(dd) {
+        let newFormat =
+          dd.getDate() +
+          " " +
+          dd.toLocaleString("default", {
+            month: "long"
+          }) +
+          " " +
+          dd.getFullYear()
+          return newFormat
+      }
 
+      state.thisTripDates.forEach(date => {
+        console.log(typeof date.startDate)
+        console.log(typeof new Date(date.startDate.seconds*1000))
+        if(date.startDate instanceof Object) {
+          date.startDate = formatTime(new Date(date.startDate.seconds*1000))
+        date.endDate = formatTime(new Date(date.endDate.seconds*1000))  
+        }
+             
+      })
+      return state.thisTripDates
+    },
     //USER
     thisUserNotificationsGetter: state => {
       let responsesObj = []
@@ -173,6 +197,8 @@ export const store = new Vuex.Store({
         'tripResponses': responsesObj
       }
     },
+
+    //GEAR
     thisTripGroupGearCategorized: state => {
       console.log("gear getter")
       let categorizedGear = {}
@@ -253,14 +279,7 @@ export const store = new Vuex.Store({
   },
 
   actions: {
-    // TODO bind other tables?
-    bindItemsRef: firestoreAction(context => {
-      // context contains all original properties like commit, state, etc
-      // and adds `bindFirestoreRef` and `unbindFirestoreRef`
-      // we return the promise returned by `bindFirestoreRef` that will
-      // resolve once data is ready
-      return context.bindFirestoreRef('items', fb.db.collection('items'))
-    }),
+    
     //Should automatically update prfile changes from action below? or is that a mutation?
     // Issue when registering new user this causes error, no profile yet so... binding at dashboard page now
     // bindProfileRef:
@@ -276,6 +295,7 @@ export const store = new Vuex.Store({
         // .orderBy("date")) // date of trip, not when created
         // TODO ERROR: if there's no date orderBy doesn't retrieve it
       }),
+    
     bindJoinedTrips:
       firestoreAction(context => {
         // i don't know if it respects where clauses?
@@ -287,6 +307,11 @@ export const store = new Vuex.Store({
       firestoreAction(context => {
         // i don't know if it respects where clauses?
         return context.bindFirestoreRef('thisTrip', fb.db.collection('trips').doc(context.state.thisTripID))
+      }),
+      bindTripDates:   firestoreAction(context => {
+        // i don't know if it respects where clauses?
+        return context.bindFirestoreRef('thisTripDates', fb.db.collection('tripDates').doc(context.state.thisTripID).collection('dates')
+        .orderBy('startDate'))
       }),
     bindTripCampers: firestoreAction(context => {
       // will it notice on its own a change in trip id?
@@ -349,19 +374,16 @@ export const store = new Vuex.Store({
           //   console.log('have owner name promise return')
           //   commit('setTripOwner', trip.owner)
           // })
-          dispatch('bindTripActivityLog')
-          dispatch('bindTripCampersPending').then(res => {
-            console.log("Pending trip campers retrieved", res)
-          })
-          dispatch('bindTripCampersNo').then(res => {
-            console.log("Declined trip campers retrieved", res)
-          })
-          dispatch('bindTripCampers').then(res => {
-            console.log('Campers retrieved', res)
-          })
-          // TODO - make this instead at end of promises?
-          console.log("routing to the trip")
+          let pagePromises = []
+          pagePromises.push(dispatch('bindTripActivityLog'))
+          pagePromises.push(dispatch('bindTripCampersPending'))
+          pagePromises.push(dispatch('bindTripCampersNo'))
+          pagePromises.push(dispatch('bindTripCampers'))
+          pagePromises.push(dispatch('bindTripDates'))
+          Promise.all(pagePromises).then(() => {
+            console.log("routing to the trip")
           router.push({ path: '/trip' })
+          })
         })
     },
 
@@ -622,8 +644,7 @@ export const store = new Vuex.Store({
         }
       })
 
-    },
-   
+    },   
     inviteCamper: ({ state, dispatch }, data) => {
       console.log('invite camper')
       return new Promise((resolve, reject) => {
@@ -875,6 +896,21 @@ export const store = new Vuex.Store({
           })
       })
 
+    },
+    newTripDate: ({state}, obj) => {
+      return fb.db.collection('tripDates').doc(obj.tid).collection('dates').add({
+        startDate: obj.dateStart,
+                endDate: obj.dateEnd,
+                flexible: obj.flexible,
+                user: state.currentUser.displayName,
+                votes: {[state.currentUser.displayName]: true}
+      })
+    },
+    tripDatesVote: ({state}, data) => {
+      var tmp='votes.'+state.currentUser.displayName
+      return fb.db.collection('tripDates').doc(data.tid).collection('dates').doc(data.dateID).update({
+        [tmp]: data.vote
+      })
     },
     // PACKING LIST MANIPULATION // GEAR
     updateGearAction: ({ state }, data) => {

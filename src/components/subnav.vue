@@ -34,7 +34,14 @@ section > div {
   margin: 0 5px;
   border-right: 1px solid black;
 }
+header {
+  top: 51px;
+    left: 0;
+    right: 0;
+    position: fixed;
+    background: whitesmoke;
 
+}
 a {
   color: #09709a;
 }

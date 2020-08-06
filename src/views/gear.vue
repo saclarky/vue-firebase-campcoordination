@@ -1,13 +1,6 @@
 <template>
   <div class="main">
-    <div class="header2">
-      <div class="subNavMenuLeft"></div>
-      <div class="subNavMenu">
-        <div class="menu-item">
-          <router-link to="/trips">Trips</router-link>
-        </div>
-      </div>
-    </div>
+   
     <div class="hero">
       <div class="hero-top" id="nav-bar">
         <h1 class="hero-title">{{thisTrip.name}}</h1>

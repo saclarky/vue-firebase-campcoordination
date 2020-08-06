@@ -1,6 +1,6 @@
 <template>
   <header>
-    <section>
+    <section class='nav'>
       <div>
         <!-- <div class="logo-wrap"><i class="material-icons"> near_me </i>	</div> -->
         <router-link to="home" class="hero-icon"></router-link>
@@ -83,6 +83,14 @@ section {
 }
 .rowStyle {
   align-items:center;
+}
+.nav {
+  top: 0;
+    left: 0;
+    right: 0;
+    position: fixed;
+    background: whitesmoke;
+    z-index: 100;
 }
 .nav-menu {
   padding: 0 15px;

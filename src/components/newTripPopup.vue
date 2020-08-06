@@ -15,6 +15,12 @@
                   v-model="title"
                 />
               </div>
+               <div class="row rowStyle">
+                 <input type="radio" name="dateFlex" value="flex" id="flex" v-model="radioFlex" selected>
+                 <label class="rowItem smText" for="flex">Flexible Dates</label>
+                 <input type="radio" name="dateFlex" value="hard" id="hard" v-model="radioFlex">
+                 <label class="rowItem smText" for="hard">Fixed Dates</label>
+              </div>
               <div class="row rowStyle">
                 <!-- <div style="font-size:.8rem; color:red;"> Required: </div> -->
                 <v-date-picker mode="range" v-model="range" is-inline />

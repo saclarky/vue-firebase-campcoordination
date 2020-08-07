@@ -18,7 +18,7 @@
               </div>
               <div class="row rowStyle">
                 <input type="submit" class="rowItem" @click="suggestNewDate" value="Save" />
-                <button @click="$emit('close')">Cancel</button>
+                <button class='rowItem' @click="$emit('close')">Cancel</button>
               </div>
             </form>
           </div>
@@ -110,7 +110,7 @@ export default {
   align-items: center;
 }
 .rowItem {
-  padding: 0 5px;
+  padding: 3px 10px;
 }
 button.rowItem {
   margin-left: 10px;

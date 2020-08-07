@@ -128,15 +128,11 @@ export const store = new Vuex.Store({
           dd.getFullYear()
           return newFormat
       }
-
       state.thisTripDates.forEach(date => {
-        console.log(typeof date.startDate)
-        console.log(typeof new Date(date.startDate.seconds*1000))
         if(date.startDate instanceof Object) {
           date.startDate = formatTime(new Date(date.startDate.seconds*1000))
         date.endDate = formatTime(new Date(date.endDate.seconds*1000))  
-        }
-             
+        }             
       })
       return state.thisTripDates
     },

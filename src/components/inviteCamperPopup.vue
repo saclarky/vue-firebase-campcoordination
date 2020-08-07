@@ -7,42 +7,53 @@
             Invite a Friend to Join
             <slot name="body"></slot>
           </div>
-          <div class="sidenote">They must already have a Campers account, </div>
+          <div class="sidenote">They must already have a Campers account,</div>
           <div class="sidenote">and the email you search must match their account</div>
-<!-- TODO invite them to create Campers account-->
+          <!-- TODO invite them to create Campers account-->
           <div class="modal-body">
             <form v-on:submit.prevent>
-            <!-- TODO   explain you already have to be friends and they have an account, pass tid prop               -->
-            <label class="rowItem" for="newCamperEmail">Camper's Registered Email:</label>
-            <input type='text' class="rowItem" id="newCamperEmail" placeholder="friend@email.com" />
-             <div class="row rowStyle">
-              <div class="loader" v-if="showSpinner"></div>
-            <input type="submit" class="rowItem button grow" @click="sendNewInvite" value="Invite" />
-             <button class='hero-cta-button button grow' @click="$emit('closeInvite')" :disabled="disableClose">Cancel</button>
-             </div>
+              <!-- TODO   explain you already have to be friends and they have an account, pass tid prop               -->
+              <label class="rowItem" for="newCamperEmail">Camper's Registered Email:</label>
+              <input type="text" class="rowItem" id="newCamperEmail" placeholder="friend@email.com" />
+              <div class="row rowStyle">
+                <div class="loader" v-if="showSpinner"></div>
+                <input
+                  type="submit"
+                  class="rowItem"
+                  @click="sendNewInvite"
+                  value="Invite"
+                />
+                <button class='rowItem'
+                  @click="$emit('close')"
+                  :disabled="disableClose"
+                >Cancel</button>
+              </div>
+
+
+
             </form>
-          </div>
           </div>
         </div>
       </div>
+    </div>
   </transition>
 </template>
 
 <script>
 export default {
   props: ["tripid"],
-  data: function() {
+  data: function () {
     return {
       showSpinner: false,
-      disableClose: false
-    }
+      disableClose: false,
+    };
   },
   methods: {
     toggleDisableClose() {
-this.disableClose = !this.disableClose
+      this.disableClose = !this.disableClose;
     },
     sendNewInvite(e) {
-      e.preventDefault()
+      e.preventDefault();
       this.toggleDisableClose();
       this.showSpinner = true;
       console.log(document.getElementById("newCamperEmail").value);
@@ -50,37 +61,38 @@ this.disableClose = !this.disableClose
       this.$store
         .dispatch("inviteCamper", {
           email: document.getElementById("newCamperEmail").value,
-          tid: this.tripid
+          tid: this.tripid,
         })
-        .then((res, rej) => {  
+        .then((res, rej) => {
           this.showSpinner = false;
-               
+
           if (!res) {
-            this.$toasted.show("No registered account.")
+            this.$toasted.show("No registered account.");
             console.log("no user found with that email");
           } else if (res === "duplicate") {
-            this.$toasted.show('This user was already invited.')
+            this.$toasted.show("This user was already invited.");
             console.log("This user was already invited");
-          } else if (res === "invited") {            
-            this.$toasted.show('Success! User invited.')
-             this.$emit('closeInvite'); 
+          } else if (res === "invited") {
+            this.$toasted.show("Success! User invited.");
+            this.$emit("close");
             console.log(res);
           } else {
-            this.$toasted.show('Error: '+ rej)
+            this.$toasted.show("Error: " + rej);
             console.log("error?", rej);
           }
-           
-        }).catch(e => {
+        })
+        .catch((e) => {
           this.showSpinner = false;
-          console.log(e)
-          this.$toasted.show(e.message)
+          console.log(e);
+          this.$toasted.show(e.message);
         });
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style scoped>
+
 .modal-mask {
   position: fixed;
   z-index: 9998;
@@ -124,15 +136,16 @@ this.disableClose = !this.disableClose
   justify-content: center;
   align-items: center;
 }
+
 .rowItem {
-  padding: 0 5px;
+  padding: 3px 10px;
 }
 button.rowItem {
   margin-left: 10px;
 }
 .sidenote {
-  font-size: .9rem;
-  font-style:italic;
+  font-size: 0.9rem;
+  font-style: italic;
 }
 
 /* .modal-default-button {
@@ -163,6 +176,11 @@ button.rowItem {
 }
 .rowStyle {
   justify-content: center;
-  margin: 5px 0;
+  align-items: center;
+  margin: 10px 0;
+}
+input,
+button {
+  margin: 5px;
 }
 </style>

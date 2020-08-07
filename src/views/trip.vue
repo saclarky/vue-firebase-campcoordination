@@ -7,18 +7,19 @@
         <h2>Started by {{thisTrip.owner}}</h2>
       </div>
       <div class="hero-bottom">
-        <div class="hero-content"> -->
-          <!-- TODO: new trip action, hidden form? -->
-          <!-- <a @click="toggleAddTrip" class="hero-cta-button button grow">New Trip</a> -->
-        <!-- </div> -->
-      <!-- </div> -->
+    <div class="hero-content">-->
+    <!-- TODO: new trip action, hidden form? -->
+    <!-- <a @click="toggleAddTrip" class="hero-cta-button button grow">New Trip</a> -->
+    <!-- </div> -->
+    <!-- </div> -->
     <!-- </div>  -->
 
     <div class="content">
       <div v-if="showDashboard" class="dashboard">
         <div class="gridWrapper">
           <div class="row splitPane">
-            <div class="smCol rightBorder">Dates
+            <div class="smCol rightBorder">
+              Dates
               <button @click="toggleTripDatesPopup">Suggest New Dates</button>
             </div>
             <div class="lgCol datesData" v-for="date in thisTripDatesGetter" :key="date.id">
@@ -27,73 +28,72 @@
                 <span :class="{display:date.flexible, hide:!date.flexible}">(flexible)</span>
                 <span :class="{display:!date.flexible, hide:date.flexible}">(hard)</span>
                 : {{date.startDate}} - {{date.endDate}}
-                <span class="up" @click="vote(true, date.id)"></span>
+                <span
+                  class="up"
+                  @click="vote(true, date.id)"
+                ></span>
                 <span class="down" @click="vote(false, date.id)"></span>
-                <span v-for="(vote, name) in date.votes" :key="name" class="votes">                  
+                <span v-for="(vote, name) in date.votes" :key="name" class="votes">
                   <span :class="{showVote:vote, noVote:!vote}"></span>
                   <span class="votesText">{{name}}</span>
                 </span>
               </p>
             </div>
           </div>
-          <newTripDatesPopup v-if="showTripDatesPopup" @close="toggleTripDatesPopup" :tid="thisTrip.id"></newTripDatesPopup>
-          
+          <newTripDatesPopup
+            v-if="showTripDatesPopup"
+            @close="toggleTripDatesPopup"
+            :tid="thisTrip.id"
+          ></newTripDatesPopup>
+
           <div class="row splitPane">
-            <div class="smCol rightBorder">Campers
+            <div class="smCol rightBorder">
+              Campers
               <button @click="toggleAddCamper">Invite</button>
             </div>
-            <div class="lgCol datesData" >
+            <div class="lgCol datesData">
               <div>Confirmed, can edit trip page</div>
-        <div v-for="(yes, uid) in thisTripCampers" :key="uid">
-          {{yes}}
-          <button @click="removeCamper(uid)" :class="{buttonDisabled: thisTrip.uid === uid} ">remove</button>
-        </div>
-        <div>Pending, can view trip page</div>
-        <div v-for="(rsvp, uid) in thisTripCampersPending" :key="uid">
-          {{rsvp}}
-          <button @click="removeCamper(uid)">remove</button>
-        </div>
-        <div>Declined, no access to the trip</div>
-        <div v-for="(no, uid) in thisTripCampersNo" :key="uid">
-          {{no}}
-          <button @click="removeCamper(uid)">remove</button>
-        </div>
-              </div>  
-               <div >
-        <div>Activity Log</div>
-        <!-- empty time fields/missing field dealt with in vuex getter -->
-        <div v-for="invite in thisTripInviteLogs" :key="invite.id">
-          <span class="logEntry">
-            {{invite.time}}
-            -
-            {{invite.text}}
-          </span>
-        </div>
-      </div>           
+              <div v-for="(yes, uid) in thisTripCampers" :key="uid">
+                {{yes}}
+                <button
+                  @click="removeCamper(uid)"
+                  :class="{buttonDisabled: thisTrip.uid === uid} "
+                >remove</button>
+              </div>
+              <div>Pending, can view trip page</div>
+              <div v-for="(rsvp, uid) in thisTripCampersPending" :key="uid">
+                {{rsvp}}
+                <button @click="removeCamper(uid)">remove</button>
+              </div>
+              <div>Declined, no access to the trip</div>
+              <div v-for="(no, uid) in thisTripCampersNo" :key="uid">
+                {{no}}
+                <button @click="removeCamper(uid)">remove</button>
+              </div>
             </div>
-         
-          <inviteCamperPopup @closeInvite="toggleAddUser()" v-if="showInviteUser" :tripid="thisTripID">
-      <!--
-      you can use custom content here to overwrite
-      default content
-      -->      <template v-slot:body>
-        <h3>{{thisTrip.name}}</h3>
-      </template>
-      <!-- <h3 slot="header">custom header</h3> -->
-    </inviteCamperPopup>
-
-
-          <div class="gridItem">
-            <h4>Definitely Going</h4>
-
-            <div class="itemBody">
-              <div class="item" v-for="(camper, uid) in thisTripCampers" :key="uid">{{camper}}</div>
-            </div>
-
-            <div @click="toggleCamperDetails" class="actionRow">
-              <div class="rightArrowIcon"></div>
+            <div>
+              <div>Activity Log</div>
+              <!-- empty time fields/missing field dealt with in vuex getter -->
+              <div v-for="invite in thisTripInviteLogs" :key="invite.id">
+                <span class="logEntry">
+                  {{invite.time}}
+                  -
+                  {{invite.text}}
+                </span>
+              </div>
             </div>
           </div>
+
+          <inviteCamperPopup
+            @close="toggleAddCamper()"
+            v-if="showInviteCamper"
+            :tripid="thisTrip.id"
+          >
+            <template v-slot:body>
+              <h3>{{thisTrip.name}}</h3>
+            </template>
+          </inviteCamperPopup>
+
           <div class="gridItem">
             <h4>Gear</h4>
 
@@ -127,10 +127,6 @@
         </div>
       </div>
 
-      <div class="detailComponents">
-        <!-- Store v-if or v-show divs here for expanding card details -->
-        <camperDetails v-if="showCamperDetails" @closeCamperDetails="toggleCamperDetails()"></camperDetails>
-      </div>
       <div v-if="showMessages" id="messages">
         <hr />Messages Section and notifications?
         <i class="plusIcon"></i>
@@ -141,9 +137,8 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import camperDetails from "../components/camperDetails";
-import inviteCamperPopup from "../components/inviteCamperPopup"
-import newTripDatesPopup from "../components/newTripDatesPopup"
+import inviteCamperPopup from "../components/inviteCamperPopup";
+import newTripDatesPopup from "../components/newTripDatesPopup";
 import subnav from "../components/subnav";
 
 export default {
@@ -156,70 +151,65 @@ export default {
     }
   },
   components: {
-    camperDetails,
     subnav,
     newTripDatesPopup,
-    inviteCamperPopup
+    inviteCamperPopup,
   },
   computed: {
-    //       camperYes: function() {
-    // return this.thisTripCampers
-    //       },
-    // ...mapGetters(['thisTripCampersNames']),
-    ...mapState(["thisTrip", "thisTripCampers",  "thisTripCampersNo",
-      "thisTripCampersPending",]),
-    ...mapGetters(["thisTripDatesGetter","thisTripInviteLogs"]),
+    ...mapState([
+      "thisTrip",
+      "thisTripCampers",
+      "thisTripCampersNo",
+      "thisTripCampersPending",
+    ]),
+    ...mapGetters(["thisTripDatesGetter", "thisTripInviteLogs"]),
   },
   data: function () {
     return {
       showDashboard: true,
       showMessages: true,
-      showCamperDetails: false,
       showInviteCamper: false,
-      showTripDatesPopup: false
+      showTripDatesPopup: false,
     };
   },
   methods: {
     toggleAddCamper() {
       this.showInviteCamper = !this.showInviteCamper;
     },
-    toggleCamperDetails() {
-      this.showCamperDetails = !this.showCamperDetails;
-      this.toggleDashboard();
-    },
-     removeCamper(camperID) {
+    removeCamper(camperID) {
       // TODO: don't have 'remove' button by the camp owner. disabled?
-      console.log("Remove ",camperID);
+      console.log("Remove ", camperID);
       if (camperID !== this.thisTrip.uid) {
-         let camperTable
-          let name
-            if(Object.keys(this.thisTripCampers).includes(camperID)) {
-              camperTable = 'campers'
-              name= this.thisTripCampers[camperID]
-            }
-            if(Object.keys(this.thisTripCampersNo).includes(camperID)) {
-              camperTable = 'campersNo'
-              name= this.thisTripCampersNo[camperID]
-            }if(Object.keys(this.thisTripCampersPending).includes(camperID)) {
-              camperTable = 'campersPending'              
-              name= this.thisTripCampersPending[camperID]
-            }
-            
+        let camperTable;
+        let name;
+        if (Object.keys(this.thisTripCampers).includes(camperID)) {
+          camperTable = "campers";
+          name = this.thisTripCampers[camperID];
+        }
+        if (Object.keys(this.thisTripCampersNo).includes(camperID)) {
+          camperTable = "campersNo";
+          name = this.thisTripCampersNo[camperID];
+        }
+        if (Object.keys(this.thisTripCampersPending).includes(camperID)) {
+          camperTable = "campersPending";
+          name = this.thisTripCampersPending[camperID];
+        }
+
         this.$store
-          .dispatch("removeCamperAction", { 'cid': camperID, 'name': name, 'camperTable':camperTable })
+          .dispatch("removeCamperAction", {
+            cid: camperID,
+            name: name,
+            camperTable: camperTable,
+          })
           .then(() => {
             this.$toasted.show("Camper removed.");
           })
-          .catch(e => {
+          .catch((e) => {
             this.$toasted.show(e.message);
           });
       } else {
         this.$toasted.show("Cannot delete trip owner.");
       }
-    },
-    toggleDashboard() {
-      this.showDashboard = !this.showDashboard;
-      this.showMessages = !this.showMessages;
     },
     toggleTripDatesPopup() {
       this.showTripDatesPopup = !this.showTripDatesPopup;
@@ -231,20 +221,22 @@ export default {
       let data = {
         tid: this.thisTrip.id,
         vote: v,
-        dateID: i
-      }
-      console.log('vote ',data)
+        dateID: i,
+      };
+      console.log("vote ", data);
       // save to the trip dates document "votes" object
-      this.$store.dispatch('tripDatesVote', data).then(() => {
-        this.$toasted.show('Voted!')
-      }).catch(e => {
-        console.log(e)
-        this.$toasted.show(e.message)
-      })
+      this.$store
+        .dispatch("tripDatesVote", data)
+        .then(() => {
+          this.$toasted.show("Voted!");
+        })
+        .catch((e) => {
+          console.log(e);
+          this.$toasted.show(e.message);
+        });
       // disable whichever vote chosen, but allow to change vote
-
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -418,7 +410,7 @@ h4 {
   height: 20px;
   cursor: pointer;
   display: inline-block;
-  margin:0 5px 0 10px;
+  margin: 0 5px 0 10px;
 }
 .down {
   background: url("../assets/thumb_down.svg") no-repeat center center;
@@ -443,5 +435,8 @@ h4 {
   font-style: italic;
   padding: 5px;
   display: inline;
+}
+.buttonDisabled {
+  display: none;
 }
 </style>

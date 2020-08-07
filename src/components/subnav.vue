@@ -1,7 +1,7 @@
 <template>
   <header>
     <section>
-      <div>Trip</div>
+      <div><slot></slot></div>
       <div>Dates</div>
       <div>Campers</div>
       <div>Gear</div>
@@ -39,7 +39,7 @@ header {
     left: 0;
     right: 0;
     position: fixed;
-    background: whitesmoke;
+    background: #e2e2e2;
 
 }
 a {

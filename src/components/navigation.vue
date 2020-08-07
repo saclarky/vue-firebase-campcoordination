@@ -89,19 +89,19 @@ section {
     left: 0;
     right: 0;
     position: fixed;
-    background: whitesmoke;
+    background: #ececec;
     z-index: 100;
 }
 .nav-menu {
   padding: 0 15px;
-  background-color: #f7f7f7;
+  /* background-color: #f7f7f7; */
   width: 120px;
   font-size: 1.2rem;
 }
 .menu {
   position: absolute;
   /* padding-top: 15px; */
-  background-color: #f7f7f7;
+  /* background-color: #f7f7f7; */
   width: inherit;
 
   box-shadow: 1px 1px 3px 1px rgba(57, 57, 57, 0.2);

@@ -1,18 +1,20 @@
 <template>
   <div class="main">
     <subnav>{{thisTrip.name}} ({{thisTrip.owner}})</subnav>
-    <!-- <div class="hero">
+    <div class="hero">
       <div class="hero-top" id="nav-bar">
         <h1 class="hero-title">{{thisTrip.name}}</h1>
-        <h2>Started by {{thisTrip.owner}}</h2>
+        <div class='hero-icon'></div>
+        <h2 class='heroSubTitle'> Started by {{thisTrip.owner}}</h2>
       </div>
       <div class="hero-bottom">
-    <div class="hero-content">-->
+    <div class="hero-content">
     <!-- TODO: new trip action, hidden form? -->
-    <!-- <a @click="toggleAddTrip" class="hero-cta-button button grow">New Trip</a> -->
-    <!-- </div> -->
-    <!-- </div> -->
-    <!-- </div>  -->
+    <div>Trip type: <span v-if="thisTrip.group===true">Group</span>  <span v-if="thisTrip.group===false">Individual</span></div>
+    <!-- <a v-if="!thisTrip.group" @click="toggleTripType" class="hero-cta-button button grow">Make Group Trip</a> -->
+    </div>
+    </div>
+</div> 
 
     <div class="content">
       <div v-if="showDashboard" class="dashboard">
@@ -46,7 +48,7 @@
             :tid="thisTrip.id"
           ></newTripDatesPopup>
 
-          <div class="row splitPane">
+          <div :class="{row:true, splitPane:true, hide: !thisTrip.group}">
             <div class="smCol rightBorder">
               Campers
               <button @click="toggleAddCamper">Invite</button>
@@ -171,10 +173,11 @@ export default {
       showDashboard: true,
       showMessages: true,
       showInviteCamper: false,
-      showTripDatesPopup: false,
+      showTripDatesPopup: false
     };
   },
   methods: {
+   
     toggleAddCamper() {
       this.showInviteCamper = !this.showInviteCamper;
     },
@@ -273,7 +276,7 @@ h4 {
   /* justify-content: space-between; */
   /* padding: 15px 0; */
   color: #f7ffff;
-  padding: 10px 5px 30px 5px;
+  padding: 10px 5px 10px 5px;
 }
 
 .hero-bottom {
@@ -287,9 +290,15 @@ h4 {
 .hero-icon {
   background: url("../assets/CampingW.png") no-repeat center center;
   background-size: contain;
-  width: 50px;
-  height: 50px;
+  width: 30px;
+  height: 30px;
   margin-bottom: 15px;
+}
+.hero-title {
+  font-size: 1.2rem;
+}
+.heroSubTitle {
+  font-size:1.1rem;
 }
 .main {
   position: relative;

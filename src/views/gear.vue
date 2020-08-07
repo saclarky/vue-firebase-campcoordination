@@ -1,11 +1,14 @@
 <template>
-  <div class="main">
+  <div>
      <div class="content">
-      <div class="gridWrapper">
+      <div v-if="thisTrip.group === true" class="gridWrapper">
         <div id="groupGearButton" :class="groupGear" @click="toggleGearPage($event)">Group Gear</div>
         <div :class="groupGearArrow"></div>
         <div :class="myGearArrow"></div>
         <div id="myGearButton" :class="myGear" @click="toggleGearPage($event)">My Gear</div>
+      </div>
+      <div v-if="thisTrip.group=== false">
+        My Gear
       </div>
 
       <!-- GROUP GEAR VIEW -->
@@ -150,7 +153,16 @@ export default {
       this.$store.dispatch("bindTripGroupGear").then((docs) => {
         console.log("got gear list", docs);
         this.$store.dispatch("bindTripIndGear").then(() => {
-          this.thisTripGearCategorized = this.thisTripGroupGearCategorized
+          if(this.$store.state.thisTrip.group === true) {
+            this.thisTripGearCategorized = this.thisTripGroupGearCategorized
+            this.whichPage = 'group'
+            this.showGroupGear = true
+          } else {
+            this.thisTripGearCategorized = this.thisTripIndGearCategorized
+            this.whichPage = 'ind'
+            this.showGroupGear = false
+          }
+          
         })
       });
     }
@@ -192,7 +204,7 @@ export default {
   data: function () {
     return {
       thisTripGearCategorized: [], // Data source for the gear list
-      whichPage: "group", // tell component if this is group gear or ind. page
+      whichPage: "", // tell component if this is group gear or ind. page
       icons: {
         upArrowIcon: true,
         downArrowIcon: false,

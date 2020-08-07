@@ -641,6 +641,12 @@ export const store = new Vuex.Store({
       })
 
     },   
+    changeTripTypeAction: (context, data) => {
+      // TODO: save group pack list in case change back? Or delete stuff?
+      return fb.db.collection('trips').doc(data.trip).update({
+        group: data.type
+      })
+    },
     inviteCamper: ({ state, dispatch }, data) => {
       console.log('invite camper')
       return new Promise((resolve, reject) => {

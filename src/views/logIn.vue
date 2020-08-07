@@ -183,7 +183,7 @@ export default {
           this.loginForm.email,
           this.loginForm.password
         )
-        .then(() => {
+        .then(() => {          
           // Sign-in triggers auth state change to save user and get profile into state
           // https://stackoverflow.com/questions/45204288/initialize-vue-app-after-firebase-auth-state-changed
           this.performingRequest = false;
@@ -254,13 +254,15 @@ export default {
               email: this.signupForm.email
               // title: this.signupForm.title
             });
-       
           profilePromise
             .then(() => {
               console.log('fetch profile')
               this.$store.dispatch("fetchUserProfile");
               // Strange issue trying to debug, 'empty' existing collections.
               // Might be because of not created ancestor first explicity so here...
+              console.log('create empty individual gear doc')
+              
+       fb.db.collection('individualGear').doc(user.user.uid).set({})
               console.log('create empty notification logs')
               fb.db
                 .collection("userNotifications")

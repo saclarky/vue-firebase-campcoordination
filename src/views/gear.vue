@@ -1,25 +1,6 @@
 <template>
   <div class="main">
-   
-    <div class="hero">
-      <div class="hero-top" id="nav-bar">
-        <h1 class="hero-title">{{thisTrip.name}}</h1>
-        <h2>Started by {{thisTrip.owner}}</h2>
-        <div class="hero-icon"></div>
-      </div>
-      <div class="hero-bottom">
-        <div class="hero-content"></div>
-      </div>
-    </div>
-    <div class="actionRow">
-      <div class="leftArrowIcon clickable"></div>
-      <router-link to="/trip">Trip</router-link>
-      <p>&#47;&#47;</p>
-      <p>Gear</p>
-      <div class="actionRowPlaceholder"></div>
-    </div>
-
-    <div class="content">
+     <div class="content">
       <div class="gridWrapper">
         <div id="groupGearButton" :class="groupGear" @click="toggleGearPage($event)">Group Gear</div>
         <div :class="groupGearArrow"></div>
@@ -202,7 +183,7 @@ export default {
         leftArrowIcon: !this.showGroupGear,
       };
     },
-    ...mapState(["thisTrip", "thisTripGroupGear", "userProfile"]),
+    ...mapState(["thisTrip", "userProfile"]),
     ...mapGetters([
       "thisTripGroupGearCategorized",
       "thisTripIndGearCategorized",
@@ -359,49 +340,6 @@ h4 {
   padding: 0;
   font-size: 1.2rem;
 }
-/* HERO CSS */
-.hero {
-  display: flex;
-  flex-flow: column nowrap;
-  background: linear-gradient(
-      rgba(45, 45, 45, 0.6),
-      rgba(0, 0, 0, 0.37),
-      rgba(255, 255, 255, 0),
-      rgba(255, 255, 255, 0),
-      rgba(255, 255, 255, 0.5)
-    ),
-    url(../assets/ryan-bahm-fMMpsyHCeK0-unsplash.jpg) no-repeat 0 -135px;
-  background-size: cover;
-  height: 200px;
-  width: 100%;
-  /*margin-bottom: 15px;*/
-}
-.hero-top {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* justify-content: space-between; */
-  /* padding: 15px 0; */
-  color: #f7ffff;
-  padding: 10px 5px 30px 5px;
-}
-
-.hero-bottom {
-  display: flex;
-  flex-direction: column;
-  /* justify-content: center; */
-  align-items: center;
-  flex: 1;
-  padding: 0 15px;
-}
-.hero-icon {
-  background: url("../assets/CampingW.png") no-repeat center center;
-  background-size: contain;
-  width: 50px;
-  height: 50px;
-  margin-bottom: 15px;
-}
-
 /* Main Content */
 .gridWrapper {
   /* padding: 15px; */

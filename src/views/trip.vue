@@ -83,7 +83,6 @@
               </div>
             </div>
           </div>
-
           <inviteCamperPopup
             @close="toggleAddCamper()"
             v-if="showInviteCamper"
@@ -94,15 +93,16 @@
             </template>
           </inviteCamperPopup>
 
-          <div class="gridItem">
-            <h4>Gear</h4>
 
-            <div class="itemBody"></div>
-            <div @click="toGear" class="actionRow">
-              <div class="rightArrowIcon"></div>
+ <div class="row splitPane">
+            <div class="smCol rightBorder">
+              Gear
             </div>
-            <!-- <i class='plusIcon'></i> -->
-          </div>
+            <div class="lgCol datesData">
+              <gear></gear>
+            </div>
+            </div>
+        
           <div class="gridItem">
             <h4>Meals</h4>
             <div class="itemBody"></div>
@@ -139,6 +139,7 @@
 import { mapState, mapGetters } from "vuex";
 import inviteCamperPopup from "../components/inviteCamperPopup";
 import newTripDatesPopup from "../components/newTripDatesPopup";
+import gear from './gear'
 import subnav from "../components/subnav";
 
 export default {
@@ -154,6 +155,7 @@ export default {
     subnav,
     newTripDatesPopup,
     inviteCamperPopup,
+    gear
   },
   computed: {
     ...mapState([

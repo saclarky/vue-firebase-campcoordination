@@ -40,7 +40,7 @@ header {
     right: 0;
     position: fixed;
     background: #e2e2e2;
-
+    z-index: 100;
 }
 a {
   color: #09709a;

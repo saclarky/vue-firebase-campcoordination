@@ -74,9 +74,10 @@
               </div>
             </div>
             <div>
-              <div>Activity Log</div>
+              <div>Activity Log<span @click="toggleCamperActivityLog" 
+              :class="{downArrowIcon: showCamperActivityLog, upArrowIcon: !showCamperActivityLog}"></span></div>
               <!-- empty time fields/missing field dealt with in vuex getter -->
-              <div v-for="invite in thisTripInviteLogs" :key="invite.id">
+              <div :class="{hide: showCamperActivityLog}" v-for="invite in thisTripInviteLogs" :key="invite.id">
                 <span class="logEntry">
                   {{invite.time}}
                   -
@@ -104,14 +105,18 @@
               <gear></gear>
             </div>
             </div>
-        
-          <div class="gridItem">
-            <h4>Meals</h4>
-            <div class="itemBody"></div>
-            <i class="plusIcon"></i>
-          </div>
 
-          <div class="gridItem">
+
+            <div class="row splitPane">
+            <div class="smCol rightBorder">
+              Meals
+            </div>
+            <div class="lgCol datesData">
+              <meals></meals>
+            </div>
+            </div>
+        
+         <div class="gridItem">
             <h4>Itinerary</h4>
             <div class="itemBody"></div>
             <i class="plusIcon"></i>
@@ -141,7 +146,8 @@
 import { mapState, mapGetters } from "vuex";
 import inviteCamperPopup from "../components/inviteCamperPopup";
 import newTripDatesPopup from "../components/newTripDatesPopup";
-import gear from './gear'
+import gear from '../components/gear'
+import meals from "../components/meals";
 import subnav from "../components/subnav";
 
 export default {
@@ -157,7 +163,8 @@ export default {
     subnav,
     newTripDatesPopup,
     inviteCamperPopup,
-    gear
+    gear,
+    meals
   },
   computed: {
     ...mapState([
@@ -173,6 +180,7 @@ export default {
       showDashboard: true,
       showMessages: true,
       showInviteCamper: false,
+      showCamperActivityLog: false,
       showTripDatesPopup: false
     };
   },
@@ -180,6 +188,10 @@ export default {
    
     toggleAddCamper() {
       this.showInviteCamper = !this.showInviteCamper;
+    },
+    toggleCamperActivityLog() {
+      console.log(this.showCamperActivityLog)
+      this.showCamperActivityLog = !this.showCamperActivityLog;
     },
     removeCamper(camperID) {
       // TODO: don't have 'remove' button by the camp owner. disabled?
@@ -219,9 +231,7 @@ export default {
     toggleTripDatesPopup() {
       this.showTripDatesPopup = !this.showTripDatesPopup;
     },
-    toGear() {
-      this.$router.push("/gear");
-    },
+    
     vote(v, i) {
       let data = {
         tid: this.thisTrip.id,
@@ -354,7 +364,28 @@ h4 {
   height: 15px;
   color: gray;
 }
-
+.downArrowIcon {
+  background: url("../assets/rightArrow.svg") no-repeat center center;
+  background-size: contain;
+  width: 15px;
+  height: 15px;
+  color: black;
+  transform: rotate(90deg); /*TODO in gimp*/
+  display:inline-block;
+  cursor: pointer;
+  margin: 0 5px;
+}
+.upArrowIcon {
+  background: url("../assets/rightArrow.svg") no-repeat center center;
+  background-size: contain;
+  width: 15px;
+  height: 15px;
+  color: black;
+  transform: rotate(270deg); /*TODO in gimp*/
+  cursor: pointer;
+  display:inline-block;
+  margin: 0 5px;
+}
 .itemBody {
   padding: 10px;
 }

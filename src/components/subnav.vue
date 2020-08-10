@@ -5,6 +5,7 @@
       <div>Dates</div>
       <div>Campers</div>
       <div>Gear</div>
+      <div>Meals</div>
     </section>
   </header>
 </template>

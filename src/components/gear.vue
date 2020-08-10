@@ -144,15 +144,9 @@ export default {
   created() {
     console.log("gear page created: ", this.$store.state.thisTrip);
     // TODO: if trip object empty route to trips
-    if (this.$store.state.thisTrip.id === undefined) {
-      console.log("no trip, pushing to trips");
-      this.$router.push({ path: "/trips" });
-    } else {
+   
       //TODO: If not logged in yet does it work?
       // TODO: getter for sorting??
-      this.$store.dispatch("bindTripGroupGear").then((docs) => {
-        console.log("got gear list", docs);
-        this.$store.dispatch("bindTripIndGear").then(() => {
           if(this.$store.state.thisTrip.group === true) {
             this.thisTripGearCategorized = this.thisTripGroupGearCategorized
             this.whichPage = 'group'
@@ -162,10 +156,8 @@ export default {
             this.whichPage = 'ind'
             this.showGroupGear = false
           }
-          
-        })
-      });
-    }
+
+    
   },
   components: {
     updateGearItemPopup,
@@ -206,10 +198,10 @@ export default {
       thisTripGearCategorized: [], // Data source for the gear list
       whichPage: "", // tell component if this is group gear or ind. page
       icons: {
-        upArrowIcon: true,
-        downArrowIcon: false,
+        upArrowIcon: false,
+        downArrowIcon: true,
       },
-      collapseClass: false,
+      collapseClass: true,
       showUpdateItem: false,
       showGroupGear: true,
       showEditCat: false,

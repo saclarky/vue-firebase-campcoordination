@@ -53,6 +53,10 @@ export const store = new Vuex.Store({
     thisTripGroupGear: [],
     thisTripIndGear: [],
 
+    // MEALS
+    thisTripGroupMeals: [],
+    thisTripIndMeals: [],
+
     // CAMPERS DOCS DATA BINDS
     thisTripCampers: {},
     thisTripCampersNo: {},
@@ -228,6 +232,46 @@ export const store = new Vuex.Store({
         }
       })
       return categorizedGear
+    },
+
+    // MEALS
+    thisTripGroupMealsOrdered: state => {
+      console.log(state.thisTripGroupMeals)
+      function formatTime(dd) {
+        let newFormat =
+          dd.getDate() +
+          " " +
+          dd.toLocaleString("default", {
+            month: "long"
+          }) +
+          " " +
+          dd.getFullYear()
+          return newFormat
+      }
+      let orderedMeals = {}
+      state.thisTripGroupMeals.forEach(meal => {
+
+        if(meal.date instanceof Object) {
+          meal.date = formatTime(new Date(meal.date.seconds*1000))
+        }  
+        if (orderedMeals[meal.date] === undefined) {
+          orderedMeals[meal.date] = [meal]
+        } else {
+          orderedMeals[meal.date].push(meal)
+        }
+      })
+      console.log(orderedMeals)
+      //TODO: items is required by this function
+      const keys = Object.keys(orderedMeals)
+for (const i of keys) {
+  console.log(i)
+  orderedMeals[i] = orderedMeals[i].sort((a, b) => (a.order > b.order) ? 1 : -1 )
+}
+      
+      return orderedMeals
+      // By date
+
+      // By meal
     }
   },
 
@@ -336,27 +380,14 @@ export const store = new Vuex.Store({
       return context.bindFirestoreRef('thisTripIndGear', fb.db.collection('individualGear').doc(context.state.currentUser.uid)
         .collection(context.state.thisTripID))
     }),
+    bindTripGroupMeals: firestoreAction(context => {
+      return context.bindFirestoreRef('thisTripGroupMeals', fb.db.collection('groupMeals').doc(context.state.thisTripID)
+      .collection('meal').orderBy('date'))
+    }),
     bindUserNotifications: firestoreAction(context => {
       return context.bindFirestoreRef('thisUserNotifications', fb.db.collection('userNotifications')
         .doc(context.state.currentUser.uid).collection('notifications').orderBy("time", "desc").limit(20))
     }),
-    // queryUsernameAction: (context, uid) => {
-    //   console.log('easier to query auth.users? maybe harder')
-    //   console.log('query a username from uid', uid)
-    //   return new Promise((resolve, reject) => {
-    //     fb.db.collection("users").doc(uid).get()
-    //       .then(doc => {
-    //         console.log('have the username doc for ', uid)
-    //         if (doc.exists) {
-    //           console.log(uid, ' name is ', doc.data().name)
-    //           resolve(doc.data().name);
-    //         } else {
-    //           console.log('error, username does not exist docs not updated with changes')
-    //           reject(new Error("Username doesn't exist! Uh oh. Check tables are updated."));
-    //         }
-    //       })
-    //   })
-    // },
     createTripPageData: ({ dispatch, commit }, tid) => {
       let id = tid
       console.log('Wrapper function to run actions for setting up data for a trip page')
@@ -376,6 +407,9 @@ export const store = new Vuex.Store({
           pagePromises.push(dispatch('bindTripCampersNo'))
           pagePromises.push(dispatch('bindTripCampers'))
           pagePromises.push(dispatch('bindTripDates'))
+          pagePromises.push(dispatch('bindTripGroupGear'))
+          pagePromises.push(dispatch('bindTripIndGear'))
+          pagePromises.push(dispatch('bindTripGroupMeals'))
           Promise.all(pagePromises).then(() => {
             console.log("routing to the trip")
           router.push({ path: '/trip' })
@@ -404,6 +438,8 @@ export const store = new Vuex.Store({
             console.log('end campers sub-promises')
             subPromises.push( fb.db.collection('tripActivityLog').doc(tripDoc.id).set({ 'null': null }))
             console.log('end activiity log sub-promise')
+            // MEALS
+            subPromises.push( fb.db.collection('groupMeals'.doc(tripDoc.id).set({})))
 
             // Dates
             fb.db.collection('tripDates').doc(tripDoc.id).set({}).then(() => {
@@ -1005,7 +1041,6 @@ export const store = new Vuex.Store({
           })
       }
     },
-    // INDIVIDUAL GEAR
 
     // Edit Default Gear Lists
     editListGearItemAction: (context, data) => {
@@ -1109,6 +1144,45 @@ export const store = new Vuex.Store({
 
         }
       })
+    },
+
+    // MEALS //
+    newTripMealDate:  ({ state }, data) => {
+      console.log("Action add: " + data.type)
+      var o;
+      switch (data.type) {
+        case('Breakfast'):
+          o = 1;
+          break
+        case("Lunch"):
+          o= 2;
+          break
+        case("Dinner"):
+          o= 3;
+          break
+        case("Snacks"):
+          o= 4;
+          break
+      } 
+      if (data.page === 'group') {
+        
+        return fb.db.collection("groupMeals").doc(data.tid).collection('meal')
+          .add({
+            items: data.items,
+            date: data.date,
+            order: o,
+            mealType: data.type
+          })
+      } else {
+        return fb.db.collection("individualMeals").doc(state.currentUser.uid).collection(data.tid)
+          .add({
+            items: data.items,
+            date: data.date,
+            order: o,
+            mealType: data.type
+          })
+      }
+
     },
     // LOGGING IN // AUTH STUFF
     fetchUserProfile({ commit, state }) {

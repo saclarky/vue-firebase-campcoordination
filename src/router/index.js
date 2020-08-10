@@ -8,7 +8,6 @@ import logIn from '../views/logIn'
 import dashboard from '../views/dashboard'
 import trip from '../views/trip.vue'
 import settings from '../views/settings'
-import gear from '../views/gear'
 console.log('vue use vue router')
 Vue.use(VueRouter)
 console.log('routes obj list')
@@ -52,13 +51,6 @@ meta: {
     path: '/list',
     name: 'list',
     component: list,
-    meta: {
-        requiresAuth: true
-    }
-},{
-    path: '/gear',
-    name: 'gear',
-    component: gear,
     meta: {
         requiresAuth: true
     }

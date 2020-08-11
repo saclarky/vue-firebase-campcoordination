@@ -261,8 +261,10 @@ export default {
               // Strange issue trying to debug, 'empty' existing collections.
               // Might be because of not created ancestor first explicity so here...
               console.log('create empty individual gear doc')
-              
+              // GEAR
        fb.db.collection('individualGear').doc(user.user.uid).set({})
+        // MEALS
+        fb.db.collection('individualMeals').doc(user.user.uid).set({})
               console.log('create empty notification logs')
               fb.db
                 .collection("userNotifications")

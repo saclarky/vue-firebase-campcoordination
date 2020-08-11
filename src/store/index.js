@@ -130,13 +130,13 @@ export const store = new Vuex.Store({
           }) +
           " " +
           dd.getFullYear()
-          return newFormat
+        return newFormat
       }
       state.thisTripDates.forEach(date => {
-        if(date.startDate instanceof Object) {
-          date.startDate = formatTime(new Date(date.startDate.seconds*1000))
-        date.endDate = formatTime(new Date(date.endDate.seconds*1000))  
-        }             
+        if (date.startDate instanceof Object) {
+          date.startDate = formatTime(new Date(date.startDate.seconds * 1000))
+          date.endDate = formatTime(new Date(date.endDate.seconds * 1000))
+        }
       })
       return state.thisTripDates
     },
@@ -246,14 +246,14 @@ export const store = new Vuex.Store({
           }) +
           " " +
           dd.getFullYear()
-          return newFormat
+        return newFormat
       }
       let orderedMeals = {}
       state.thisTripGroupMeals.forEach(meal => {
 
-        if(meal.date instanceof Object) {
-          meal.date = formatTime(new Date(meal.date.seconds*1000))
-        }  
+        if (meal.date instanceof Object) {
+          meal.date = formatTime(new Date(meal.date.seconds * 1000))
+        }
         if (orderedMeals[meal.date] === undefined) {
           orderedMeals[meal.date] = [meal]
         } else {
@@ -263,11 +263,11 @@ export const store = new Vuex.Store({
       console.log(orderedMeals)
       //TODO: items is required by this function
       const keys = Object.keys(orderedMeals)
-for (const i of keys) {
-  console.log(i)
-  orderedMeals[i] = orderedMeals[i].sort((a, b) => (a.order > b.order) ? 1 : -1 )
-}
-      
+      for (const i of keys) {
+        console.log(i)
+        orderedMeals[i] = orderedMeals[i].sort((a, b) => (a.order > b.order) ? 1 : -1)
+      }
+
       return orderedMeals
       // By date
 
@@ -319,7 +319,7 @@ for (const i of keys) {
   },
 
   actions: {
-    
+
     //Should automatically update prfile changes from action below? or is that a mutation?
     // Issue when registering new user this causes error, no profile yet so... binding at dashboard page now
     // bindProfileRef:
@@ -335,7 +335,7 @@ for (const i of keys) {
         // .orderBy("date")) // date of trip, not when created
         // TODO ERROR: if there's no date orderBy doesn't retrieve it
       }),
-    
+
     bindJoinedTrips:
       firestoreAction(context => {
         // i don't know if it respects where clauses?
@@ -348,11 +348,11 @@ for (const i of keys) {
         // i don't know if it respects where clauses?
         return context.bindFirestoreRef('thisTrip', fb.db.collection('trips').doc(context.state.thisTripID))
       }),
-      bindTripDates:   firestoreAction(context => {
-        // i don't know if it respects where clauses?
-        return context.bindFirestoreRef('thisTripDates', fb.db.collection('tripDates').doc(context.state.thisTripID).collection('dates')
+    bindTripDates: firestoreAction(context => {
+      // i don't know if it respects where clauses?
+      return context.bindFirestoreRef('thisTripDates', fb.db.collection('tripDates').doc(context.state.thisTripID).collection('dates')
         .orderBy('startDate'))
-      }),
+    }),
     bindTripCampers: firestoreAction(context => {
       // will it notice on its own a change in trip id?
       // DOC returns an object, returns null if no data
@@ -382,7 +382,7 @@ for (const i of keys) {
     }),
     bindTripGroupMeals: firestoreAction(context => {
       return context.bindFirestoreRef('thisTripGroupMeals', fb.db.collection('groupMeals').doc(context.state.thisTripID)
-      .collection('meal').orderBy('date'))
+        .collection('meal').orderBy('date'))
     }),
     bindUserNotifications: firestoreAction(context => {
       return context.bindFirestoreRef('thisUserNotifications', fb.db.collection('userNotifications')
@@ -412,7 +412,7 @@ for (const i of keys) {
           pagePromises.push(dispatch('bindTripGroupMeals'))
           Promise.all(pagePromises).then(() => {
             console.log("routing to the trip")
-          router.push({ path: '/trip' })
+            router.push({ path: '/trip' })
           })
         })
     },
@@ -423,8 +423,10 @@ for (const i of keys) {
       return new Promise((resolve) => {
         console.log('New promise')
         // trip document
-        fb.db.collection("trips").add({ 'name': obj.name, 'uid': state.currentUser.uid, 'owner': state.currentUser.displayName,
-      'group': obj.group })
+        fb.db.collection("trips").add({
+          'name': obj.name, 'uid': state.currentUser.uid, 'owner': state.currentUser.displayName,
+          'group': obj.group
+        })
           .then(tripDoc => {
             console.log('Saved trip document')
             subPromises.push(fb.db.collection('campersNo').doc(tripDoc.id).set({}))
@@ -436,10 +438,10 @@ for (const i of keys) {
               [state.currentUser.uid]: state.currentUser.displayName
             }))
             console.log('end campers sub-promises')
-            subPromises.push( fb.db.collection('tripActivityLog').doc(tripDoc.id).set({ 'null': null }))
+            subPromises.push(fb.db.collection('tripActivityLog').doc(tripDoc.id).set({ 'null': null }))
             console.log('end activiity log sub-promise')
             // MEALS
-            subPromises.push( fb.db.collection('groupMeals'.doc(tripDoc.id).set({})))
+            subPromises.push(fb.db.collection('groupMeals'.doc(tripDoc.id).set({})))
 
             // Dates
             fb.db.collection('tripDates').doc(tripDoc.id).set({}).then(() => {
@@ -451,45 +453,45 @@ for (const i of keys) {
                 endDate: obj.dateEnd,
                 flexible: obj.flexible,
                 user: state.currentUser.displayName,
-                votes: {[state.currentUser.displayName]: true}
+                votes: { [state.currentUser.displayName]: true }
               }))
               console.log('pushed date subpromise')
             })
-        
-              console.log('run individual gear for group or ind trip now')
-              // Individual trip
-              if (obj.indTemplate === "My List") {
-                console.log('copy over users default ind list')
-                fb.db.collection('individualGear').doc(state.currentUser.uid).collection('default').get().then((results) => {
-                  if (!results.empty) {
-                    console.log('ind not empty')
-                    results.docs.forEach(doc => {
-                      subPromises.push(fb.db.collection('individualGear').doc(state.currentUser.uid).collection(tripDoc.id).add(doc.data()))
-                      
-                    })
-                  } else {
-                    console.log('no ind docs')
-                   
-                  }
-                })
-              } else if (obj.indTemplate === "Generic List") {
-                console.log('copy generic ind list')
-                fb.db.collection('defaultList').get().then((results) => {
-                  if (!results.empty) {
-                    console.log('generic ind nto empty')
-                    //TODO if results.docs.exists
-                   subPromises.push(results.docs.forEach(doc => {
+
+            console.log('run individual gear for group or ind trip now')
+            // Individual trip
+            if (obj.indTemplate === "My List") {
+              console.log('copy over users default ind list')
+              fb.db.collection('individualGear').doc(state.currentUser.uid).collection('default').get().then((results) => {
+                if (!results.empty) {
+                  console.log('ind not empty')
+                  results.docs.forEach(doc => {
+                    subPromises.push(fb.db.collection('individualGear').doc(state.currentUser.uid).collection(tripDoc.id).add(doc.data()))
+
+                  })
+                } else {
+                  console.log('no ind docs')
+
+                }
+              })
+            } else if (obj.indTemplate === "Generic List") {
+              console.log('copy generic ind list')
+              fb.db.collection('defaultList').get().then((results) => {
+                if (!results.empty) {
+                  console.log('generic ind nto empty')
+                  //TODO if results.docs.exists
+                  subPromises.push(results.docs.forEach(doc => {
                     fb.db.collection('individualGear').doc(state.currentUser.uid).collection(tripDoc.id).add(doc.data())
-                    }))
-                   
-                  } else {
-                    console.log('no generic ind docs')
-                    
-                  }
-                })
-              } else {
-                console.log('no ind template selected')                
-              }
+                  }))
+
+                } else {
+                  console.log('no generic ind docs')
+
+                }
+              })
+            } else {
+              console.log('no ind template selected')
+            }
             // group
             if (obj.group) {
               console.log('Group data')
@@ -524,7 +526,7 @@ for (const i of keys) {
                     if (!results.empty) {
                       console.log('not empty')
                       //TODO if results.docs.exists
-                     subPromises.push(results.docs.forEach(doc => {
+                      subPromises.push(results.docs.forEach(doc => {
                         fb.db.collection('groupGear').doc(tripDoc.id).collection('gear').add(doc.data())
                       }))
                       Promise.all(subPromises).then(() => {
@@ -547,8 +549,8 @@ for (const i of keys) {
                   })
                 }
               })
-            } 
-          })          
+            }
+          })
       })
     },
     deleteTripAction: (context, id) => {
@@ -579,7 +581,7 @@ for (const i of keys) {
 
               // Delete dates
               fb.db.collection('tripDates').doc(id).collection('dates').get().then((docs) => {
-                if(!docs.empty) {
+                if (!docs.empty) {
                   let waitingDates = []
                   docs.forEach(doc => {
                     waitingDates.push(fb.db.collection("tripDates")
@@ -593,11 +595,11 @@ for (const i of keys) {
                   })
                 } else {
                   fb.db.collection('tripDates').doc(id).delete()
-                }               
+                }
               })
               // Delete group gear
               fb.db.collection('groupGear').doc(id).collection('gear').get().then((docs) => {
-                if(!docs.empty) {
+                if (!docs.empty) {
                   let waitingGear = []
                   docs.forEach(doc => {
                     waitingGear.push(fb.db.collection("groupGear")
@@ -611,11 +613,11 @@ for (const i of keys) {
                   })
                 } else {
                   fb.db.collection('groupGear').doc(id).delete()
-                }                
+                }
               })
               // Delete Ind Gear
               fb.db.collection('individualGear').doc(context.state.currentUser.uid).collection(id).get().then((docs) => {
-                if(!docs.empty) {
+                if (!docs.empty) {
                   let waitingIGear = []
                   docs.forEach(doc => {
                     waitingIGear.push(fb.db.collection('individualGear').doc(context.state.currentUser.uid).collection(id).doc(doc.id)
@@ -630,7 +632,7 @@ for (const i of keys) {
                 } else {
                   console.log('need?')
                   // fb.db.collection('groupGear').doc(id).delete()
-                }                
+                }
               })
               // delete logs
               console.log('TODO redo trip activity log collection deletion, recursive bad? cloud function?')
@@ -659,6 +661,44 @@ for (const i of keys) {
                 })
               })
 
+              // Delete group meals
+              fb.db.collection('groupMeals').doc(id).collection('meal').get().then((docs) => {
+                if (!docs.empty) {
+                  let waitingGMeals = []
+                  docs.forEach(doc => {
+                    waitingGMeals.push(fb.db.collection("groupMeals")
+                      .doc(id).collection("meal").doc(doc.id)
+                      .delete())
+                  })
+                  Promise.all(waitingGMeals).then(() => {
+                    // fb.db.collection('tripActivityLog').doc(id).collection('logs').delete() NOT A FUNCTION/not necessary
+                    console.log('still concerned, TODO check logs collection is not orphaned')
+                    fb.db.collection('groupMeals').doc(id).delete()
+                  })
+                } else {
+                  fb.db.collection('groupMeals').doc(id).delete()
+                }
+              })
+              // Delete ind meals
+              fb.db.collection('individualMeals').doc(context.state.currentUser.uid).collection(id).get().then((docs) => {
+                if (!docs.empty) {
+                  let waitingIMeals = []
+                  docs.forEach(doc => {
+                    waitingIMeals.push(fb.db.collection('individualMeals').doc(context.state.currentUser.uid).collection(id).doc(doc.id)
+                      .delete())
+                  })
+                  Promise.all(waitingIMeals).then(() => {
+                    // fb.db.collection('tripActivityLog').doc(id).collection('logs').delete() NOT A FUNCTION/not necessary
+                    console.log('individual gear all goob?')
+                    // fb.db.collection('individualGear').doc(state.currentUser.uid)
+                    // fb.db.collection('groupGear').doc(id).delete()
+                  })
+                } else {
+                  console.log('need?')
+                  // fb.db.collection('groupGear').doc(id).delete()
+                }
+              })
+
               Promise.all([delC, delCP, delN]).then(() => {
                 resolve('Trip deleted')
               }).catch(function (error) {
@@ -676,7 +716,7 @@ for (const i of keys) {
         }
       })
 
-    },   
+    },
     changeTripTypeAction: (context, data) => {
       // TODO: save group pack list in case change back? Or delete stuff?
       return fb.db.collection('trips').doc(data.trip).update({
@@ -935,17 +975,17 @@ for (const i of keys) {
       })
 
     },
-    newTripDate: ({state}, obj) => {
+    newTripDate: ({ state }, obj) => {
       return fb.db.collection('tripDates').doc(obj.tid).collection('dates').add({
         startDate: obj.dateStart,
-                endDate: obj.dateEnd,
-                flexible: obj.flexible,
-                user: state.currentUser.displayName,
-                votes: {[state.currentUser.displayName]: true}
+        endDate: obj.dateEnd,
+        flexible: obj.flexible,
+        user: state.currentUser.displayName,
+        votes: { [state.currentUser.displayName]: true }
       })
     },
-    tripDatesVote: ({state}, data) => {
-      var tmp='votes.'+state.currentUser.displayName
+    tripDatesVote: ({ state }, data) => {
+      var tmp = 'votes.' + state.currentUser.displayName
       return fb.db.collection('tripDates').doc(data.tid).collection('dates').doc(data.dateID).update({
         [tmp]: data.vote
       })
@@ -1057,9 +1097,9 @@ for (const i of keys) {
     },
     updateGearCategory: ({ state }, data) => {
       console.log(data)
-      if(data.category === undefined) {
+      if (data.category === undefined) {
         console.log("ERROR: can't have an undefined category, no way to edit it because firestore cannot search for nonexistent fields.")
-      } 
+      }
       return new Promise((resolve) => {
         // if group
         if (data.page === 'group') {
@@ -1082,7 +1122,7 @@ for (const i of keys) {
             })
         } else {
           // if individual
-          
+
           fb.db.collection('individualGear').doc(state.currentUser.uid).collection(state.thisTripID).where('category', '==', data.category)
             .get().then(docs => {
               if (!docs.empty) {
@@ -1147,25 +1187,25 @@ for (const i of keys) {
     },
 
     // MEALS //
-    newTripMealDate:  ({ state }, data) => {
+    newTripMealDate: ({ state }, data) => {
       console.log("Action add: " + data.type)
       var o;
       switch (data.type) {
-        case('Breakfast'):
+        case ('Breakfast'):
           o = 1;
           break
-        case("Lunch"):
-          o= 2;
+        case ("Lunch"):
+          o = 2;
           break
-        case("Dinner"):
-          o= 3;
+        case ("Dinner"):
+          o = 3;
           break
-        case("Snacks"):
-          o= 4;
+        case ("Snacks"):
+          o = 4;
           break
-      } 
+      }
       if (data.page === 'group') {
-        
+
         return fb.db.collection("groupMeals").doc(data.tid).collection('meal')
           .add({
             items: data.items,
@@ -1184,7 +1224,79 @@ for (const i of keys) {
       }
 
     },
-    // LOGGING IN // AUTH STUFF
+    deleteMealDateAction: ({ state }, data) => {
+      console.log(data)
+      if (data.page === 'group') {
+        let gProm = []
+        return new Promise((resolve, reject) => {
+          if (data.ids.length > 0) {
+            data.ids.forEach(doc => {
+              gProm.push(fb.db.collection("groupMeals").doc(data.tid).collection('meal').doc(doc).delete())
+            })
+            Promise.all(gProm).then(() => {
+              resolve()
+            })
+          } else {
+            console.log('impossible, dates come from meals')
+            reject({message: "No date to delete."})
+          }
+        })
+      } else {
+        let iProm = []
+        return new Promise((resolve, reject) => {
+          if (data.ids.length > 0) {
+            data.ids.forEach(doc => {
+              iProm.push(fb.db.collection("individualMeals").doc(state.currentUser.uid).collection(data.tid).doc(doc).delete())
+            })
+            Promise.all(iProm).then(() => {
+              resolve()
+            })
+          } else {
+            console.log('impossible, dates come from meals')
+            reject({message: "No date to delete."})
+          }
+        })
+      }
+    },
+    editMealDateAction: ({ state }, data) => {
+      console.log(data)
+      if (data.page === 'group') {
+        let gProm = []
+        return new Promise((resolve, reject) => {
+          if (data.ids.length > 0) {
+            data.ids.forEach(doc => {
+              gProm.push(fb.db.collection("groupMeals").doc(data.tid).collection('meal').doc(doc).update({
+                date: data.newDate
+              }) )
+            })
+            Promise.all(gProm).then(() => {
+              resolve()
+            })
+          } else {
+            console.log('impossible, dates come from meals')
+            reject({message: "No date to edit."})
+          }
+        })
+      } else {
+        let iProm = []
+        return new Promise((resolve, reject) => {
+          if (data.ids.length > 0) {
+            data.ids.forEach(doc => {
+              iProm.push(fb.db.collection("individualMeals").doc(state.currentUser.uid).collection(data.tid).doc(doc).update({
+                date: data.newDate
+              }) )
+            })
+            Promise.all(iProm).then(() => {
+              resolve()
+            })
+          } else {
+            console.log('impossible, dates come from meals')
+            reject({message: "No date to edit."})
+          }
+        })
+      }
+    },
+    // LOGGING IN // AUTH STUFF //
     fetchUserProfile({ commit, state }) {
       console.log('handle empty profiles more elegantly...')
       console.log('dispatch user profile get, TODO ONLY RUN when need it, not on auth state change...? maybe null it on auth change');

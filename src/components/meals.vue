@@ -2,10 +2,10 @@
   <div>
      <div class="content">
       <div v-if="thisTrip.group === true" class="gridWrapper">
-        <div id="groupGearButton" :class="groupGear" @click="toggleGearPage($event)">Group Meals</div>
-        <div :class="groupGearArrow"></div>
-        <div :class="myGearArrow"></div>
-        <div id="myGearButton" :class="myGear" @click="toggleGearPage($event)">My Meals</div>
+        <div id="groupButton" :class="group" @click="toggleMealPage($event)">Group Meals</div>
+        <div :class="groupArrow"></div>
+        <div :class="myArrow"></div>
+        <div id="myButton" :class="mine" @click="toggleMealPage($event)">My Meals</div>
       </div>
       <div v-if="thisTrip.group=== false">
         My Meals
@@ -13,20 +13,20 @@
 
       <!-- MEALS VIEW -->
       <div>
-        <div class="paper">  
+        <div >  
            <button @click='toggleNewDay'>Add Day</button>        
           <div class="categoryGrid">
            
             <div
               class="categoryBlock"
-              v-for="(category, name) in thisTripMealsCategorized"
-              :key="name"
+              v-for="(meals, date) in thisTripMealsCategorized"
+              :key="date"
             >
               <div class="categoryHeader">
-                <div :class="icons" @click="toggleCategory"></div>
-                <div class="categoryTitle" :id="name">{{name}}</div>
-                <!-- Ability to edit/delete categorie text -->
-                <div class="editIcon" @click="toggleEditCategory(name)">
+                <div :class="icons" @click="toggleDate"></div>
+                <div class="categoryTitle" :id="date">{{date}}</div>
+                <!-- Ability to edit/delete full days -->
+                <div class="editIcon" @click="toggleEditDate(date)">
                   <svg>
                     <path
                       fill="#c0c0c0"
@@ -34,8 +34,7 @@
                     />
                   </svg>
                 </div>
-                <!-- TODO: Warn will delete all gear in this category/section -->
-                <div class="deleteIcon" @click="toggleDeleteCategory(name)">
+                <div class="deleteIcon" @click="toggleDeleteDate(date)">
                   <svg>
                     <path
                       fill="#c0c0c0"
@@ -44,13 +43,12 @@
                   </svg>
                 </div>
               </div>
-              <!-- Display all gear items in this category -->
+              <!-- Display all meals for this date -->
               <!-- <div> wrapper is just for show/hide -->
               <div :class="{collapse: collapseClass, collapseWrapper: true}">
-                <div class="item" v-for="meal in thisTripMealsCategorized[name]" :key="meal.id">
-                  <div class="lead">{{meal.mealType}}:</div>
-                  <div>{{Array.isArray(meal.items) ? meal.items.join(', ') : ''}}</div>
-                 
+                <div class="item" v-for="meal in thisTripMealsCategorized[date]" :key="meal.id">
+                  <div class="lead" :id="meal.id">{{meal.mealType}}:</div>
+                  <div>{{Array.isArray(meal.items) ? meal.items.join(', ') : ''}}</div>                 
                   <div
                     class="editIcon"
                     @click="toggleUpdateItem(meal.id, meal.items, meal.type)"
@@ -79,12 +77,16 @@
     </div>
    
    <newMealDatesPopup v-if='showNewDay' @close='toggleNewDay' :tid="thisTrip.id" :page="whichPage"></newMealDatesPopup>
+   <editMealDatesPopup v-if="showEditDate" @close='function() {showEditDate = !showEditDate;}' :date="thisDate" :page="whichPage" :tid="thisTrip.id" :docIDs="dateDocIDs"></editMealDatesPopup>
+   <deleteMealDatesPopup v-if="showDeleteDate" @close='function() {showDeleteDate = !showDeleteDate;}' :date="thisDate" :page="whichPage" :tid="thisTrip.id" :docIDs="dateDocIDs"></deleteMealDatesPopup>
   </div>
 </template>
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import newMealDatesPopup from "../components/newMealDatesPopup";
+import newMealDatesPopup from "./newMealDatesPopup";
+import editMealDatesPopup from "./editMealDatesPopup";
+import deleteMealDatesPopup from './deleteMealDatesPopup'
 export default {
   created() {
           if(this.$store.state.thisTrip.group === true) {
@@ -99,27 +101,29 @@ export default {
    
   },
   components: {
-    newMealDatesPopup
+    newMealDatesPopup,
+    editMealDatesPopup,
+    deleteMealDatesPopup
   },
   computed: {
-    groupGear() {
+    group() {
       return {
         highlightGear: this.showGroupGear,
         gearPages: true,
       };
     },
-    myGear() {
+    mine() {
       return {
         highlightGear: !this.showGroupGear,
         gearPages: true,
       };
     },
-    groupGearArrow() {
+    groupArrow() {
       return {
         rightArrowIcon: this.showGroupGear,
       };
     },
-    myGearArrow() {
+    myArrow() {
       return {
         leftArrowIcon: !this.showGroupGear,
       };
@@ -141,15 +145,20 @@ export default {
       showNewMeal: false,
       showNewDay: false,
 
+showEditDate: false,
+      showDeleteDate: false,
+thisDate: "",
+dateDocIDs: [],
+
 
       showUpdateItem: false,
       showGroupGear: true,
-      showEditCat: false,
-      showDeleteCat: false,
+      
       thisItemID: "", // Pass ID prop into the updateItem popup for DB action
       thisItemTitle: "",
       thisItemCat: "",
-      thisCategory: "",
+      
+
       thisCampers: [],
       addGearTitle: "",
       addGearCat: ""
@@ -157,12 +166,12 @@ export default {
   },
   methods: {
     // UX
-    toggleGearPage(event) {
-      if ( (event.target.id === "groupGearButton" && this.showGroupGear === false)    ) {
+    toggleMealPage(event) {
+      if ( (event.target.id === "groupButton" && this.showGroupGear === false)    ) {
         this.showGroupGear = !this.showGroupGear;
         this.whichPage = 'group'
         this.thisTripMealsCategorized = this.thisTripGroupGearCategorized
-      } else if ( (event.target.id === "myGearButton" && this.showGroupGear === true)) {
+      } else if ( (event.target.id === "myButton" && this.showGroupGear === true)) {
         this.showGroupGear = !this.showGroupGear;
         this.whichPage = 'ind'
         this.thisTripMealsCategorized = this.thisTripIndGearCategorized
@@ -170,7 +179,7 @@ export default {
 
       }
     },
-    toggleCategory(e) {
+    toggleDate(e) {
       var content = e.target.parentNode.nextElementSibling;
       if (content.classList.contains("collapse")) {
         content.classList.remove("collapse");
@@ -205,13 +214,7 @@ export default {
     },
 
     // MEALS
-    toggleNewDay() {
-      this.showNewDay = !this.showNewDay
-    },
-
-
-
-
+   
     toggleUpdateItem(id, title, cat, campers) {
       this.showUpdateItem = !this.showUpdateItem;
       this.thisItemID = id;
@@ -269,14 +272,49 @@ export default {
       })
     },  
 
-    // CATEGORIES
-    toggleEditCategory: function (type) {
-      this.thisCategory = type;
-      this.showEditCat = !this.showEditCat;
+    // Dates
+     toggleNewDay() {
+      this.showNewDay = !this.showNewDay
     },
-    toggleDeleteCategory: function (type) {
-      this.thisCategory = type;
-      this.showDeleteCat = !this.showDeleteCat;
+    toggleEditDate: function (date) {
+      this.thisDate = date;
+      var elementProm = []
+      // gather all the doc ids to trash
+      var ids = document.getElementById(date).parentNode.nextElementSibling.getElementsByClassName("lead")
+      var idsArray = []
+      for (let i = 0; i < ids.length; i++) {
+        elementProm.push(new Promise((resolve) => {
+          idsArray.push(ids[i].id)
+          resolve()
+          }))        
+      }
+      console.log(idsArray)
+      Promise.all(elementProm).then(() => {
+        console.log('then')
+         this.dateDocIDs = idsArray;
+      this.showEditDate = !this.showEditDate;
+      })
+      
+    },
+    toggleDeleteDate: function (date) {
+      this.thisDate = date;
+      var elementProm = []
+      // gather all the doc ids to trash
+      var ids = document.getElementById(date).parentNode.nextElementSibling.getElementsByClassName("lead")
+      var idsArray = []
+      for (let i = 0; i < ids.length; i++) {
+        elementProm.push(new Promise((resolve) => {
+          idsArray.push(ids[i].id)
+          resolve()
+          }))        
+      }
+      console.log(idsArray)
+      Promise.all(elementProm).then(() => {
+        console.log('then')
+         this.dateDocIDs = idsArray;
+      this.showDeleteDate = !this.showDeleteDate;
+      })
+     
     },
   },
 };
@@ -492,43 +530,7 @@ h4 {
   display: flex;
   align-items: center;
 }
-.paper {
-  color: #282625;
-  margin: 0 auto;
-  width: 850px;
-  padding: 7px 55px 27px;
-  position: relative;
-  border: 1px solid #b5b5b5;
-  background: white;
-  background: -webkit-linear-gradient(0deg, #dfe8ec 0%, white 8%) 0 57px;
-  background: -moz-linear-gradient(0deg, #dfe8ec 0%, white 8%) 0 57px;
-  background: linear-gradient(0deg, #dfe8ec 0%, white 8%) 0 57px;
-  -webkit-background-size: 100% 30px;
-  -moz-background-size: 100% 30px;
-  -ms-background-size: 100% 30px;
-  background-size: 100% 30px;
-}
-.paper::before {
-  content: "";
-  z-index: -1;
-  margin: 0 1px;
-  width: 706px;
-  height: 10px;
-  position: absolute;
-  bottom: -3px;
-  left: 0;
-  background: white;
-  border: 1px solid #b5b5b5;
-}
-.paper::after {
-  content: "";
-  position: absolute;
-  width: 0px;
-  top: 0;
-  left: 39px;
-  bottom: 0;
-  border-left: 1px solid #f8d3d3;
-}
+
 .lead {
   font-style: normal;
   font-weight: bold;

@@ -107,12 +107,13 @@ export default {
   },
   computed: {
     thisTripMealsCategorized: function() {
-      if (this.whichPage === 'group') {
+      // if (this.whichPage === 'group') {
         return this.thisTripGroupMealsOrdered
-      } else {
-        console.log('todo ind')
-        // return this.thisTripIndMealsO
-      }
+      // } 
+      // else {
+        // console.log('todo ind')
+        // return this.thisTripIndMealsOrdered
+      // }
     },
     group() {
       return {

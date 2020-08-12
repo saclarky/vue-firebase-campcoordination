@@ -1205,7 +1205,6 @@ export const store = new Vuex.Store({
           break
       }
       if (data.page === 'group') {
-
         return fb.db.collection("groupMeals").doc(data.tid).collection('meal')
           .add({
             items: data.items,
@@ -1238,7 +1237,7 @@ export const store = new Vuex.Store({
             })
           } else {
             console.log('impossible, dates come from meals')
-            reject({message: "No date to delete."})
+            reject({ message: "No date to delete." })
           }
         })
       } else {
@@ -1253,7 +1252,7 @@ export const store = new Vuex.Store({
             })
           } else {
             console.log('impossible, dates come from meals')
-            reject({message: "No date to delete."})
+            reject({ message: "No date to delete." })
           }
         })
       }
@@ -1267,14 +1266,14 @@ export const store = new Vuex.Store({
             data.ids.forEach(doc => {
               gProm.push(fb.db.collection("groupMeals").doc(data.tid).collection('meal').doc(doc).update({
                 date: data.newDate
-              }) )
+              }))
             })
             Promise.all(gProm).then(() => {
               resolve()
             })
           } else {
             console.log('impossible, dates come from meals')
-            reject({message: "No date to edit."})
+            reject({ message: "No date to edit." })
           }
         })
       } else {
@@ -1284,16 +1283,57 @@ export const store = new Vuex.Store({
             data.ids.forEach(doc => {
               iProm.push(fb.db.collection("individualMeals").doc(state.currentUser.uid).collection(data.tid).doc(doc).update({
                 date: data.newDate
-              }) )
+              }))
             })
             Promise.all(iProm).then(() => {
               resolve()
             })
           } else {
             console.log('impossible, dates come from meals')
-            reject({message: "No date to edit."})
+            reject({ message: "No date to edit." })
           }
         })
+      }
+    },
+    updateTripMeal: ({ state }, data) => {
+      console.log(data)
+      var o;
+      switch (data.type) {
+        case ('Breakfast'):
+          o = 1;
+          break
+        case ("Lunch"):
+          o = 2;
+          break
+        case ("Dinner"):
+          o = 3;
+          break
+        case ("Snacks"):
+          o = 4;
+          break
+      }
+      if (data.page === 'group') {
+        return fb.db.collection("groupMeals").doc(data.tid).collection('meal').doc(data.id).update({
+          items: data.items,
+          date: data.newDate,
+          mealType: data.type,
+          order: o
+        })
+      } else {
+        return fb.db.collection("individualMeals").doc(state.currentUser.uid).collection(data.tid).doc(data.id).update({
+          items: data.items,
+          date: data.newDate,
+          mealType: data.type,
+          order: o
+        })
+      }
+    },
+    deleteMealAction: ({state}, data) => {
+      console.log(data)
+      if (data.page === 'group') {
+        return fb.db.collection("groupMeals").doc(data.tid).collection('meal').doc(data.id).delete()
+      } else {
+        return fb.db.collection("individualMeals").doc(state.currentUser.uid).collection(data.tid).doc(data.id).delete()
       }
     },
     // LOGGING IN // AUTH STUFF //

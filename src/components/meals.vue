@@ -14,7 +14,7 @@
       <!-- MEALS VIEW -->
       <div>
         <div >  
-           <button @click='toggleNewDay'>Add Day</button>        
+           <button @click='toggleNewDay'>Add Meal</button>        
           <div class="categoryGrid">
            
             <div
@@ -45,13 +45,13 @@
               </div>
               <!-- Display all meals for this date -->
               <!-- <div> wrapper is just for show/hide -->
-              <div :class="{collapse: collapseClass, collapseWrapper: true}">
+              <div :class="{collapse: collapseClass, collapseWrapper: true}">      
                 <div class="item" v-for="meal in thisTripMealsCategorized[date]" :key="meal.id">
                   <div class="lead" :id="meal.id">{{meal.mealType}}:</div>
                   <div>{{Array.isArray(meal.items) ? meal.items.join(', ') : ''}}</div>                 
                   <div
                     class="editIcon"
-                    @click="toggleUpdateItem(meal.id, meal.items, meal.type)"
+                    @click="toggleUpdateItem(meal)"
                   >
                     <svg>
                       <path
@@ -60,7 +60,7 @@
                       />
                     </svg>
                   </div>
-                  <div class="deleteIcon" @click="deleteGearItem(meal.id)">
+                  <div class="deleteIcon" @click="deleteItem(meal.id)">
                     <svg>
                       <path
                         fill="#c0c0c0"
@@ -79,6 +79,8 @@
    <newMealDatesPopup v-if='showNewDay' @close='toggleNewDay' :tid="thisTrip.id" :page="whichPage"></newMealDatesPopup>
    <editMealDatesPopup v-if="showEditDate" @close='function() {showEditDate = !showEditDate;}' :date="thisDate" :page="whichPage" :tid="thisTrip.id" :docIDs="dateDocIDs"></editMealDatesPopup>
    <deleteMealDatesPopup v-if="showDeleteDate" @close='function() {showDeleteDate = !showDeleteDate;}' :date="thisDate" :page="whichPage" :tid="thisTrip.id" :docIDs="dateDocIDs"></deleteMealDatesPopup>
+   <updateMealPopup v-if="showUpdateItem" @close='function() {showUpdateItem = !showUpdateItem;}' :meal="thisMeal" :page="whichPage" :tid="thisTrip.id" ></updateMealPopup>
+  <deleteMealPopup v-if='showDeleteMeal' @close='function() {showDeleteMeal = !showDeleteMeal;}' :id="thisItemID" :tid="thisTrip.id" :page="whichPage"></deleteMealPopup>
   </div>
 </template>
 
@@ -87,6 +89,9 @@ import { mapState, mapGetters } from "vuex";
 import newMealDatesPopup from "./newMealDatesPopup";
 import editMealDatesPopup from "./editMealDatesPopup";
 import deleteMealDatesPopup from './deleteMealDatesPopup'
+import updateMealPopup from './updateMealPopup'
+import deleteMealPopup from './deleteMealPopup'
+
 export default {
   created() {
           if(this.$store.state.thisTrip.group === true) {
@@ -97,13 +102,14 @@ export default {
             // this.thisTripMealsCategorized = this.thisTripIndMealsOrdered
             this.whichPage = 'ind'
             this.showGroupGear = false
-          }
-   
+          }   
   },
   components: {
     newMealDatesPopup,
     editMealDatesPopup,
-    deleteMealDatesPopup
+    deleteMealDatesPopup,
+    updateMealPopup,
+    deleteMealPopup
   },
   computed: {
     thisTripMealsCategorized: function() {
@@ -151,7 +157,6 @@ export default {
         downArrowIcon: false,
       },
       collapseClass: false,
-      showNewMeal: false,
       showNewDay: false,
 
 showEditDate: false,
@@ -159,16 +164,15 @@ showEditDate: false,
 thisDate: "",
 dateDocIDs: [],
 
-
+thisMeal: {},
       showUpdateItem: false,
-      showGroupGear: true,
-      
-      thisItemID: "", // Pass ID prop into the updateItem popup for DB action
-      thisItemTitle: "",
-      thisItemCat: "",
+
+      showDeleteMeal: false,
+thisItemID: '',
+
+      showGroupGear: true,     
       
 
-      thisCampers: [],
       addGearTitle: "",
       addGearCat: ""
     };
@@ -224,51 +228,18 @@ dateDocIDs: [],
 
     // MEALS
    
-    toggleUpdateItem(id, title, cat, campers) {
+    toggleUpdateItem(item) {
       this.showUpdateItem = !this.showUpdateItem;
-      this.thisItemID = id;
-      this.thisItemTitle = title;
-      this.thisItemCat = cat;
-      this.thisCampers = campers;
+      this.thisMeal = item;
+      // this.thisItemID = id;
+      // this.thisItemTitle = title;
+      // this.thisItemCat = cat;
+      // this.thisCampers = campers;
     },
-    addGearItem: function () {
-      if (this.addGearTitle !== "") {
-        // TODO: injection threat check
-        let data = {
-          page: this.whichPage,
-            title: this.addGearTitle,
-            category: this.addGearCat,
-          };       
-        this.$store
-          .dispatch("addGearItemAction", data)
-          .then(() => {
-            this.$toasted.show("Added item!");
-          })
-          .catch((e) => {
-            this.$toasted.show(e.message);
-          });
-      } else {
-        this.$toasted.show("Please enter a title for the item.");
-      }
-    },
-    deleteGearItem: function (itemID) {      
-      // change from button to top-level delete button that deletes checked boxes?
-      // or... edit a template mode? where you can delete rows/add rows etc?
-      if(confirm("Did you mean to delete this item?")) {
-      let data = { 
-        page: this.whichPage,
-        id: itemID }      
-      this.$store
-        .dispatch("deleteGearItemAction", data)
-        .then(() => {
-          this.$toasted.show("Deleted item!");
-        })
-        .catch((e) => {
-          this.$toasted.show(e.message);
-        });
-      } else {
-        return;
-      }
+   
+    deleteItem: function (itemID) {  
+      this.thisItemID = itemID;    
+      this.showDeleteMeal = !this.showDeleteMeal
     },
     updateGearItemStatus: function (item) {
       let data = {
@@ -324,7 +295,7 @@ dateDocIDs: [],
       this.showDeleteDate = !this.showDeleteDate;
       })
      
-    },
+    }
   },
 };
 </script>

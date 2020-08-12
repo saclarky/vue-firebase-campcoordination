@@ -22,10 +22,10 @@
                 
   <div class="row rowStyle">
 <label for='food' class="rowItem" >Food (comma separated):</label>
-<input v-model='items' id='food' placeholder='Bagels, Cream Cheese'>
+<input v-model='items' id='food' :placeholder='items'>
 </div>
               <div class="row rowStyle">
-                <input type="submit" class="rowItem" @click="newMeal" value="Save" />
+                <input type="submit" class="rowItem" @click="updateMeal" value="Save" />
                 <button class='rowItem' @click="$emit('close')">Cancel</button>
               </div>
             </form>
@@ -40,25 +40,27 @@
 export default {
   data() {
     return {
-        day: new Date(),
-       type: 'Breakfast',
-       items:''
+        day: new Date(Date.parse(this.meal.date)),
+       type: this.meal.mealType,
+       items: this.meal.items.join(', ')
     }
   },
-  props: ['tid','page'],
+  props: ['meal','tid','page'],
   methods: {
-     newMeal(e) {
+     updateMeal(e) {
        e.preventDefault();
       let data = {
+        id: this.meal.id,
         tid: this.tid,
         page: this.page,
-        date: this.day,
+        newDate: this.day,
         type: this.type,
         items: this.items.indexOf(',') > -1 ?  this.items.split(",").map(function(i) {return i.trim();}) : [this.items]
       };
+     
       console.log(data)
       // Add new date to tripDates
-      this.$store.dispatch('newTripMealDate', data).then(() => {
+      this.$store.dispatch('updateTripMeal', data).then(() => {
         this.$emit("close");
        this.$toasted.show('Meal added!')
       }).catch(e => {

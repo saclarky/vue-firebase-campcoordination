@@ -5,11 +5,11 @@
         <div class="modal-container">
           <div class="modal-header">Are you Sure?</div>
           <div class="modal-body">
-            <div>This will delete all the meals for this date.</div>
+            <div>This will delete all of the items for this meal.</div>
             <form v-on:submit.prevent>
             <div class="row rowStyle">
               <div class="loader" v-if="showSpinner"></div>
-              <button class="rowItem" @click="deleteMealDate">Delete</button>
+              <button class="rowItem" @click="deleteMeal">Delete</button>
               <button class="rowItem" @click="$emit('close')">Cancel</button>
             </div>
             </form>
@@ -22,30 +22,27 @@
 
 <script>
 export default {
-  props: ["date", "tid", "page", "docIDs"],
+  props: ["id", "tid", "page"],
   data: function () {
     return {
       showSpinner: false,
     };
   },
   methods: {
-    deleteMealDate: function () {
+    deleteMeal: function () {
       this.showSpinner = true;
       let data = {
         page: this.page,
-        date: this.date,
         tid: this.tid,
-        ids: this.docIDs
+        id: this.id
       };
       
       this.$store
-        .dispatch("deleteMealDateAction", data)
+        .dispatch("deleteMealAction", data)
         .then(() => {
               this.showSpinner = false;
-          this.$toasted.show("Deleted date!");
+          this.$toasted.show("Deleted meal!");
             this.$emit("close"); 
-          
-                 
         })
         .catch((e) => {
           this.showSpinner = false;

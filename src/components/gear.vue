@@ -148,11 +148,11 @@ export default {
       //TODO: If not logged in yet does it work?
       // TODO: getter for sorting??
           if(this.$store.state.thisTrip.group === true) {
-            this.thisTripGearCategorized = this.thisTripGroupGearCategorized
+            // this.thisTripGearCategorized = this.thisTripGroupGearCategorized
             this.whichPage = 'group'
             this.showGroupGear = true
           } else {
-            this.thisTripGearCategorized = this.thisTripIndGearCategorized
+            // this.thisTripGearCategorized = this.thisTripIndGearCategorized
             this.whichPage = 'ind'
             this.showGroupGear = false
           }
@@ -165,6 +165,19 @@ export default {
     deleteGearCategory,
   },
   computed: {
+    
+    thisTripGearCategorized: function() {
+      if (this.whichPage === 'group') {
+        return this.thisTripGroupGearCategorized
+      } else {
+        return this.thisTripIndGearCategorized
+      }
+    },
+    ...mapState(["thisTrip", "userProfile"]),
+    ...mapGetters([
+      "thisTripGroupGearCategorized",
+      "thisTripIndGearCategorized",
+    ]),
     groupGear() {
       return {
         highlightGear: this.showGroupGear,
@@ -186,16 +199,11 @@ export default {
       return {
         leftArrowIcon: !this.showGroupGear,
       };
-    },
-    ...mapState(["thisTrip", "userProfile"]),
-    ...mapGetters([
-      "thisTripGroupGearCategorized",
-      "thisTripIndGearCategorized",
-    ]),
+    }
   },
   data: function () {
     return {
-      thisTripGearCategorized: [], // Data source for the gear list
+      // thisTripGearCategorized: [], // Data source for the gear list
       whichPage: "", // tell component if this is group gear or ind. page
       icons: {
         upArrowIcon: false,
@@ -221,11 +229,11 @@ export default {
       if ( (event.target.id === "groupGearButton" && this.showGroupGear === false)    ) {
         this.showGroupGear = !this.showGroupGear;
         this.whichPage = 'group'
-        this.thisTripGearCategorized = this.thisTripGroupGearCategorized
+        // this.thisTripGearCategorized = this.thisTripGroupGearCategorized
       } else if ( (event.target.id === "myGearButton" && this.showGroupGear === true)) {
         this.showGroupGear = !this.showGroupGear;
         this.whichPage = 'ind'
-        this.thisTripGearCategorized = this.thisTripIndGearCategorized
+        // this.thisTripGearCategorized = this.thisTripIndGearCategorized
         // hide cmaper class div --> with class booleans
 
       }

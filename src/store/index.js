@@ -1036,7 +1036,7 @@ export const store = new Vuex.Store({
       if (!data.category) {
         data.category = 'Miscellaneous'
       }
-      if (data.page === ' group') {
+      if (data.page === 'group') {
         return fb.db.collection("groupGear").doc(state.thisTripID).collection('gear')
           .add({
             title: data.title,

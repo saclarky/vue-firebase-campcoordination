@@ -95,11 +95,9 @@ import deleteMealPopup from './deleteMealPopup'
 export default {
   created() {
           if(this.$store.state.thisTrip.group === true) {
-            // this.thisTripMealsCategorized = this.thisTripGroupMealsOrdered
             this.whichPage = 'group'
             this.showGroupGear = true
           } else {
-            // this.thisTripMealsCategorized = this.thisTripIndMealsOrdered
             this.whichPage = 'ind'
             this.showGroupGear = false
           }   
@@ -113,13 +111,13 @@ export default {
   },
   computed: {
     thisTripMealsCategorized: function() {
-      // if (this.whichPage === 'group') {
+      if (this.whichPage === 'group') {
         return this.thisTripGroupMealsOrdered
-      // } 
-      // else {
-        // console.log('todo ind')
-        // return this.thisTripIndMealsOrdered
-      // }
+      } 
+      else {
+        console.log('todo ind')
+        return this.thisTripIndMealsOrdered
+      }
     },
     group() {
       return {
@@ -145,12 +143,11 @@ export default {
     },
     ...mapState(["thisTrip", "userProfile"]),
     ...mapGetters([
-      "thisTripGroupMealsOrdered",
+      "thisTripGroupMealsOrdered", "thisTripIndMealsOrdered"
     ]),
   },
   data: function () {
     return {
-      // thisTripMealsCategorized: [], // Data source for the gear list
       whichPage: "", // tell component if this is group gear or ind. page
       icons: {
         upArrowIcon: true,
@@ -183,13 +180,9 @@ thisItemID: '',
       if ( (event.target.id === "groupButton" && this.showGroupGear === false)    ) {
         this.showGroupGear = !this.showGroupGear;
         this.whichPage = 'group'
-        this.thisTripMealsCategorized = this.thisTripGroupGearCategorized
       } else if ( (event.target.id === "myButton" && this.showGroupGear === true)) {
         this.showGroupGear = !this.showGroupGear;
         this.whichPage = 'ind'
-        this.thisTripMealsCategorized = this.thisTripIndGearCategorized
-        // hide cmaper class div --> with class booleans
-
       }
     },
     toggleDate(e) {

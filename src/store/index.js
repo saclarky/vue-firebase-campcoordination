@@ -261,7 +261,6 @@ export const store = new Vuex.Store({
         }
       })
       console.log(orderedMeals)
-      //TODO: items is required by this function
       const keys = Object.keys(orderedMeals)
       for (const i of keys) {
         console.log(i)
@@ -269,9 +268,39 @@ export const store = new Vuex.Store({
       }
 
       return orderedMeals
-      // By date
+    },
+    thisTripIndMealsOrdered: state => {
+      console.log(state.thisTripIndMeals)
+      function formatTime(dd) {
+        let newFormat =
+          dd.getDate() +
+          " " +
+          dd.toLocaleString("default", {
+            month: "long"
+          }) +
+          " " +
+          dd.getFullYear()
+        return newFormat
+      }
+      let orderedMeals = {}
+      state.thisTripIndMeals.forEach(meal => {
 
-      // By meal
+        if (meal.date instanceof Object) {
+          meal.date = formatTime(new Date(meal.date.seconds * 1000))
+        }
+        if (orderedMeals[meal.date] === undefined) {
+          orderedMeals[meal.date] = [meal]
+        } else {
+          orderedMeals[meal.date].push(meal)
+        }
+      })
+      console.log(orderedMeals)
+      const keys = Object.keys(orderedMeals)
+      for (const i of keys) {
+        console.log(i)
+        orderedMeals[i] = orderedMeals[i].sort((a, b) => (a.order > b.order) ? 1 : -1)
+      }
+      return orderedMeals
     }
   },
 
@@ -384,6 +413,10 @@ export const store = new Vuex.Store({
       return context.bindFirestoreRef('thisTripGroupMeals', fb.db.collection('groupMeals').doc(context.state.thisTripID)
         .collection('meal').orderBy('date'))
     }),
+    bindTripIndMeals: firestoreAction(context => {
+      return context.bindFirestoreRef('thisTripIndMeals', fb.db.collection('individualMeals').doc(context.state.currentUser.uid)
+        .collection(context.state.thisTripID).orderBy('date'))
+    }),
     bindUserNotifications: firestoreAction(context => {
       return context.bindFirestoreRef('thisUserNotifications', fb.db.collection('userNotifications')
         .doc(context.state.currentUser.uid).collection('notifications').orderBy("time", "desc").limit(20))
@@ -410,6 +443,7 @@ export const store = new Vuex.Store({
           pagePromises.push(dispatch('bindTripGroupGear'))
           pagePromises.push(dispatch('bindTripIndGear'))
           pagePromises.push(dispatch('bindTripGroupMeals'))
+          pagePromises.push(dispatch('bindTripIndMeals'))
           Promise.all(pagePromises).then(() => {
             console.log("routing to the trip")
             router.push({ path: '/trip' })

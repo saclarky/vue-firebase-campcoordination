@@ -131,6 +131,7 @@
       :itemcat="thisCategory"
       :itempage="whichPage"
     ></deleteGearCategory>
+    <deleteGearItem v-if="showDeleteItem" @close="deleteGearItem('')" :id="deleteItemID" :tid="thisTrip.id" :page="whichPage"></deleteGearItem>
   </div>
 </template>
 
@@ -139,6 +140,7 @@ import { mapState, mapGetters } from "vuex";
 import updateGearItemPopup from "../components/updateGearItemPopup";
 import editGearCategory from "../components/editGearCategory";
 import deleteGearCategory from "../components/deleteGearCategory";
+import deleteGearItem from "./deleteGearItem"
 export default {
   name: "gear",
   created() {
@@ -163,6 +165,7 @@ export default {
     updateGearItemPopup,
     editGearCategory,
     deleteGearCategory,
+    deleteGearItem
   },
   computed: {
     
@@ -214,6 +217,8 @@ export default {
       showGroupGear: true,
       showEditCat: false,
       showDeleteCat: false,
+      showDeleteItem: false,
+      deleteItemID: "",
       thisItemID: "", // Pass ID prop into the updateItem popup for DB action
       thisItemTitle: "",
       thisItemCat: "",
@@ -300,24 +305,9 @@ export default {
         this.$toasted.show("Please enter a title for the item.");
       }
     },
-    deleteGearItem: function (itemID) {      
-      // change from button to top-level delete button that deletes checked boxes?
-      // or... edit a template mode? where you can delete rows/add rows etc?
-      if(confirm("Did you mean to delete this item?")) {
-      let data = { 
-        page: this.whichPage,
-        id: itemID }      
-      this.$store
-        .dispatch("deleteGearItemAction", data)
-        .then(() => {
-          this.$toasted.show("Deleted item!");
-        })
-        .catch((e) => {
-          this.$toasted.show(e.message);
-        });
-      } else {
-        return;
-      }
+    deleteGearItem: function (itemID) {     
+      this.showDeleteItem = !this.showDeleteItem 
+      this.deleteItemID = itemID;
     },
     updateGearItemStatus: function (item) {
       let data = {

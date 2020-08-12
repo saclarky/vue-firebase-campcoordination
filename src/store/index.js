@@ -1095,11 +1095,11 @@ export const store = new Vuex.Store({
     deleteGearItemAction: ({ state }, data) => {
       if (data.page === 'group') {
         return fb.db.collection("groupGear")
-          .doc(state.thisTripID).collection('gear').doc(data.id)
+          .doc(data.tid).collection('gear').doc(data.id)
           .delete()
       } else {
         return fb.db.collection("individualGear").doc(state.currentUser.uid)
-          .collection(state.thisTripID).doc(data.id)
+          .collection(data.tid).doc(data.id)
           .delete()
       }
 

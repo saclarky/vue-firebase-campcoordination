@@ -90,11 +90,11 @@ import deleteMealDatesPopup from './deleteMealDatesPopup'
 export default {
   created() {
           if(this.$store.state.thisTrip.group === true) {
-            this.thisTripMealsCategorized = this.thisTripGroupMealsOrdered
+            // this.thisTripMealsCategorized = this.thisTripGroupMealsOrdered
             this.whichPage = 'group'
             this.showGroupGear = true
           } else {
-            this.thisTripMealsCategorized = this.thisTripIndMealsOrdered
+            // this.thisTripMealsCategorized = this.thisTripIndMealsOrdered
             this.whichPage = 'ind'
             this.showGroupGear = false
           }
@@ -106,6 +106,14 @@ export default {
     deleteMealDatesPopup
   },
   computed: {
+    thisTripMealsCategorized: function() {
+      if (this.whichPage === 'group') {
+        return this.thisTripGroupMealsOrdered
+      } else {
+        console.log('todo ind')
+        // return this.thisTripIndMealsO
+      }
+    },
     group() {
       return {
         highlightGear: this.showGroupGear,
@@ -135,7 +143,7 @@ export default {
   },
   data: function () {
     return {
-      thisTripMealsCategorized: [], // Data source for the gear list
+      // thisTripMealsCategorized: [], // Data source for the gear list
       whichPage: "", // tell component if this is group gear or ind. page
       icons: {
         upArrowIcon: true,

@@ -1024,6 +1024,7 @@ export const store = new Vuex.Store({
         [tmp]: data.vote
       })
     },
+
     // PACKING LIST MANIPULATION // GEAR
     updateGearAction: ({ state }, data) => {
       console.log("action to update a group gear item")
@@ -1064,10 +1065,11 @@ export const store = new Vuex.Store({
         return e
       })
     },
-
     addGearItemAction: ({ state }, data) => {
-      console.log("Action add: " + data.title)
+      console.log("Action add: ", data)
+      console.log(!data.category)
       if (!data.category) {
+        console.log('No category')
         data.category = 'Miscellaneous'
       }
       if (data.page === 'group') {
@@ -1115,7 +1117,6 @@ export const store = new Vuex.Store({
           })
       }
     },
-
     // Edit Default Gear Lists
     editListGearItemAction: (context, data) => {
       // for not using to input data to the main defualt list

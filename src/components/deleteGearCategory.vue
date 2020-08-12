@@ -33,12 +33,8 @@ export default {
       this.showSpinner = true;
       let data = {
         page: this.itempage,
+        category: this.itemcat
       };
-      if (this.itemcat === "Miscellaneous") {
-        data.category = "";
-      } else {
-        data.category = this.itemcat;
-      }
       this.$store
         .dispatch("deleteGearCategory", data)
         .then((res) => {

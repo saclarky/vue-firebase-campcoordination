@@ -116,11 +116,16 @@
             </div>
             </div>
         
-         <div class="gridItem">
-            <h4>Itinerary</h4>
-            <div class="itemBody"></div>
-            <i class="plusIcon"></i>
-          </div>
+          <div class="row splitPane">
+            <div class="smCol rightBorder">
+              Itinerary
+            </div>
+            <div class="lgCol datesData">
+              <itinerary></itinerary>
+            </div>
+            </div>
+            
+          
           <div class="gridItem">
             <h4>Logistics</h4>
             <div class="itemBody"></div>
@@ -149,6 +154,7 @@ import newTripDatesPopup from "../components/newTripDatesPopup";
 import gear from '../components/gear'
 import meals from "../components/meals";
 import subnav from "../components/subnav";
+import itinerary from "../components/itinerary/itinerary"
 
 export default {
   name: "trip",
@@ -164,7 +170,8 @@ export default {
     newTripDatesPopup,
     inviteCamperPopup,
     gear,
-    meals
+    meals,
+    itinerary
   },
   computed: {
     ...mapState([

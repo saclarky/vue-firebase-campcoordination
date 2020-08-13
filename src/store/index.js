@@ -66,6 +66,9 @@ export const store = new Vuex.Store({
     //TRIP LOGS
     thisTripActivityLog: [],
 
+    // ITINERARY
+    thisTripItinerary: [],
+
     // USER DATA BINDS
     currentUser: null,
     userProfile: {},
@@ -301,6 +304,56 @@ export const store = new Vuex.Store({
         orderedMeals[i] = orderedMeals[i].sort((a, b) => (a.order > b.order) ? 1 : -1)
       }
       return orderedMeals
+    },
+
+    // ITINERARY
+    thisTripItineraryGrouped:state => {
+      console.log(state.thisTripItinerary)
+      function formatTime(dd) {
+        let hours = dd.getHours();
+        let flipper = " AM";
+        if (hours >= 12) {
+          hours = hours - 12;
+          flipper = " PM";
+        }
+        if (hours == 0) {
+          hours = 12;
+        }
+        let m = dd.getMinutes();
+        m = m < 10 ? "0" + m : m;
+
+        let newFormat =
+        hours +
+        ":" +
+        m +
+        flipper
+        return newFormat
+      }
+      function formatDate(dd) {
+        let newFormat =
+          dd.getDate() +
+          " " +
+          dd.toLocaleString("default", {
+            month: "long"
+          }) +
+          " " +
+          dd.getFullYear()
+        return newFormat
+      }
+      let groupedItinerary = {}
+      state.thisTripItinerary.forEach(entry => {
+        if (entry.date instanceof Object) {
+          entry.time = formatTime(new Date(entry.date.seconds * 1000))
+          entry.date = formatDate(new Date(entry.date.seconds * 1000))
+        }
+        if (groupedItinerary[entry.date] === undefined) {
+          groupedItinerary[entry.date] = [entry]
+        } else {
+          groupedItinerary[entry.date].push(entry)
+        }
+      })
+      console.log(groupedItinerary)      
+      return groupedItinerary
     }
   },
 
@@ -417,6 +470,11 @@ export const store = new Vuex.Store({
       return context.bindFirestoreRef('thisTripIndMeals', fb.db.collection('individualMeals').doc(context.state.currentUser.uid)
         .collection(context.state.thisTripID).orderBy('date'))
     }),
+    bindTripItinerary: firestoreAction(context => {
+      return context.bindFirestoreRef('thisTripItinerary', fb.db.collection('itinerary').doc(context.state.thisTrip.id)
+        .collection('items').orderBy('date'))
+    }),
+    
     bindUserNotifications: firestoreAction(context => {
       return context.bindFirestoreRef('thisUserNotifications', fb.db.collection('userNotifications')
         .doc(context.state.currentUser.uid).collection('notifications').orderBy("time", "desc").limit(20))
@@ -444,6 +502,7 @@ export const store = new Vuex.Store({
           pagePromises.push(dispatch('bindTripIndGear'))
           pagePromises.push(dispatch('bindTripGroupMeals'))
           pagePromises.push(dispatch('bindTripIndMeals'))
+          pagePromises.push(dispatch('bindTripItinerary'))
           Promise.all(pagePromises).then(() => {
             console.log("routing to the trip")
             router.push({ path: '/trip' })
@@ -1371,6 +1430,67 @@ export const store = new Vuex.Store({
         return fb.db.collection("individualMeals").doc(state.currentUser.uid).collection(data.tid).doc(data.id).delete()
       }
     },
+
+    // ITINERARY //
+    editItinDateAction: (context, data) => {
+      console.log(data)
+        let gProm = []
+        let ids = Object.keys(data.ids) // mapped doc ids 
+        let nd = data.newDate
+        return new Promise((resolve, reject) => {
+          if (ids.length > 0) {
+            ids.forEach(doc => {
+          // parse the old time from string to re-save with new date
+              let hour = parseInt(data.ids[doc].split(':')[0])
+              let min = parseInt(data.ids[doc].split(':')[1].split(' ')[0])
+              let tock = data.ids[doc].split(':')[1].split(' ')[1]
+              if (tock === 'PM') {
+                hour = hour + 12
+              }
+              if (hour == 12 && tock == "AM") {
+                hour = 0
+              }
+              let newTime = new Date(nd.getFullYear(), nd.getMonth(), nd.getDate(), hour, min)
+              console.log('new t',newTime)
+              gProm.push(fb.db.collection("itinerary").doc(data.tid).collection('items').doc(doc).update({
+                date: newTime
+              }))
+            })
+            Promise.all(gProm).then(() => {
+              resolve()
+            })
+          } else {
+            console.log('impossible, dates come from meals')
+            reject({ message: "No date to edit." })
+          }
+        })      
+    },
+    deleteItinDayAction: (context, data) => {
+      console.log(data)
+        let gProm = []
+        return new Promise((resolve, reject) => {
+          if (data.ids.length > 0) {
+            data.ids.forEach(doc => {
+              gProm.push(fb.db.collection("itinerary").doc(data.tid).collection('items').doc(doc).delete())
+            })
+            Promise.all(gProm).then(() => {
+              resolve()
+            })
+          } else {
+            console.log('impossible, dates come from meals')
+            reject({ message: "No date to delete." })
+          }
+        })
+    },
+    addItinEntry: (context, data) => {
+      console.log("Action add: ", data)      
+        return fb.db.collection("itinerary").doc(data.tid).collection('items')
+          .add({
+            entry: data.items,
+            date: data.date,
+          })
+    },
+
     // LOGGING IN // AUTH STUFF //
     fetchUserProfile({ commit, state }) {
       console.log('handle empty profiles more elegantly...')

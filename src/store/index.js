@@ -1490,7 +1490,11 @@ export const store = new Vuex.Store({
             date: data.date,
           })
     },
-
+    deleteItinEntryAction: (context, data) => {
+      console.log(data)
+        return fb.db.collection("itinerary").doc(data.tid).collection('items').doc(data.id).delete()      
+    },
+    
     // LOGGING IN // AUTH STUFF //
     fetchUserProfile({ commit, state }) {
       console.log('handle empty profiles more elegantly...')

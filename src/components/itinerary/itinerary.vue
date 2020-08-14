@@ -78,7 +78,7 @@
    <editItinDatePopup v-if="showEditDate" @close='function() {showEditDate = !showEditDate;}' :date="thisDate" :tid="thisTrip.id" :docIDs="timeMapIDs"></editItinDatePopup>
    <deleteItinDatePopup v-if="showDeleteDate" @close='function() {showDeleteDate = !showDeleteDate;}'  :tid="thisTrip.id" :docIDs="dateDocIDs"></deleteItinDatePopup>
    <updateMealPopup v-if="showUpdateItem" @close='function() {showUpdateItem = !showUpdateItem;}' :meal="thisMeal" :page="whichPage" :tid="thisTrip.id" ></updateMealPopup>
-  <deleteMealPopup v-if='showDeleteMeal' @close='function() {showDeleteMeal = !showDeleteMeal;}' :id="thisItemID" :tid="thisTrip.id" :page="whichPage"></deleteMealPopup>
+  <deleteEntryPopup v-if='showDeleteItem' @close='function() {showDeleteItem = !showDeleteItem;}' :id="thisItemID" :tid="thisTrip.id"></deleteEntryPopup>
   </div>
 </template>
 
@@ -88,7 +88,7 @@ import { mapState, mapGetters } from "vuex";
 import editItinDatePopup from "./editItinDatePopup";
 import deleteItinDatePopup from './deleteItinDatePopup'
 import updateMealPopup from './updateMealPopup'
-import deleteMealPopup from './deleteMealPopup'
+import deleteEntryPopup from './deleteEntryPopup'
 import DateTimePicker from 'vue-vanilla-datetime-picker';
 
 export default {
@@ -107,7 +107,7 @@ export default {
     editItinDatePopup,
     deleteItinDatePopup,
     updateMealPopup,
-    deleteMealPopup
+    deleteEntryPopup
   },
   computed: {
     ...mapState(["thisTrip"]),
@@ -133,7 +133,7 @@ timeMapIDs: {},
 thisMeal: {},
       showUpdateItem: false,
 
-      showDeleteMeal: false,
+      showDeleteItem: false,
 thisItemID: '',
 
       showGroupGear: true,     
@@ -188,7 +188,7 @@ thisItemID: '',
    
     deleteItem: function (itemID) {  
       this.thisItemID = itemID;    
-      this.showDeleteMeal = !this.showDeleteMeal
+      this.showDeleteItem = !this.showDeleteItem
     },
      toggleNewEntry() {
       this.showNewDay = !this.showNewDay

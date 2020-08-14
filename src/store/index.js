@@ -343,6 +343,7 @@ export const store = new Vuex.Store({
       let groupedItinerary = {}
       state.thisTripItinerary.forEach(entry => {
         if (entry.date instanceof Object) {
+          entry.dateJS =new Date( entry.date.seconds*1000)
           entry.time = formatTime(new Date(entry.date.seconds * 1000))
           entry.date = formatDate(new Date(entry.date.seconds * 1000))
         }
@@ -1493,6 +1494,12 @@ export const store = new Vuex.Store({
     deleteItinEntryAction: (context, data) => {
       console.log(data)
         return fb.db.collection("itinerary").doc(data.tid).collection('items').doc(data.id).delete()      
+    },
+    updateItinEntryAction: (context, data) => {
+      return fb.db.collection("itinerary").doc(data.tid).collection('items').doc(data.id).update({
+        entry: data.items,
+        date: data.newDate
+      })
     },
     
     // LOGGING IN // AUTH STUFF //

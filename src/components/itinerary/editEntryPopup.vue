@@ -5,22 +5,19 @@
         <div class="modal-container">
           <div class="modal-body">
             <form v-on:submit.prevent class="column columnStyle">
-              <span>Itinerary Entry</span>
-               <div class="row rowStyle">
-<!-- <label for='item' class="rowItem" >Entry Text:</label> -->
-<input v-model='items' id='item' placeholder='e.g. Carpool meet-up'>
-</div>
-             
+              
+              
               <div class="row rowStyle">
-                <!-- <div style="font-size:.8rem; color:red;"> Required: </div> -->
-                <!-- <v-date-picker mode="single" v-model="day" is-inline /> -->
-                <VueCtkDateTimePicker v-model="time" no-header="true" no-button-now="true" label="Time" only-time="true" />
-                <VueCtkDateTimePicker v-model="day" no-header="true" no-button-now="true" label="Date" only-date="true" />
+               <span class="rowItem">Edit date and time: </span>
+                 <date-time-picker inline v-model="editEntryDate" format="fff"></date-time-picker>
               </div>
                 
- 
+  <div class="row rowStyle">
+<label for='food' class="rowItem" >Edit Entry:</label>
+<input v-model='items' id='food' :placeholder='items'>
+</div>
               <div class="row rowStyle">
-                <input type="submit" class="rowItem" @click="newEntry" value="Save" />
+                <input type="submit" class="rowItem" @click="updateEntry" value="Save" />
                 <button class='rowItem' @click="$emit('close')">Cancel</button>
               </div>
             </form>
@@ -32,34 +29,43 @@
 </template>
 
 <script>
+import DateTimePicker from 'vue-vanilla-datetime-picker';
+
 export default {
+  components: {
+    DateTimePicker
+  },
   data() {
     return {
-        day: new Date(),
-        time: '',
-       items:''
+        editEntryDate: this.entry.dateJS,
+       items: this.entry.entry
     }
   },
-  props: ['tid'],
+ 
+  props: ['entry','tid'],
   methods: {
-     newEntry(e) {
+     updateEntry(e) {
        e.preventDefault();
+       if (this.editEntryDate == this.entry.dateJS && this.items == this.entry.entry) {
+         this.$toasted.show("No changes made!")
+         return
+       }
       let data = {
+        id: this.entry.id,
         tid: this.tid,
-        time: this.time,
-        date: this.day,
+        newDate: this.editEntryDate,
         items: this.items
       };
-      console.log(data, 'todoL time')
-      
+     
+      console.log(data)
       // Add new date to tripDates
-      // this.$store.dispatch('addItinEntry', data).then(() => {
-      //   this.$emit("close");
-      //  this.$toasted.show('Entry added!')
-      // }).catch(e => {
-      //   console.log(e)
-      //   this.$toasted.show(e.message)
-      // })
+      this.$store.dispatch('updateItinEntryAction', data).then(() => {
+        this.$emit("close");
+       this.$toasted.show('Entry updated!')
+      }).catch(e => {
+        console.log(e)
+        this.$toasted.show(e.message)
+      })
     }
    
   }
@@ -67,6 +73,7 @@ export default {
 </script>
 
 <style scoped>
+@import "../../../node_modules/vue-vanilla-datetime-picker/dist/DateTimePicker.css";
 .columnStyle {
   justify-content: center;
 }

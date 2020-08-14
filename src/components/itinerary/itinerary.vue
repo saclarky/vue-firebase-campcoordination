@@ -74,20 +74,19 @@
       </div>     
     </div>
    
-   <!-- <newItinEntryPopup v-if='showNewDay' @close='toggleNewEntry' :tid="thisTrip.id"></newItinEntryPopup> -->
+   
    <editItinDatePopup v-if="showEditDate" @close='function() {showEditDate = !showEditDate;}' :date="thisDate" :tid="thisTrip.id" :docIDs="timeMapIDs"></editItinDatePopup>
    <deleteItinDatePopup v-if="showDeleteDate" @close='function() {showDeleteDate = !showDeleteDate;}'  :tid="thisTrip.id" :docIDs="dateDocIDs"></deleteItinDatePopup>
-   <updateMealPopup v-if="showUpdateItem" @close='function() {showUpdateItem = !showUpdateItem;}' :meal="thisMeal" :page="whichPage" :tid="thisTrip.id" ></updateMealPopup>
+   <editEntryPopup v-if="showUpdateItem" @close='function() {showUpdateItem = !showUpdateItem;}' :entry="thisEntry" :tid="thisTrip.id" ></editEntryPopup>
   <deleteEntryPopup v-if='showDeleteItem' @close='function() {showDeleteItem = !showDeleteItem;}' :id="thisItemID" :tid="thisTrip.id"></deleteEntryPopup>
   </div>
 </template>
 
 <script>
 import { mapState, mapGetters } from "vuex";
-// import newItinEntryPopup from "./newItinEntryPopup";
 import editItinDatePopup from "./editItinDatePopup";
 import deleteItinDatePopup from './deleteItinDatePopup'
-import updateMealPopup from './updateMealPopup'
+import editEntryPopup from './editEntryPopup'
 import deleteEntryPopup from './deleteEntryPopup'
 import DateTimePicker from 'vue-vanilla-datetime-picker';
 
@@ -103,10 +102,9 @@ export default {
   },
   components: {
     DateTimePicker,
-    // newItinEntryPopup,
     editItinDatePopup,
     deleteItinDatePopup,
-    updateMealPopup,
+    editEntryPopup,
     deleteEntryPopup
   },
   computed: {
@@ -130,7 +128,7 @@ thisDate: "",
 dateDocIDs: [],
 timeMapIDs: {},
 
-thisMeal: {},
+thisEntry: {},
       showUpdateItem: false,
 
       showDeleteItem: false,
@@ -183,7 +181,7 @@ thisItemID: '',
    // ITINERARY ENTRIES
     toggleUpdateItem(item) {
       this.showUpdateItem = !this.showUpdateItem;
-      this.thisMeal = item;
+      this.thisEntry = item;
     },
    
     deleteItem: function (itemID) {  

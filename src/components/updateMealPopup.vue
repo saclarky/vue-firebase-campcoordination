@@ -62,7 +62,7 @@ export default {
       // Add new date to tripDates
       this.$store.dispatch('updateTripMeal', data).then(() => {
         this.$emit("close");
-       this.$toasted.show('Meal added!')
+       this.$toasted.show('Meal updated!')
       }).catch(e => {
         console.log(e)
         this.$toasted.show(e.message)

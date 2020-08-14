@@ -3,7 +3,16 @@
      <div class="content">
       <div>
         <div >  
-           <button @click='toggleNewEntry'>Add Entry</button>        
+          
+           <div class="row rowStyle"> <button @click='newEntry'>Add Entry</button>     
+                
+               
+<input v-model='newEntryText' id='item' placeholder='e.g. Carpool meet-up'>
+
+
+                <!-- <DateTimePicker v-model="newEntryDate" /> -->
+                <date-time-picker v-model="newEntryDate"></date-time-picker>
+              </div>   
           <div class="categoryGrid">
            
             <div
@@ -65,7 +74,7 @@
       </div>     
     </div>
    
-   <newItinEntryPopup v-if='showNewDay' @close='toggleNewEntry' :tid="thisTrip.id"></newItinEntryPopup>
+   <!-- <newItinEntryPopup v-if='showNewDay' @close='toggleNewEntry' :tid="thisTrip.id"></newItinEntryPopup> -->
    <editItinDatePopup v-if="showEditDate" @close='function() {showEditDate = !showEditDate;}' :date="thisDate" :tid="thisTrip.id" :docIDs="timeMapIDs"></editItinDatePopup>
    <deleteItinDatePopup v-if="showDeleteDate" @close='function() {showDeleteDate = !showDeleteDate;}'  :tid="thisTrip.id" :docIDs="dateDocIDs"></deleteItinDatePopup>
    <updateMealPopup v-if="showUpdateItem" @close='function() {showUpdateItem = !showUpdateItem;}' :meal="thisMeal" :page="whichPage" :tid="thisTrip.id" ></updateMealPopup>
@@ -75,11 +84,12 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import newItinEntryPopup from "./newItinEntryPopup";
+// import newItinEntryPopup from "./newItinEntryPopup";
 import editItinDatePopup from "./editItinDatePopup";
 import deleteItinDatePopup from './deleteItinDatePopup'
 import updateMealPopup from './updateMealPopup'
 import deleteMealPopup from './deleteMealPopup'
+import DateTimePicker from 'vue-vanilla-datetime-picker';
 
 export default {
   created() {
@@ -92,7 +102,8 @@ export default {
           }   
   },
   components: {
-    newItinEntryPopup,
+    DateTimePicker,
+    // newItinEntryPopup,
     editItinDatePopup,
     deleteItinDatePopup,
     updateMealPopup,
@@ -104,6 +115,8 @@ export default {
   },
   data: function () {
     return {
+      newEntryDate: '',
+      newEntryText: '',
       icons: {
         upArrowIcon: true,
         downArrowIcon: false,
@@ -180,6 +193,32 @@ thisItemID: '',
      toggleNewEntry() {
       this.showNewDay = !this.showNewDay
     },
+    newEntry: function() {
+      if(!this.newEntryText) {
+        this.$toasted.show("Please add a description.")
+        return
+      }
+      if (!this.newEntryDate) {
+        this.$toasted.show("Please add a date and time.")
+        return
+      }
+      let data = {
+        tid: this.thisTrip.id,
+        date: new Date(Date.parse(this.newEntryDate)),
+        items: this.newEntryText
+      };
+      
+      // Add new date to tripDates
+      this.$store.dispatch('addItinEntry', data).then(() => {
+        this.$emit("close");
+        this.newEntryText=''
+        this.newEntryDate=''
+       this.$toasted.show('Entry added!')
+      }).catch(e => {
+        console.log(e)
+        this.$toasted.show(e.message)
+      })
+    },
     toggleEditDate: function (date) {
       this.thisDate = date;
       var elementProm = []
@@ -225,6 +264,8 @@ thisItemID: '',
 </script>
 
 <style scoped>
+@import "../../../node_modules/vue-vanilla-datetime-picker/dist/DateTimePicker.css";
+
 input[type="checkbox"]:checked + label.strikethrough {
   text-decoration: line-through;
 }
@@ -440,4 +481,10 @@ h4 {
   font-weight: bold;
   padding-right: 20px;
 }
+.rowStyle {
+  justify-content: center;
+  align-items: center;
+  margin: 10px 0;
+}
+
 </style>

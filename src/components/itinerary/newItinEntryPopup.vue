@@ -10,13 +10,12 @@
 <!-- <label for='item' class="rowItem" >Entry Text:</label> -->
 <input v-model='items' id='item' placeholder='e.g. Carpool meet-up'>
 </div>
-               <div class="row rowStyle">
-                 Time:
-               </div>
              
               <div class="row rowStyle">
                 <!-- <div style="font-size:.8rem; color:red;"> Required: </div> -->
-                <v-date-picker mode="single" v-model="day" is-inline />
+                <!-- <v-date-picker mode="single" v-model="day" is-inline /> -->
+                <VueCtkDateTimePicker v-model="time" no-header="true" no-button-now="true" label="Time" only-time="true" />
+                <VueCtkDateTimePicker v-model="day" no-header="true" no-button-now="true" label="Date" only-date="true" />
               </div>
                 
  
@@ -54,13 +53,13 @@ export default {
       console.log(data, 'todoL time')
       
       // Add new date to tripDates
-      this.$store.dispatch('addItinEntry', data).then(() => {
-        this.$emit("close");
-       this.$toasted.show('Entry added!')
-      }).catch(e => {
-        console.log(e)
-        this.$toasted.show(e.message)
-      })
+      // this.$store.dispatch('addItinEntry', data).then(() => {
+      //   this.$emit("close");
+      //  this.$toasted.show('Entry added!')
+      // }).catch(e => {
+      //   console.log(e)
+      //   this.$toasted.show(e.message)
+      // })
     }
    
   }

@@ -10,8 +10,9 @@
 <input v-model='newEntryText' id='item' placeholder='e.g. Carpool meet-up'>
 
 
-                <!-- <DateTimePicker v-model="newEntryDate" /> -->
-                <date-time-picker v-model="newEntryDate"></date-time-picker>
+                <!-- <date-time-picker v-model="newEntryDate"></date-time-picker> -->
+
+                <datetime-picker id="lbdtp" placeholder="Add date and time." :dayStr='lbds' :timeStr="lbts" btnStr="Save" timeType="minute" v-model="newEntryDate" ></datetime-picker>
               </div>   
           <div class="categoryGrid">
            
@@ -88,7 +89,8 @@ import editItinDatePopup from "./editItinDatePopup";
 import deleteItinDatePopup from './deleteItinDatePopup'
 import editEntryPopup from './editEntryPopup'
 import deleteEntryPopup from './deleteEntryPopup'
-import DateTimePicker from 'vue-vanilla-datetime-picker';
+// import DateTimePicker from 'vue-vanilla-datetime-picker';
+import { DatetimePicker } from '@livelybone/vue-datepicker'; // POssibly throws error on reroute to trips from refresh
 
 export default {
   created() {
@@ -101,7 +103,8 @@ export default {
           }   
   },
   components: {
-    DateTimePicker,
+    // DateTimePicker,
+    'datetime-picker': DatetimePicker,
     editItinDatePopup,
     deleteItinDatePopup,
     editEntryPopup,
@@ -113,6 +116,8 @@ export default {
   },
   data: function () {
     return {
+      lbds: ["Su","M","T","W","Th","F","S"],
+      lbts: ["H","M","S"],
       newEntryDate: '',
       newEntryText: '',
       icons: {
@@ -262,8 +267,10 @@ thisItemID: '',
 </script>
 
 <style scoped>
-@import "../../../node_modules/vue-vanilla-datetime-picker/dist/DateTimePicker.css";
-
+/* vanilla css */
+/* @import "../../../node_modules/vue-vanilla-datetime-picker/dist/DateTimePicker.css"; */
+ /* livelybone css */
+@import "../../../node_modules/@livelybone/vue-datepicker/lib/css/index.css";
 input[type="checkbox"]:checked + label.strikethrough {
   text-decoration: line-through;
 }

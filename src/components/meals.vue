@@ -27,7 +27,7 @@
                 <div class="categoryTitle" :id="date">{{date}}</div>
                 <!-- Ability to edit/delete full days -->
                 <div class="editIcon" @click="toggleEditDate(date)">
-                  <svg>
+                  <svg width="22px" height="22px" viewbox="0 0 22 22">
                     <path
                       fill="#c0c0c0"
                       d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
@@ -35,7 +35,7 @@
                   </svg>
                 </div>
                 <div class="deleteIcon" @click="toggleDeleteDate(date)">
-                  <svg>
+                  <svg width="22px" height="22px" viewbox="0 0 22 22">
                     <path
                       fill="#c0c0c0"
                       d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"
@@ -53,7 +53,7 @@
                     class="editIcon"
                     @click="toggleUpdateItem(meal)"
                   >
-                    <svg>
+                    <svg width="22px" height="22px" viewbox="0 0 22 22">
                       <path
                         fill="#c0c0c0"
                         d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
@@ -61,7 +61,7 @@
                     </svg>
                   </div>
                   <div class="deleteIcon" @click="deleteItem(meal.id)">
-                    <svg>
+                    <svg width="22px" height="22px" viewbox="0 0 22 22">
                       <path
                         fill="#c0c0c0"
                         d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"
@@ -339,25 +339,25 @@ h4 {
 .deleteIcon {
   /* background: url("../assets/delete.svg") no-repeat center center; */
   /* background-size: contain; */
-  width: 12px;
-  height: 12px;
+  width: 22px;
+  height: 22px;
   cursor: pointer;
   /* vertical-align: middle; */
   /* padding: 12px; */
   display: inline-block;
 
-  padding: 0 9px 9px 9px;
+  /* padding: 0 9px 9px 9px; */
 }
 .editIcon {
   /* background: url("../assets/edit.svg") no-repeat center center; */
   /* background-size: contain; */
-  width: 12px;
-  height: 12px;
+  width: 22px;
+  height: 22px;
   cursor: pointer;
   /* vertical-align: middle; */
   /* margin-left: 20px; */
 
-  padding: 0 9px 9px 9px;
+  /* padding: 0 9px 9px 9px; */
   display: inline-block;
 }
 .plusHide {

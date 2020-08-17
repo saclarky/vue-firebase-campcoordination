@@ -9,8 +9,7 @@
               
               <div class="row rowStyle">
                <span class="rowItem">Edit date and time: </span>
-                
-                 <datetime-picker id="lbdtp" placeholder="Add date and time." :dayStr='lbds' :timeStr="lbts" btnStr="Save" timeType="minute" v-model="editEntryDate" ></datetime-picker>
+                <datetime-picker id="lbdtp2" placeholder="Add date and time." :dayStr='lbds' :timeStr="lbts" btnStr="Save" timeType="minute" v-model="editEntryDate" ></datetime-picker>
               </div>
                 
   <div class="row rowStyle">
@@ -30,13 +29,7 @@
 </template>
 
 <script>
-// import DateTimePicker from 'vue-vanilla-datetime-picker';
-import { DatetimePicker } from '@livelybone/vue-datepicker';
-
 export default {
-  components: {
-    'datetime-picker': DatetimePicker
-  },
   data() {
     return {
             lbds: ["Su","M","T","W","Th","F","S"],
@@ -77,9 +70,6 @@ export default {
 </script>
 
 <style scoped>
- /* livelybone css */
-@import "../../../node_modules/@livelybone/vue-datepicker/lib/css/index.css";
-
 .columnStyle {
   justify-content: center;
 }

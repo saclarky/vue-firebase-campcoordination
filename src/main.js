@@ -20,6 +20,14 @@ Vue.use(VCalendar);
 //   ...,                // ...other defaults
 // });
 
+import { Datepicker, DatetimePicker, DateRangePicker } from '@livelybone/vue-datepicker';
+
+// Global register
+Vue.component('datepicker', Datepicker);
+// Vue.component('timepicker', Timepicker);
+Vue.component('datetime-picker', DatetimePicker);
+Vue.component('date-range-picker', DateRangePicker);
+
 Vue.config.productionTip = false
 console.log('new view')
 // new Vue({

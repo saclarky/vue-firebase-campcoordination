@@ -1445,7 +1445,7 @@ export const store = new Vuex.Store({
               let hour = parseInt(data.ids[doc].split(':')[0])
               let min = parseInt(data.ids[doc].split(':')[1].split(' ')[0])
               let tock = data.ids[doc].split(':')[1].split(' ')[1]
-              if (tock === 'PM') {
+              if (hour != 12 && tock === 'PM') {
                 hour = hour + 12
               }
               if (hour == 12 && tock == "AM") {

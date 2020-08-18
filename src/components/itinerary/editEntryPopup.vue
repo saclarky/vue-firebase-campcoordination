@@ -9,7 +9,9 @@
               
               <div class="row rowStyle">
                <span class="rowItem">Edit date and time: </span>
-                <datetime-picker id="lbdtp2" placeholder="Add date and time." :dayStr='lbds' :timeStr="lbts" btnStr="Save" timeType="minute" v-model="editEntryDate" ></datetime-picker>
+               <vue-timepicker format="hh:mm A" :minute-interval="10" v-model="editEntryTime"></vue-timepicker>
+                <v-date-picker mode="single" v-model="editEntryDate" is-inline />
+               
               </div>
                 
   <div class="row rowStyle">
@@ -29,12 +31,13 @@
 </template>
 
 <script>
+import VueTimepicker from 'vue2-timepicker';
 export default {
+  components: { VueTimepicker },
   data() {
     return {
-            lbds: ["Su","M","T","W","Th","F","S"],
-      lbts: ["H","M","S"],
         editEntryDate: this.entry.dateJS,
+        editEntryTime: this.entry.dateJS,
        items: this.entry.entry
     }
   },
@@ -47,10 +50,28 @@ export default {
          this.$toasted.show("No changes made!")
          return
        }
+       if (!this.editEntryTime) {
+        this.$toasted.show("Please add a time.");
+        return;
+      }
+      let h;
+      if (this.editEntryTime.hh != 12 && this.editEntryTime.A === "PM") {     
+        h = parseInt(this.editEntryTime.hh) + 12        
+      } else if (this.editEntryTime.hh == 12 && this.editEntryTime.A == "AM") {
+        h = 0;
+      } else {
+        h = this.editEntryTime.hh;
+      }
       let data = {
         id: this.entry.id,
         tid: this.tid,
-        newDate: this.editEntryDate,
+        newDate: new Date(
+          this.editEntryDate.getFullYear(),
+          this.editEntryDate.getMonth(),
+          this.editEntryDate.getDate(),
+          h,
+          this.editEntryTime.mm
+        ),
         items: this.items
       };
      

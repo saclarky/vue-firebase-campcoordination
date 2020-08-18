@@ -3,10 +3,11 @@
   
       <div class="lgCol datesData" v-for="date in thisTripDatesGetter" :key="date.id">
         <p>
-          {{date.user}}
-          <span :class="{display:date.flexible, hide:!date.flexible}">(flexible)</span>
-          <span :class="{display:!date.flexible, hide:date.flexible}">(hard)</span>
-          : {{date.startDate}} - {{date.endDate}}
+          <!-- {{date.user}} -->
+          <!-- <span :class="{display:date.flexible, hide:!date.flexible}">(flexible)</span> -->
+          <!-- <span :class="{display:!date.flexible, hide:date.flexible}">(hard)</span> -->
+          <!-- :  -->
+         <span class='theDates'> {{date.startDate}} - {{date.endDate}} </span>
           <span
             class="up"
             @click="vote(true, date.id)"
@@ -74,6 +75,7 @@ export default {
 }
 .datesData {
   padding-left: 20px;
+  margin-bottom: 20px;
 }
 .showVote {
   background: url("../../assets/check_circle.svg") no-repeat center center;
@@ -115,11 +117,15 @@ export default {
   /* justify-content: center; */
   align-items: center;
   margin-left: 15px;
+  color: gray;
 }
 .display {
   display: inline-block;
 }
 .hide {
   display: none;
+}
+.theDates {
+    font-weight: bold;
 }
 </style>

@@ -3,11 +3,7 @@
     <div class="content">
       <div>
         <div>
-          <div class="row rowStyle">
-            <!-- todo move to trip col1 -->
-            <button @click="toggleNewItinEntry">Add Entry</button>
-
-          </div>
+         
           <div class="categoryGrid">
             <div class="categoryBlock" v-for="(day, date) in thisTripItineraryGrouped" :key="date">
               <div class="categoryHeader">
@@ -86,7 +82,7 @@
       :id="thisItemID"
       :tid="thisTrip.id"
     ></deleteEntryPopup>
-    <newItinEntryPopup v-if='showNewItinEntry' @close="toggleNewItinEntry" :tid="thisTrip.id"></newItinEntryPopup>
+   
   </div>
 </template>
 
@@ -96,7 +92,6 @@ import editItinDatePopup from "./editItinDatePopup";
 import deleteItinDatePopup from "./deleteItinDatePopup";
 import editEntryPopup from "./editEntryPopup";
 import deleteEntryPopup from "./deleteEntryPopup";
-import newItinEntryPopup from './newItinEntryPopup';
 
 export default {
   created() {
@@ -112,8 +107,7 @@ export default {
     editItinDatePopup,
     deleteItinDatePopup,
     editEntryPopup,
-    deleteEntryPopup,
-    newItinEntryPopup
+    deleteEntryPopup
   },
   computed: {
     ...mapState(["thisTrip"]),
@@ -121,7 +115,7 @@ export default {
   },
   data: function () {
     return {
-      showNewItinEntry: false,
+      
       icons: {
         upArrowIcon: true,
         downArrowIcon: false,
@@ -184,10 +178,7 @@ export default {
       this.icons = { upArrowIcon: false, downArrowIcon: true };
     },
 
-    // ITINERARY ENTRIES
-    toggleNewItinEntry() {
-      this.showNewItinEntry = !this.showNewItinEntry;
-    },
+   
     toggleUpdateItem(item) {
       this.showUpdateItem = !this.showUpdateItem;
       this.thisEntry = item;

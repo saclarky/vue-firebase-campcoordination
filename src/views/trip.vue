@@ -24,23 +24,7 @@
               Dates
               <button @click="toggleTripDatesPopup">Suggest New Dates</button>
             </div>
-            <div class="lgCol datesData" v-for="date in thisTripDatesGetter" :key="date.id">
-              <p>
-                {{date.user}}
-                <span :class="{display:date.flexible, hide:!date.flexible}">(flexible)</span>
-                <span :class="{display:!date.flexible, hide:date.flexible}">(hard)</span>
-                : {{date.startDate}} - {{date.endDate}}
-                <span
-                  class="up"
-                  @click="vote(true, date.id)"
-                ></span>
-                <span class="down" @click="vote(false, date.id)"></span>
-                <span v-for="(vote, name) in date.votes" :key="name" class="votes">
-                  <span :class="{showVote:vote, noVote:!vote}"></span>
-                  <span class="votesText">{{name}}</span>
-                </span>
-              </p>
-            </div>
+          <dates></dates>
           </div>
           <newTripDatesPopup
             v-if="showTripDatesPopup"
@@ -119,12 +103,13 @@
           <div class="row splitPane">
             <div class="smCol rightBorder">
               Itinerary
+              <button @click="toggleNewItinEntry">Add Entry</button>
             </div>
             <div class="lgCol datesData">
               <itinerary></itinerary>
             </div>
             </div>
-            
+             <newItinEntryPopup v-if='showNewItinEntry' @close="toggleNewItinEntry" :tid="thisTrip.id"></newItinEntryPopup>
           
           <div class="gridItem">
             <h4>Logistics</h4>
@@ -150,11 +135,13 @@
 <script>
 import { mapState, mapGetters } from "vuex";
 import inviteCamperPopup from "../components/inviteCamperPopup";
-import newTripDatesPopup from "../components/newTripDatesPopup";
+import dates from "../components/dates/dates";
+import newTripDatesPopup from "../components/dates/newTripDatesPopup";
 import gear from '../components/gear'
 import meals from "../components/meals";
 import subnav from "../components/subnav";
 import itinerary from "../components/itinerary/itinerary"
+import newItinEntryPopup from '../components/itinerary/newItinEntryPopup';
 
 export default {
   name: "trip",
@@ -167,11 +154,13 @@ export default {
   },
   components: {
     subnav,
+    dates,
     newTripDatesPopup,
     inviteCamperPopup,
     gear,
     meals,
-    itinerary
+    itinerary,
+    newItinEntryPopup
   },
   computed: {
     ...mapState([
@@ -180,19 +169,26 @@ export default {
       "thisTripCampersNo",
       "thisTripCampersPending",
     ]),
-    ...mapGetters(["thisTripDatesGetter", "thisTripInviteLogs"]),
+    ...mapGetters(["thisTripInviteLogs"]),
   },
   data: function () {
     return {
+      showTripDatesPopup: false,
+      showNewItinEntry: false,
       showDashboard: true,
       showMessages: true,
       showInviteCamper: false,
-      showCamperActivityLog: false,
-      showTripDatesPopup: false
+      showCamperActivityLog: false
     };
   },
   methods: {
-   
+     toggleTripDatesPopup() {
+      this.showTripDatesPopup = !this.showTripDatesPopup;
+    },
+    // ITINERARY ENTRIES
+    toggleNewItinEntry() {
+      this.showNewItinEntry = !this.showNewItinEntry;
+    },
     toggleAddCamper() {
       this.showInviteCamper = !this.showInviteCamper;
     },
@@ -234,30 +230,9 @@ export default {
       } else {
         this.$toasted.show("Cannot delete trip owner.");
       }
-    },
-    toggleTripDatesPopup() {
-      this.showTripDatesPopup = !this.showTripDatesPopup;
-    },
+    }
     
-    vote(v, i) {
-      let data = {
-        tid: this.thisTrip.id,
-        vote: v,
-        dateID: i,
-      };
-      console.log("vote ", data);
-      // save to the trip dates document "votes" object
-      this.$store
-        .dispatch("tripDatesVote", data)
-        .then(() => {
-          this.$toasted.show("Voted!");
-        })
-        .catch((e) => {
-          console.log(e);
-          this.$toasted.show(e.message);
-        });
-      // disable whichever vote chosen, but allow to change vote
-    },
+    
   },
 };
 </script>

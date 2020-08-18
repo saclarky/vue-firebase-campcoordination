@@ -402,7 +402,18 @@ export const store = new Vuex.Store({
   },
 
   actions: {
-
+    logout: function() {
+      fb.auth
+        .signOut()
+        .then(() => {
+          console.log('then')
+          this.$store.dispatch("clearData"); // authStateChange actually can do this?
+          this.$router.push("/login");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
     //Should automatically update prfile changes from action below? or is that a mutation?
     // Issue when registering new user this causes error, no profile yet so... binding at dashboard page now
     // bindProfileRef:

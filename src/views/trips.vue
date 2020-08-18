@@ -118,6 +118,9 @@ export default {
 </script>
 
 <style scoped>
+.main {
+  top: 81px;
+}
 /* HERO CSS */
 .hero {
   display: flex;

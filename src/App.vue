@@ -1,19 +1,21 @@
 <template>
   <div id="app">
     <navigation id="nav"></navigation>
+    <navigationUser v-if="currentUser" id="navUser"></navigationUser>
     <router-view/>
   </div>
 </template>
 
 <script>
 console.log("App!")
-// import {mapState} from 'vuex'
+import {mapState} from 'vuex'
 import navigation from './components/navigation.vue'
+import navigationUser from './components/navigationUser'
 export default {
   
-  components: {navigation},
+  components: {navigation, navigationUser},
   computed: {
-    // ...mapState(['currentUser'])
+    ...mapState(['currentUser'])
   }
 }
 </script>

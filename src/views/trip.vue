@@ -319,7 +319,7 @@ h4 {
 }
 .main {
   position: relative;
-  top: 100px;
+  top: 116px;
 }
 /* Main Content */
 .gridWrapper {

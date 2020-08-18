@@ -3,30 +3,46 @@
     <section class='nav'>
       <div>
         <!-- <div class="logo-wrap"><i class="material-icons"> near_me </i>	</div> -->
-        <router-link to="home" class="hero-icon"></router-link>
+      
       </div>
       <div class='row rowStyle'>
-        <div v-if="!currentUser">
-          <router-link to="/login">Login</router-link>
-        </div>        
-        <div v-if="currentUser" class="nav-menu">
-          <div>Hi, {{currentUser.displayName}}!</div>
-          
+              
+          <div class="menu-item" >
+          <router-link to="/trips">Trips</router-link>
         </div>
-       
+         
+            <div class="menu-item" >
+              <router-link to="/dashboard">Dashboard</router-link>
+            </div>
+            <div class="menu-item" >
+              <router-link to="/settings">Settings</router-link>
+            </div>
+            <div class="menu-item">
+              <a @click="logout">Logout</a>
+            </div>
+      
+   
+      
       </div>
     </section>
   </header>
 </template>
 
 <script>
-import { mapState } from "vuex";
+
 
 export default {
-  
-  computed: {
-    ...mapState(["currentUser"]),
-  }  
+  data: function () {
+    return {
+    };
+  },
+ 
+  methods: {
+    
+    logout() {
+      this.$store.dispatch('logout')
+    },
+  },
 };
 </script>
 
@@ -36,25 +52,24 @@ section {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 30px;
+  padding: 0 30px;
 }
 .rowStyle {
   align-items:center;
 }
 .nav {
-  top: 0;
+  top: 51px;
     left: 0;
     right: 0;
     position: fixed;
-    background: #ececec;
+    background: #e2e2e2;
     z-index: 100;
 }
 .nav-menu {
-  /* padding: 0 15px; */
+  padding: 0 15px;
   /* background-color: #f7f7f7; */
   width: 120px;
-  font-size: 1.2rem;  
-  color: #054d6b;
+  font-size: 1.2rem;
 }
 .menu {
   position: absolute;
@@ -66,20 +81,18 @@ section {
 }
 /* .selected-menu-class {    
 } */
-.menu-item {
-  font-size: 1.1rem;
-  padding: 15px;
-}
+
 .col {
   display: flex;
   margin: 0 10px;
 }
 a {
   color: #09709a;
+  font-size: 1.1rem;
 }
 
 a.router-link-exact-active {
-  color: #42b983;
+  color: #43c3f7;
 }
 /* ul {
     display: flex;

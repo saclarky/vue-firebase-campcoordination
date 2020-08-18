@@ -4,17 +4,8 @@
       <div>
         <div>
           <div class="row rowStyle">
-            <button @click="newEntry">Add Entry</button>
+            <button @click="toggleNewItinEntry">Add Entry</button>
 
-            <input v-model="newEntryText" id="item" placeholder="e.g. Carpool meet-up" />
-
-            <vue-timepicker
-              format="hh:mm A"
-              :minute-interval="10"
-              v-model="newEntryTime"
-              close-on-complete
-            ></vue-timepicker>
-            <v-date-picker mode="single" v-model="newEntryDate" />
           </div>
           <div class="categoryGrid">
             <div class="categoryBlock" v-for="(day, date) in thisTripItineraryGrouped" :key="date">
@@ -94,6 +85,7 @@
       :id="thisItemID"
       :tid="thisTrip.id"
     ></deleteEntryPopup>
+    <newItinEntryPopup v-if='showNewItinEntry' @close="toggleNewItinEntry" :tid="thisTrip.id"></newItinEntryPopup>
   </div>
 </template>
 
@@ -103,7 +95,8 @@ import editItinDatePopup from "./editItinDatePopup";
 import deleteItinDatePopup from "./deleteItinDatePopup";
 import editEntryPopup from "./editEntryPopup";
 import deleteEntryPopup from "./deleteEntryPopup";
-import VueTimepicker from "vue2-timepicker";
+import newItinEntryPopup from './newItinEntryPopup';
+
 export default {
   created() {
     if (this.$store.state.thisTrip.group === true) {
@@ -119,7 +112,7 @@ export default {
     deleteItinDatePopup,
     editEntryPopup,
     deleteEntryPopup,
-    VueTimepicker,
+    newItinEntryPopup
   },
   computed: {
     ...mapState(["thisTrip"]),
@@ -127,13 +120,7 @@ export default {
   },
   data: function () {
     return {
-      newEntryDate: "",
-      newEntryTime: {
-        hh: "08",
-        mm: "00",
-        a: "AM",
-      },
-      newEntryText: "",
+      showNewItinEntry: false,
       icons: {
         upArrowIcon: true,
         downArrowIcon: false,
@@ -197,6 +184,9 @@ export default {
     },
 
     // ITINERARY ENTRIES
+    toggleNewItinEntry() {
+      this.showNewItinEntry = !this.showNewItinEntry;
+    },
     toggleUpdateItem(item) {
       this.showUpdateItem = !this.showUpdateItem;
       this.thisEntry = item;
@@ -209,51 +199,7 @@ export default {
     toggleNewEntry() {
       this.showNewDay = !this.showNewDay;
     },
-    newEntry: function () {
-      if (!this.newEntryText) {
-        this.$toasted.show("Please add a description.");
-        return;
-      }
-      if (!this.newEntryDate) {
-        this.$toasted.show("Please add a date.");
-        return;
-      }
-      if (!this.newEntryTime) {
-        this.$toasted.show("Please add a time.");
-        return;
-      }
-      let h;
-      if (this.newEntryTime.hh != 12 && this.newEntryTime.A === "PM") {     
-        h = parseInt(this.newEntryTime.hh) + 12        
-      } else if (this.newEntryTime.hh == 12 && this.newEntryTime.A == "AM") {
-        h = 0;
-      } else {
-        h = this.newEntryTime.hh;
-      }
-      let data = {
-        tid: this.thisTrip.id,
-        date: new Date(
-          this.newEntryDate.getFullYear(),
-          this.newEntryDate.getMonth(),
-          this.newEntryDate.getDate(),
-          h,
-          this.newEntryTime.mm
-        ),
-        // time: this.newEntryTime,
-        items: this.newEntryText,
-      };
-      console.log(data);
-      // Add new date to tripDates
-      // this.$store.dispatch('addItinEntry', data).then(() => {
-      //   this.$emit("close");
-      //   this.newEntryText=''
-      //   this.newEntryDate=''
-      //  this.$toasted.show('Entry added!')
-      // }).catch(e => {
-      //   console.log(e)
-      //   this.$toasted.show(e.message)
-      // })
-    },
+    
     toggleEditDate: function (date) {
       this.thisDate = date;
       var elementProm = [];

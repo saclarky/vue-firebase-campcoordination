@@ -30,18 +30,20 @@ section {
   align-items: center;
   /* justify-content: space-between; */
   padding: 10px 30px;
+  font-size: .8rem;
 }
 section > div {
   margin: 0 5px;
   border-right: 1px solid black;
 }
 header {
-  top: 51px;
+  top: 81px;
     left: 0;
     right: 0;
     position: fixed;
-    background: #e2e2e2;
+    background: #054d6b;
     z-index: 100;
+    color: white;
 }
 a {
   color: #09709a;

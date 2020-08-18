@@ -1,7 +1,7 @@
 <template>
   <header>
     <section>
-      <div><slot></slot></div>
+      <div class='tripTitle'><slot></slot></div>
       <div>Dates</div>
       <div>Campers</div>
       <div>Gear</div>
@@ -24,6 +24,9 @@ export default {
 </script>
 
 <style scoped>
+.tripTitle {
+  color: #43c3f7;
+}
 section {
   display: flex;
   flex-direction: row;

@@ -5,22 +5,27 @@
         <div class="modal-container">
           <div class="modal-body">
             <form v-on:submit.prevent class="column columnStyle">
-              
-              
               <div class="row rowStyle">
-               <span class="rowItem">Edit date and time: </span>
-               <vue-timepicker format="hh:mm A" :minute-interval="10" v-model="editEntryTime"></vue-timepicker>
-                <v-date-picker mode="single" v-model="editEntryDate" is-inline />
-               
+                <label for="editItinEntryPop" class="rowItem">Edit Entry:</label>
+                <input v-model="items" id="editItinEntryPop" :placeholder="items" />
               </div>
-                
-  <div class="row rowStyle">
-<label for='food' class="rowItem" >Edit Entry:</label>
-<input v-model='items' id='food' :placeholder='items'>
-</div>
               <div class="row rowStyle">
+                <span class="rowItem">Edit Time:</span>
+                <vue-timepicker
+                  format="hh:mm A"
+                  :minute-interval="10"
+                  v-model="editEntryTime"
+                  close-on-complete
+                ></vue-timepicker>
+              </div>
+              <div class="row rowStyle">
+                <span class="rowItem">Edit Date:</span>
+                <v-date-picker mode="single" v-model="editEntryDate" is-inline />
+              </div>
+
+              <div class="row rowStyle2">
                 <input type="submit" class="rowItem" @click="updateEntry" value="Save" />
-                <button class='rowItem' @click="$emit('close')">Cancel</button>
+                <button class="rowItem" @click="$emit('close')">Cancel</button>
               </div>
             </form>
           </div>
@@ -31,32 +36,82 @@
 </template>
 
 <script>
-import VueTimepicker from 'vue2-timepicker';
+import VueTimepicker from "vue2-timepicker";
 export default {
+ created() {
+this.editEntryTime = this.objTime
+ },
   components: { VueTimepicker },
   data() {
     return {
-        editEntryDate: this.entry.dateJS,
-        editEntryTime: this.entry.dateJS,
-       items: this.entry.entry
-    }
+      editEntryDate: this.entry.dateJS,
+      editEntryTime: {
+        hh: '',
+        mm: '',
+        A: "",
+      },
+      items: this.entry.entry,
+    };
   },
- 
-  props: ['entry','tid'],
+  computed: {
+    objTime: function() {
+      let h, aa, m;
+      //12pm - 11pm
+      if (this.entry.dateJS.getHours() >= 12) {
+        aa = "PM";
+        if (this.entry.dateJS.getHours() > 12) {
+          h = this.entry.dateJS.getHours() - 12;
+        } else {
+          h = this.entry.dateJS.getHours();
+        }
+      }
+      // midnight
+      else if (this.entry.dateJS.getHours() == 0) {
+        h = 12;
+        aa = "AM";
+      } else {
+        aa = "AM";
+        h = this.entry.dateJS.getHours();
+      }
+      if (String(this.entry.dateJS.getMinutes()).length < 2) {
+        m = "0" + String(this.entry.dateJS.getMinutes())
+      } else {
+        m =String(this.entry.dateJS.getMinutes())
+      }
+      return {hh: String(h), mm:m, A:aa}
+    }    
+  },
+  props: ["entry", "tid"],
   methods: {
-     updateEntry(e) {
-       e.preventDefault();
-       if (this.editEntryDate == this.entry.dateJS && this.items == this.entry.entry) {
-         this.$toasted.show("No changes made!")
-         return
-       }
-       if (!this.editEntryTime) {
-        this.$toasted.show("Please add a time.");
+    updateEntry(e) {
+      e.preventDefault();
+      if (
+        this.editEntryDate == this.entry.dateJS &&
+        this.items == this.entry.entry &&
+        this.editEntryTime.hh == this.objTime.hh &&
+        this.editEntryTime.mm == this.objTime.mm &&
+        this.editEntryTime.A == this.objTime.A
+      ) {
+        this.$toasted.show("No changes made!");
         return;
       }
+      // If no changes made to just time
+      if (this.editEntryTime.hh=="" && this.editEntryTime.mm=="" && this.editEntryTime.A=='') {
+        this.editEntryTime = this.objTime
+      } else if (this.editEntryTime.hh=="") {
+        this.$toasted.show("Please choose an hour.")
+        return
+      }else if (this.editEntryTime.mm=="") {
+        this.$toasted.show("Please choose minutes.")
+        return
+      }else if (this.editEntryTime.A=="") {
+        this.$toasted.show("Please choose AM or PM.")
+        return
+      }
+
       let h;
-      if (this.editEntryTime.hh != 12 && this.editEntryTime.A === "PM") {     
-        h = parseInt(this.editEntryTime.hh) + 12        
+      if (this.editEntryTime.hh != 12 && this.editEntryTime.A === "PM") {
+        h = parseInt(this.editEntryTime.hh) + 12;
       } else if (this.editEntryTime.hh == 12 && this.editEntryTime.A == "AM") {
         h = 0;
       } else {
@@ -72,21 +127,23 @@ export default {
           h,
           this.editEntryTime.mm
         ),
-        items: this.items
+        items: this.items,
       };
-     
-      console.log(data)
+
+      console.log(data);
       // Add new date to tripDates
-      this.$store.dispatch('updateItinEntryAction', data).then(() => {
-        this.$emit("close");
-       this.$toasted.show('Entry updated!')
-      }).catch(e => {
-        console.log(e)
-        this.$toasted.show(e.message)
-      })
-    }
-   
-  }
+      this.$store
+        .dispatch("updateItinEntryAction", data)
+        .then(() => {
+          this.$emit("close");
+          this.$toasted.show("Updated!");
+        })
+        .catch((e) => {
+          console.log(e);
+          this.$toasted.show(e.message);
+        });
+    },
+  },
 };
 </script>
 
@@ -170,6 +227,11 @@ button.rowItem {
   transform: scale(1.1);
 }
 .rowStyle {
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+}
+.rowStyle2 {
   justify-content: center;
   align-items: center;
   margin: 10px 0;
@@ -180,10 +242,9 @@ button {
 }
 .header {
   margin-bottom: 15px;
- 
 }
 .teal {
-   color: #42b983;
+  color: #42b983;
 }
 .smText {
   font-size: 1rem;

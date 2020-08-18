@@ -6,22 +6,23 @@
           <div class="modal-body">
             <form v-on:submit.prevent class="column columnStyle">
                <div class="row rowStyle">
-               <span class="rowItem">Set time: </span>              
+<label for='itinAdd' class="rowItem" >Entry:</label>
+ <input v-model="newEntryText" id="itinAdd" placeholder="e.g. Carpool meet-up" />
+</div>
+               <div class="row rowStyle">
+               <span class="rowItem">Set Time: </span>              
               <vue-timepicker format="hh:mm A" :minute-interval="10" v-model="newEntryTime" close-on-complete></vue-timepicker>
               </div>
               
-              <div class="row rowStyle">
-               <span class="rowItem">Set date: </span>
-                <v-date-picker mode="single" v-model="newEntryDate" is-inline />               
+              <div class="column leftColumn">
+               <span class="rowItem">Set Date: </span>
+                <v-date-picker style="align-self: center;" mode="single" v-model="newEntryDate" is-inline />               
               </div>
                 
-  <div class="row rowStyle">
-<label for='itinAdd' class="rowItem" >Add Entry:</label>
- <input v-model="newEntryText" id="itinAdd" placeholder="e.g. Carpool meet-up" />
-</div>
-              <div class="row rowStyle">
+ 
+              <div class="row rowStyle2">
                 <input type="submit" class="rowItem" @click="addEntry" value="Save" />
-                <button class='rowItem' @click="$emit('close')">Cancel</button>
+               <button class='rowItem' @click="$emit('close')">Cancel</button>
               </div>
             </form>
           </div>
@@ -49,7 +50,7 @@ export default {
  
   props: ['tid'],
   methods: {
-     newEntry(e) {
+     addEntry(e) {
        e.preventDefault();
       if (!this.newEntryText) {
         this.$toasted.show("Please add a description.");
@@ -72,7 +73,7 @@ export default {
         h = this.newEntryTime.hh;
       }
       let data = {
-        tid: this.thisTrip.id,
+        tid: this.tid,
         date: new Date(
           this.newEntryDate.getFullYear(),
           this.newEntryDate.getMonth(),
@@ -179,6 +180,11 @@ button.rowItem {
   transform: scale(1.1);
 }
 .rowStyle {
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+}
+.rowStyle2 {
   justify-content: center;
   align-items: center;
   margin: 10px 0;

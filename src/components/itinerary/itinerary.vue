@@ -4,6 +4,7 @@
       <div>
         <div>
           <div class="row rowStyle">
+            <!-- todo move to trip col1 -->
             <button @click="toggleNewItinEntry">Add Entry</button>
 
           </div>

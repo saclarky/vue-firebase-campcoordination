@@ -176,7 +176,7 @@ export default {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: space-around;
   background-color: #d6dee6d9;
 }
 .tripContent:hover {

@@ -1098,6 +1098,19 @@ export const store = new Vuex.Store({
     tripDatesDeleteAction: (context, data) => {
       return fb.db.collection('tripDates').doc(data.tid).collection('dates').doc(data.id).delete()
     },
+    finalizeTripDatesAction: (context, data) => {
+      return fb.db.collection("trips").doc(data.tid).update({
+        finalDates: data.final,
+        dateStart: data.start,
+        dateEnd: data.end
+      })
+    },
+   unfinalizeTripDatesAction: (context, data) => {
+      return fb.db.collection("trips").doc(data.tid).update({
+        finalDates: false
+      })
+    },
+
     // PACKING LIST MANIPULATION // GEAR
     updateGearAction: ({ state }, data) => {
       console.log("action to update a group gear item")

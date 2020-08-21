@@ -26,9 +26,11 @@
           <div id="datesSection" class="row splitPane scroller">
             <div class="smCol rightBorder">
               Dates
-              <button @click="toggleTripDatesPopup">Suggest New Dates</button>
+              <button v-if="!thisTrip.finalDates" @click="toggleTripDatesPopup">Suggest New Dates</button>
+             
             </div>
-            <dates></dates>
+            <dates v-if="!thisTrip.finalDates"></dates>
+            <finalDates :thisTripDateStart="thisTrip.dateStart" :thisTripDateEnd="thisTrip.dateEnd" v-if="thisTrip.finalDates"></finalDates>
           </div>
           <newTripDatesPopup
             v-if="showTripDatesPopup"
@@ -146,6 +148,7 @@
 import { mapState, mapGetters } from "vuex";
 import inviteCamperPopup from "../components/inviteCamperPopup";
 import dates from "../components/dates/dates";
+import finalDates from "../components/dates/finalDates"
 import newTripDatesPopup from "../components/dates/newTripDatesPopup";
 import gear from '../components/gear'
 import meals from "../components/meals";
@@ -224,6 +227,7 @@ t.classList.remove('active')
   components: {
     // subnav,
     dates,
+    finalDates,
     newTripDatesPopup,
     inviteCamperPopup,
     gear,

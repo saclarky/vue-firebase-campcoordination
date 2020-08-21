@@ -4,6 +4,7 @@
         <v-calendar ref="datesCal" :attributes="attrs"></v-calendar>
       </div>
   <div class='lgCol'>
+   
       <div class="datesData" v-for="date in thisTripDatesGetter" :key="date.id">
         <div class='datesRow'>
            <span class="deleteIcon" @click="toggleDatesDelete(date.id)">
@@ -21,6 +22,7 @@
             @click="vote(true, date.id)"
           ></span>
           <span class="down" @click="vote(false, date.id)"></span>
+          <button class='choose' @click='finalDates(date.startDate, date.endDate)'>Finalize These Dates</button>
           </div>
           <span v-for="(vote, name) in date.votes" :key="name" class="votes">
             <span :class="{showVote:vote, noVote:!vote}"></span>
@@ -110,6 +112,29 @@ const calendar = this.$refs.datesCal
           this.$toasted.show(e.message);
         });
       // disable whichever vote chosen, but allow to change vote
+    },
+    finalDates(start, end) {
+      // trip.finalDates==true
+     console.log('final dates')
+     let data = {
+       final: true,
+        tid: this.thisTrip.id,
+        start: new Date(Date.parse(start)),
+        end: new Date(Date.parse(end))
+      };
+      console.log(data)
+      this.$store
+        .dispatch("finalizeTripDatesAction", data)
+        .then(() => {
+          this.$toasted.show("Deleted dates!");
+        })
+        .catch((e) => {
+          console.log(e);
+          this.$toasted.show(e.message);
+        });
+      //trip.dateStart/End = dates
+
+
     }
   }
 };
@@ -212,5 +237,8 @@ const calendar = this.$refs.datesCal
   display: inline-block;
 
   /* padding: 0 9px 9px 9px; */
+}
+.choose {
+  margin: 0 15px;
 }
 </style>

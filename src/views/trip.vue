@@ -361,11 +361,13 @@ h4 {
 }
 .hero-title {
   font-size: 1.5rem;
-  font-family: 'Oxygen', sans-serif;
+  /* font-family: 'Heebo', sans-serif; */
+  font-weight: normal;
 }
 .heroSubTitle {
   font-size: 1.1rem;
-  font-family: 'Oxygen', sans-serif;
+  /* font-family: 'Heebo', sans-serif; */
+  font-weight: normal;
 }
 .main {
   position: relative;

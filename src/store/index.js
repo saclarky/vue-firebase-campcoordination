@@ -1095,7 +1095,9 @@ export const store = new Vuex.Store({
         [tmp]: data.vote
       })
     },
-
+    tripDatesDeleteAction: (context, data) => {
+      return fb.db.collection('tripDates').doc(data.tid).collection('dates').doc(data.id).delete()
+    },
     // PACKING LIST MANIPULATION // GEAR
     updateGearAction: ({ state }, data) => {
       console.log("action to update a group gear item")

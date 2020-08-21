@@ -31,7 +31,7 @@ export default {
 </script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Oxygen&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Heebo&display=swap');
 @import '../node_modules/vue2-timepicker/dist/VueTimepicker.css';
 html {
    overflow: auto;
@@ -53,8 +53,8 @@ body {
 }
 
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  /* font-family: 'Oxygen', sans-serif; */
+  /* font-family: Avenir, Helvetica, Arial, sans-serif; */
+  font-family: 'Heebo', sans-serif;
   /* -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale; */
   text-align: center;

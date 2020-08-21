@@ -1,11 +1,12 @@
 <template>
   <header>
-    <section>
-      <div class='tripTitle'><slot></slot></div>
-      <div>Dates</div>
-      <div>Campers</div>
-      <div>Gear</div>
-      <div>Meals</div>
+    <section id="subnavSection">
+      <a href="#topScroll" @click="scrollingTrip"><slot></slot></a>
+      <a href="#datesSection" @click="scrollingTrip">Dates</a>
+      <a href="#campersSection" @click="scrollingTrip">Campers</a>
+      <a href="#gearSection" @click="scrollingTrip">Gear</a>
+      <a href="#mealsSection" @click="scrollingTrip">Meals</a>
+      <a href="#itinerarySection" @click="scrollingTrip">Itinerary</a>
     </section>
   </header>
 </template>
@@ -19,12 +20,25 @@ export default {
   },
   computed: {
   },
-  methods: {}
+  methods: {
+    scrollingTrip: function(e) {
+      e.preventDefault()
+      console.log(e.target.hash)
+      var d = e.target.hash.split("#")[1]
+     var ss = d=='topScroll' ? 0 : document.getElementById(d).offsetTop 
+     console.log(ss)
+      window.scroll({top:ss, left:0, behavior:'smooth'})
+//       document.getElementById('subnavSection').children.forEach(t => {
+// t.classList.remove('active')
+//    })
+  //  document.getElementById(e.target.hash.split("#")[1]).classList.add('active')
+    }
+  }
 };
 </script>
 
 <style scoped>
-.tripTitle {
+.active {
   color: #43c3f7;
 }
 section {
@@ -35,9 +49,9 @@ section {
   padding: 10px 30px;
   font-size: .8rem;
 }
-section > div {
-  margin: 0 5px;
-  border-right: 1px solid black;
+section > a {
+  margin: 0 10px;
+  /* border-right: 1px solid black; */
 }
 header {
   top: 81px;
@@ -49,11 +63,11 @@ header {
     color: white;
 }
 a {
-  color: #09709a;
+  color: #8cb6c7;
 }
 
-a.router-link-exact-active {
-  color: #42b983;
+a:hover {
+  color: #43c3f7;
 }
 .hero-icon {
   background: url("../assets/Camping.png") no-repeat center center;

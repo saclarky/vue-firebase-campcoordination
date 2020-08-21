@@ -1,30 +1,34 @@
 <template>
-  <div class="main">
-    <subnav>{{thisTrip.name}} ({{thisTrip.owner}})</subnav>
+  <div id="topScroll" class="main">
+   
     <div class="hero">
       <div class="hero-top" id="nav-bar">
         <h1 class="hero-title">{{thisTrip.name}}</h1>
-        <div class='hero-icon'></div>
-        <h2 class='heroSubTitle'> Started by {{thisTrip.owner}}</h2>
+        <div class="hero-icon"></div>
+        <h2 class="heroSubTitle">Started by {{thisTrip.owner}}</h2>
       </div>
       <div class="hero-bottom">
-    <div class="hero-content">
-    <!-- TODO: new trip action, hidden form? -->
-    <div>Trip type: <span v-if="thisTrip.group===true">Group</span>  <span v-if="thisTrip.group===false">Individual</span></div>
-    <!-- <a v-if="!thisTrip.group" @click="toggleTripType" class="hero-cta-button button grow">Make Group Trip</a> -->
+        <div class="hero-content">
+          <!-- TODO: new trip action, hidden form? -->
+          <div>
+            Trip type:
+            <span v-if="thisTrip.group===true">Group</span>
+            <span v-if="thisTrip.group===false">Individual</span>
+          </div>
+          <!-- <a v-if="!thisTrip.group" @click="toggleTripType" class="hero-cta-button button grow">Make Group Trip</a> -->
+        </div>
+      </div>
     </div>
-    </div>
-</div> 
 
     <div class="content">
       <div v-if="showDashboard" class="dashboard">
         <div class="gridWrapper">
-          <div class="row splitPane">
+          <div id="datesSection" class="row splitPane scroller">
             <div class="smCol rightBorder">
               Dates
               <button @click="toggleTripDatesPopup">Suggest New Dates</button>
             </div>
-          <dates></dates>
+            <dates></dates>
           </div>
           <newTripDatesPopup
             v-if="showTripDatesPopup"
@@ -32,7 +36,10 @@
             :tid="thisTrip.id"
           ></newTripDatesPopup>
 
-          <div :class="{row:true, splitPane:true, hide: !thisTrip.group}">
+          <div
+            id="campersSection"
+            :class="{row:true, splitPane:true, hide: !thisTrip.group, scroller:true}"
+          >
             <div class="smCol rightBorder">
               Campers
               <button @click="toggleAddCamper">Invite</button>
@@ -58,10 +65,19 @@
               </div>
             </div>
             <div>
-              <div>Activity Log<span @click="toggleCamperActivityLog" 
-              :class="{downArrowIcon: showCamperActivityLog, upArrowIcon: !showCamperActivityLog}"></span></div>
+              <div>
+                Activity Log
+                <span
+                  @click="toggleCamperActivityLog"
+                  :class="{downArrowIcon: showCamperActivityLog, upArrowIcon: !showCamperActivityLog}"
+                ></span>
+              </div>
               <!-- empty time fields/missing field dealt with in vuex getter -->
-              <div :class="{hide: showCamperActivityLog}" v-for="invite in thisTripInviteLogs" :key="invite.id">
+              <div
+                :class="{hide: showCamperActivityLog}"
+                v-for="invite in thisTripInviteLogs"
+                :key="invite.id"
+              >
                 <span class="logEntry">
                   {{invite.time}}
                   -
@@ -80,27 +96,21 @@
             </template>
           </inviteCamperPopup>
 
-
- <div class="row splitPane">
-            <div class="smCol rightBorder">
-              Gear
-            </div>
+          <div id="gearSection" class="row splitPane scroller">
+            <div class="smCol rightBorder">Gear</div>
             <div class="lgCol datesData">
               <gear></gear>
             </div>
-            </div>
+          </div>
 
-
-            <div class="row splitPane">
-            <div class="smCol rightBorder">
-              Meals
-            </div>
+          <div id="mealsSection" class="row splitPane scroller">
+            <div class="smCol rightBorder">Meals</div>
             <div class="lgCol datesData">
               <meals></meals>
             </div>
-            </div>
-        
-          <div class="row splitPane">
+          </div>
+
+          <div id="itinerarySection" class="row splitPane scroller">
             <div class="smCol rightBorder">
               Itinerary
               <button @click="toggleNewItinEntry">Add Entry</button>
@@ -108,9 +118,9 @@
             <div class="lgCol datesData">
               <itinerary></itinerary>
             </div>
-            </div>
-             <newItinEntryPopup v-if='showNewItinEntry' @close="toggleNewItinEntry" :tid="thisTrip.id"></newItinEntryPopup>
-          
+          </div>
+          <newItinEntryPopup v-if="showNewItinEntry" @close="toggleNewItinEntry" :tid="thisTrip.id"></newItinEntryPopup>
+
           <div class="gridItem">
             <h4>Logistics</h4>
             <div class="itemBody"></div>
@@ -139,7 +149,7 @@ import dates from "../components/dates/dates";
 import newTripDatesPopup from "../components/dates/newTripDatesPopup";
 import gear from '../components/gear'
 import meals from "../components/meals";
-import subnav from "../components/subnav";
+// import subnav from "../components/subnav";
 import itinerary from "../components/itinerary/itinerary"
 import newItinEntryPopup from '../components/itinerary/newItinEntryPopup';
 
@@ -151,9 +161,68 @@ export default {
       console.log("no trip, pushing to trips");
       this.$router.push({ path: "/trips" });
     }
+    
   },
+  mounted() {
+    console.log('mounted')
+// Cache selectors
+var topMenu = document.getElementById("subnavSection"),
+    // topMenuHeight = topMenu.outerHeight()+15,
+    // topMenuHeight = '116px',
+    // All list items
+    menuItems = topMenu.children,
+    // Divs corresponding to menu items
+    scrollItems = []
+    for(let i = 0; i < menuItems.length; i++) {
+      var itemA = menuItems[i].getAttribute("href").split('#')[1]
+      var item = document.getElementById(itemA) 
+      // console.log(item)
+      if (item) {scrollItems.push(item)}
+    }
+
+// Bind to scroll
+window.addEventListener('scroll', function() {
+   // Get container scroll position
+   var fromTop = window.pageYOffset+100;
+
+  //  console.log('window',window.pageYOffset,window.pageYOffset+116)
+   // Get id of current scroll item
+   var cur = []
+   scrollItems.forEach(function(t){
+    //  console.log(t.id,fromTop, t.offsetTop, t.getBoundingClientRect())
+     if (t.offsetTop < fromTop)
+       cur.push(t);
+   });
+  //  console.log(cur)
+   // Get the id of the current element
+   if(cur.length === 0) {
+     //empty, no matches
+     cur = [scrollItems[0]]
+    //  console.log(cur)
+   }
+   var id = cur[cur.length-1].id;
+  //  var id = cur[0].id
+  //  console.log(id)
+   menuItems.forEach(t => {
+t.classList.remove('active')
+
+    
+   })
+    menuItems.forEach(t => {
+
+    //  console.log(t.getAttribute("href"))
+     if(t.getAttribute("href") == '#'+id) {
+      //  console.log("MATCH")
+       t.classList.add('active')
+       return
+     }
+   })
+  //  // Set/remove active class
+ 
+    })
+      },
   components: {
-    subnav,
+    // subnav,
     dates,
     newTripDatesPopup,
     inviteCamperPopup,
@@ -182,6 +251,7 @@ export default {
     };
   },
   methods: {
+    
      toggleTripDatesPopup() {
       this.showTripDatesPopup = !this.showTripDatesPopup;
     },
@@ -238,6 +308,7 @@ export default {
 </script>
 
 <style scoped>
+
 h4 {
   margin: 0;
   padding: 0;
@@ -290,7 +361,7 @@ h4 {
   font-size: 1.2rem;
 }
 .heroSubTitle {
-  font-size:1.1rem;
+  font-size: 1.1rem;
 }
 .main {
   position: relative;
@@ -353,7 +424,7 @@ h4 {
   height: 15px;
   color: black;
   transform: rotate(90deg); /*TODO in gimp*/
-  display:inline-block;
+  display: inline-block;
   cursor: pointer;
   margin: 0 5px;
 }
@@ -365,7 +436,7 @@ h4 {
   color: black;
   transform: rotate(270deg); /*TODO in gimp*/
   cursor: pointer;
-  display:inline-block;
+  display: inline-block;
   margin: 0 5px;
 }
 .itemBody {

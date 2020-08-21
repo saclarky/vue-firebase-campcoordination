@@ -2,6 +2,7 @@
   <div id="app">
     <navigation id="nav"></navigation>
     <navigationUser v-if="currentUser" id="navUser"></navigationUser>
+   <subnav v-if='showSubnav'>{{thisTrip.name}}</subnav>
     <router-view/>
   </div>
 </template>
@@ -11,11 +12,20 @@ console.log("App!")
 import {mapState} from 'vuex'
 import navigation from './components/navigation.vue'
 import navigationUser from './components/navigationUser'
+import subnav from './components/subnav'
 export default {
   
-  components: {navigation, navigationUser},
+  components: {navigation, navigationUser,subnav},
   computed: {
-    ...mapState(['currentUser'])
+    showSubnav: function() {
+      // console.log()
+      if (this.$route.name=="trip") {
+        return true
+      } else {
+        return false
+      }
+    },
+    ...mapState(['currentUser','thisTrip'])
   }
 }
 </script>
@@ -63,8 +73,8 @@ a {
     text-decoration: none;
     display: inline-block;
     color: black;
-    font-size: 16pt;
-    transition: .2s;
+    /* font-size: 16pt; */
+    /* transition: .2s; */
 }
 .grow {
     -webkit-transition: all 0.5s ease-out;

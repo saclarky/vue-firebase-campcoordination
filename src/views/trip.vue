@@ -3,17 +3,17 @@
    
     <div class="hero">
       <div class="hero-top" id="nav-bar">
-        <h1 class="hero-title">{{thisTrip.name}}</h1>
-        <div class="hero-icon"></div>
-        <h2 class="heroSubTitle">Started by {{thisTrip.owner}}</h2>
+        <h1 class="hero-title hero-items">{{thisTrip.name}}</h1>
+        <div class="hero-icon hero-items"></div>
+        <h2 class="heroSubTitle hero-items">Started by {{thisTrip.owner}}</h2>
       </div>
       <div class="hero-bottom">
         <div class="hero-content">
           <!-- TODO: new trip action, hidden form? -->
-          <div>
-            Trip type:
-            <span v-if="thisTrip.group===true">Group</span>
-            <span v-if="thisTrip.group===false">Individual</span>
+          <div class='typeColor'>
+           
+            <span v-if="thisTrip.group===true">Group Trip</span>
+            <span v-if="thisTrip.group===false">Individual Trip</span>
           </div>
           <!-- <a v-if="!thisTrip.group" @click="toggleTripType" class="hero-cta-button button grow">Make Group Trip</a> -->
         </div>
@@ -316,7 +316,6 @@ h4 {
 }
 /* HERO CSS */
 .hero {
-  top: 100px;
   display: flex;
   flex-flow: column nowrap;
   background: linear-gradient(
@@ -326,28 +325,31 @@ h4 {
       rgba(255, 255, 255, 0),
       rgba(255, 255, 255, 0.5)
     ),
-    url(../assets/ryan-bahm-fMMpsyHCeK0-unsplash.jpg) no-repeat 0 -135px;
+    url(../assets/ryan-bahm-fMMpsyHCeK0-unsplash.jpg) no-repeat 0 -230px;
   background-size: cover;
-  height: 200px;
+  height: 150px;
   width: 100%;
+  justify-content: center;
   /*margin-bottom: 15px;*/
 }
 .hero-top {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* justify-content: space-between; */
-  /* padding: 15px 0; */
-  color: #f7ffff;
-  padding: 10px 5px 10px 5px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    /* padding: 15px 0; */
+    color: #f7ffff;
+    padding: 5px 0;
 }
-
+.hero-items {
+  margin: 0 5px;
+}
 .hero-bottom {
   display: flex;
   flex-direction: column;
   /* justify-content: center; */
   align-items: center;
-  flex: 1;
+  /* flex: 1; */
   padding: 0 15px;
 }
 .hero-icon {
@@ -355,13 +357,15 @@ h4 {
   background-size: contain;
   width: 30px;
   height: 30px;
-  margin-bottom: 15px;
+  margin-bottom: 8px;
 }
 .hero-title {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
+  font-family: 'Oxygen', sans-serif;
 }
 .heroSubTitle {
   font-size: 1.1rem;
+  font-family: 'Oxygen', sans-serif;
 }
 .main {
   position: relative;
@@ -533,5 +537,10 @@ h4 {
 }
 .buttonDisabled {
   display: none;
+}
+.typeColor {
+  color: white;
+  font-size: 1.3rem;
+  font-family: "Kalam", cursive;
 }
 </style>

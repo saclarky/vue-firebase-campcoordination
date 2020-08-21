@@ -1,7 +1,7 @@
 <template>
   <header>
     <section id="subnavSection">
-      <a href="#topScroll" @click="scrollingTrip"><slot></slot></a>
+      <a href="#topScroll" @click="scrollingTrip" class='active'><slot></slot></a>
       <a href="#datesSection" @click="scrollingTrip">Dates</a>
       <a href="#campersSection" @click="scrollingTrip">Campers</a>
       <a href="#gearSection" @click="scrollingTrip">Gear</a>

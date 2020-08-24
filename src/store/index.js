@@ -77,6 +77,7 @@ export const store = new Vuex.Store({
   getters: {
     // TRIPS
     tripsOrdered: state => {
+      console.log("Sprt trips by date or name")
       function formatDate(dff) {
         let dd = new Date(dff.seconds * 1000)
         let newFormat =
@@ -92,29 +93,20 @@ export const store = new Vuex.Store({
       let hasDates = []
       let noDates = []
       state.trips.forEach(trip => {
-        console.log('obj ref',trip.finalDates)
-        console.log('comparison',trip.finalDates === true)
         if (trip.finalDates) {
-          console.log('truthy',trip.finalDates)
           hasDates.push(trip)
         } else {
-           console.log('elsey',trip.finalDates)
           noDates.push(trip)
         }
       })
-
       // formats dates first or else sort is dealing with two formats
       hasDates.forEach(trip => {
-        console.log(trip.dateStart)
-        if(trip.dateStart instanceof Object) {
+        if (trip.dateStart instanceof Object) {
           trip.dateStart = formatDate(trip.dateStart)
           trip.dateEnd = formatDate(trip.dateEnd)
-        }        
+        }
       })
       let sorted = hasDates.sort((a, b) => (new Date(Date.parse(a.dateStart)) > new Date(Date.parse(b.dateStart)) ? 1 : -1))
-      console.log(state.trips)
-      console.log(sorted)
-      
       let sortedND = noDates.sort((a, b) => (a.name > b.name) ? 1 : -1)
       return sorted.concat(sortedND)
     },
@@ -567,31 +559,30 @@ export const store = new Vuex.Store({
 
     saveNewTripAction: ({ state }, obj) => {
       console.log('Save new trip action.')
-      var subPromises = []
+
       return new Promise((resolve) => {
-        console.log('New promise')
+        console.log('Save trip doc')
         // trip document
         let thisNewTripPromise;
-        console.log(obj.finalDates)
         if (obj.finalDates === true) {
           thisNewTripPromise = new Promise((resolve) => {
             fb.db.collection("trips").add({
               'name': obj.name, 'uid': state.currentUser.uid, 'owner': state.currentUser.displayName,
               'group': obj.group, 'finalDates': obj.finalDates, 'dateStart': obj.dateStart, 'dateEnd': obj.dateEnd
-            }).then((tripSaved) => {resolve(tripSaved)})
+            }).then((tripSaved) => { resolve(tripSaved) })
           })
         } else {
           thisNewTripPromise = new Promise((resolve) => {
-            console.log("not final dates, none")
             fb.db.collection("trips").add({
               'name': obj.name, 'uid': state.currentUser.uid, 'owner': state.currentUser.displayName,
               'group': obj.group, 'finalDates': obj.finalDates
-            }).then((tripSaved) => {resolve(tripSaved)})
+            }).then((tripSaved) => { resolve(tripSaved) })
           })
         }
 
         thisNewTripPromise.then(tripDoc => {
-          console.log('Saved trip document')
+          console.log('Subpromises set({})')
+          let subPromises = []
           subPromises.push(fb.db.collection('campersNo').doc(tripDoc.id).set({}))
           subPromises.push(fb.db.collection('campersPending').doc(tripDoc.id).set({}))
           //TODO redirect to new trip page?
@@ -605,122 +596,115 @@ export const store = new Vuex.Store({
           console.log('end activiity log sub-promise')
           // MEALS
           // don't load for individual trips
-          console.log(obj.group)
           if (obj.group === true) {
-            console.log('adding group meals')
+            console.log('adding group tables')
             subPromises.push(fb.db.collection('groupMeals').doc(tripDoc.id).set({}))
+            subPromises.push(fb.db.collection('groupGear').doc(tripDoc.id).set({}))
           }
-          // Dates
-          fb.db.collection('tripDates').doc(tripDoc.id).set({}).then(() => {
-            console.log('created empty dates doc')
-            console.log(obj.dateStart)
-            console.log(typeof obj.dateStart)            
-            subPromises.push(fb.db.collection('tripDates').doc(tripDoc.id).collection('dates').add({
+          subPromises.push(fb.db.collection('tripDates').doc(tripDoc.id).set({}))
+
+          // Collect the null promises
+          Promise.all(subPromises).then(() => {
+            console.log("Next promise 1")
+            // Dates         
+            fb.db.collection('tripDates').doc(tripDoc.id).collection('dates').add({
               startDate: obj.dateStart,
               endDate: obj.dateEnd,
               user: state.currentUser.displayName,
               votes: { [state.currentUser.displayName]: true }
-            }))
-            console.log('pushed date subpromise')
+            }).then(() => {
+              console.log("Next promise 2")
+              var indPromise
+              var indGearPushPromise = []
+              // Individual trip
+              if (obj.indTemplate === "My List") {
+                indPromise = new Promise(resolve => {
+                  fb.db.collection('individualGear').doc(state.currentUser.uid).collection('default').get().then((results) => {
+                    if (!results.empty) {
+                      results.docs.forEach(doc => {
+                        indGearPushPromise.push(fb.db.collection('individualGear').doc(state.currentUser.uid).collection(tripDoc.id).add(doc.data()))
+                      })
+                      Promise.all(indGearPushPromise).then(() => {
+                        resolve()
+                      })
+                    } else {
+                      resolve()
+                    }
+                  })
+                })
+              } else if (obj.indTemplate === "Generic List") {
+                indPromise = new Promise(resolve => {
+                  fb.db.collection('defaultList').get().then((results) => {
+                    if (!results.empty) {
+                      //TODO if results.docs.exists
+                      results.docs.forEach(doc => {
+                        indGearPushPromise.push(fb.db.collection('individualGear').doc(state.currentUser.uid).collection(tripDoc.id).add(doc.data()))
+                      })
+                      Promise.all(indGearPushPromise).then(() => {
+                        resolve()
+                      })
+                    } else {
+                      resolve()
+                    }
+                  })
+                })
+              } else {
+                indPromise = new Promise(resolve => { resolve() })
+              }
+              indPromise.then(() => {
+                console.log("Next promise 3")
+                var grpPromisePush = []
+                // group
+                if (obj.group === true) {
+                  // fill with a template
+                  if (obj.template === "My Group List") {
+                    fb.db.collection('individualGear').doc(state.currentUser.uid).collection('myDefaultGroup').get().then((results) => {
+                      if (!results.empty) {
+                        console.log('results not empty')
+                        results.docs.forEach(doc => {
+                          grpPromisePush.push(fb.db.collection('groupGear').doc(tripDoc.id).collection('gear').add(doc.data()))
+                        })
+                        Promise.all(grpPromisePush).then(() => {
+                          resolve()
+                        })
+                      } else {
+                        console.log('no user list')
+                        resolve()
+                      }
+                    })
+                  } else if (obj.template === "Generic List") {
+                    console.log('copy over generic group gear list')
+                      fb.db.collection('defaultGroupGear').get().then((results) => {
+                      if (!results.empty) {
+                        console.log('not empty')
+                        //TODO if results.docs.exists
+                        results.docs.forEach(doc => {
+                          grpPromisePush.push(fb.db.collection('groupGear').doc(tripDoc.id).collection('gear').add(doc.data()))
+                        })
+                        Promise.all(grpPromisePush).then(() => {
+                          resolve()
+                        })
+                      } else {
+                        console.log('no generic group docs')
+                        resolve()
+                      }
+                    })
+                  } else {
+                    console.log('no group gear template selected')
+                   resolve()
+                  }
+
+                } else {
+                  console.log("Next promise 4")
+                  //otherwise no group stuff, resolve
+                 resolve()
+                }
+              })
+
+            })
+
           })
 
-          console.log('run individual gear for group or ind trip now')
-         
-          // group
-          if (obj.group === true) {
-            console.log('Group data')
-            // set empty group gear so collection isn't a ghost
-            fb.db.collection('groupGear').doc(tripDoc.id).set({}).then(() => {
-              console.log('set empty group gear doc')
-              // fill with a template
-              if (obj.template === "My Group List") {
-                console.log('copy over users default group list')
-                fb.db.collection('individualGear').doc(state.currentUser.uid).collection('myDefaultGroup').get().then((results) => {
-                  if (!results.empty) {
-                    console.log('results not empty')
-                    results.docs.forEach(doc => {
-                      console.log('push doc promise')
-                      subPromises.push(fb.db.collection('groupGear').doc(tripDoc.id).collection('gear').add(doc.data()))
-                    })
-                   
-                  } else {
-                    console.log('no user list')
-                    
-                  }
-                })
-              } else if (obj.template === "Generic List") {
-                console.log('copy over generic group gear list')
-                fb.db.collection('defaultGroupGear').get().then((results) => {
-                  if (!results.empty) {
-                    console.log('not empty')
-                    //TODO if results.docs.exists
-                    subPromises.push(results.docs.forEach(doc => {
-                      fb.db.collection('groupGear').doc(tripDoc.id).collection('gear').add(doc.data())
-                    }))
-                    
-                  } else {
-                    console.log('no generic group docs')
-                    
-                  }
-                })
-              } else {
-                console.log('no group gear template selected')
-                
-              }
-            })
-          }
-
-           // Individual trip
-          if (obj.indTemplate === "My List") {
-            console.log('copy over users default ind list')
-            fb.db.collection('individualGear').doc(state.currentUser.uid).collection('default').get().then((results) => {
-              if (!results.empty) {
-                console.log('ind not empty')
-                results.docs.forEach(doc => {
-                  subPromises.push(fb.db.collection('individualGear').doc(state.currentUser.uid).collection(tripDoc.id).add(doc.data()))
-
-                })
-                Promise.all(subPromises).then(() => {
-                  console.log('promises resolved')
-                  resolve('Saved trip!')
-                })
-              } else {
-                console.log('no ind docs')
-                Promise.all(subPromises).then(() => {
-                  console.log('promises resolved')
-                  resolve('Saved trip!')
-                })
-              }
-            })
-          } else if (obj.indTemplate === "Generic List") {
-            console.log('copy generic ind list')
-            fb.db.collection('defaultList').get().then((results) => {
-              if (!results.empty) {
-                console.log('generic ind nto empty')
-                //TODO if results.docs.exists
-                subPromises.push(results.docs.forEach(doc => {
-                  fb.db.collection('individualGear').doc(state.currentUser.uid).collection(tripDoc.id).add(doc.data())
-                }))
-                Promise.all(subPromises).then(() => {
-                  console.log('promises resolved')
-                  resolve('Saved trip!')
-                })
-              } else {
-                console.log('no generic ind docs')
-                Promise.all(subPromises).then(() => {
-                  console.log('promises resolved')
-                  resolve('Saved trip!')
-                })
-              }
-            })
-          } else {
-            console.log('no ind template selected')
-            Promise.all(subPromises).then(() => {
-              console.log('promises resolved')
-              resolve('Saved trip!')
-            })
-          }
-         
         })
       })
     },

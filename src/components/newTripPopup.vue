@@ -93,12 +93,30 @@ export default {
         return;
       }
       // DEFAULTS: flexible dates, today's dates, group trip, no gear list
+      let booleanFlex
+      let booleanGroup
+      switch (this.radioFlex) {
+        case true:
+        case 'true':
+          booleanFlex = true
+          break
+        default:
+          booleanFlex = false
+      }
+      switch (this.group) {
+        case true:
+        case 'true':
+          booleanGroup = true
+          break
+        default:
+          booleanGroup = false
+      }
       let data = {
         name: this.title,
         dateStart: this.range.start,
         dateEnd: this.range.end,
-        finalDates: this.radioFlex,
-        group: this.group,
+        finalDates: booleanFlex,
+        group: booleanGroup,
         template: this.groupGearTemplate,
         indTemplate: this.indGearTemplate,
       };

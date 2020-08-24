@@ -92,9 +92,13 @@ export const store = new Vuex.Store({
       let hasDates = []
       let noDates = []
       state.trips.forEach(trip => {
+        console.log('obj ref',trip.finalDates)
+        console.log('comparison',trip.finalDates === true)
         if (trip.finalDates) {
+          console.log('truthy',trip.finalDates)
           hasDates.push(trip)
         } else {
+           console.log('elsey',trip.finalDates)
           noDates.push(trip)
         }
       })

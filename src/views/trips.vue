@@ -205,4 +205,9 @@ div.tripContent > div {
 .text {
   text-decoration: underline;
 }
+.datesStyle {
+  font-size:.9rem;
+  color:rgb(82, 82, 82);
+  font-style: italic;
+}
 </style>

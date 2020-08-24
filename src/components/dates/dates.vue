@@ -48,8 +48,9 @@ document.getElementById(this.thisTripDatesGetter[0].id).style.color='#43c3f7'
 const calendar = this.$refs.datesCal
 
 // Moves to today's date
+if(startCalPage) {
  calendar.move(new Date(Date.parse(startCalPage)), {transition:'slide-h'})
-
+}
  },
  components: {deleteTripDatesPopup},
  data() {
@@ -61,9 +62,15 @@ return {
   computed: {
     attrs: function() {
       let vcd = []
-      this.thisTripDates.forEach(element => {
+      console.log('empty? UNDFND', this.thisTripDates)
+      if(this.thisTripDates) {
+this.thisTripDates.forEach(element => {
         vcd.push({start: new Date(Date.parse(element.startDate)), end: new Date(Date.parse(element.endDate))})
       });
+      } else {
+        vcd = [{start: new Date(), end: new Date().getDate()+2}]
+      }
+      
       return [
         {
           key: 'today',

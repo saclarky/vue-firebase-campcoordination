@@ -15,7 +15,7 @@
               <router-link to="/dashboard">Dashboard</router-link>
             </div>
             <div class="menu-item" >
-              <router-link to="/settings">Settings</router-link>
+              <router-link to="/settings">Account</router-link>
             </div>
             <div class="menu-item">
               <a @click="logout">Logout</a>

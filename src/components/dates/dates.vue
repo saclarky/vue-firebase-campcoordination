@@ -126,7 +126,7 @@ const calendar = this.$refs.datesCal
       this.$store
         .dispatch("finalizeTripDatesAction", data)
         .then(() => {
-          this.$toasted.show("Deleted dates!");
+          this.$toasted.show("Finalized dates!");
         })
         .catch((e) => {
           console.log(e);

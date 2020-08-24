@@ -1107,7 +1107,9 @@ export const store = new Vuex.Store({
     },
    unfinalizeTripDatesAction: (context, data) => {
       return fb.db.collection("trips").doc(data.tid).update({
-        finalDates: false
+        finalDates: false,
+        dateStart: firebase.firestore.FieldValue.delete(),
+        dateEnd: firebase.firestore.FieldValue.delete()
       })
     },
 

@@ -1,7 +1,7 @@
 <template>
   <div class="row">
     <div class="calCol">
-      <button @click="unfinalizeTripDates">Change Dates</button>
+      <button @click="unfinalizeTripDates">Undo These Dates</button>
       <v-calendar ref="finalCal" :attributes="attr" ></v-calendar>
     </div>
   </div>
@@ -41,7 +41,7 @@ export default {
       this.$store
         .dispatch("unfinalizeTripDatesAction", data)
         .then(() => {
-          this.$toasted.show("Ready!");
+          this.$toasted.show("Done!");
         })
         .catch((e) => {
           console.log(e);

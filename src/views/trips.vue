@@ -18,7 +18,8 @@
         
         <div class="tripBlock">
           <div class="title">My Trips</div>
-          <div v-for="item in trips" :key="item.id" :id="item.id" class="tripContent">
+          <div v-for="item in tripsOrdered" :key="item.id" :id="item.id" class="tripContent">
+            <div>{{item.dateStart}}</div>
             <div @click="goToTrip(item.id)">{{item.name}}</div>
             <!-- TODO: how validate other rows below? If date field is empty, breaks -->
             <div
@@ -59,7 +60,7 @@
 
 <script>
 // import { db } from "@/main"
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import newTripPopup from "../components/newTripPopup.vue";
 
 export default {
@@ -68,6 +69,7 @@ export default {
     console.log("TODO: MUST separate owned from joined trips somehow, asterisk? and disable delete...")
     //TODO: If not logged in yet does it work?
     // TODO: listen for promise for loading spinner?
+    // TODO: do this only once? like on app load?
     this.$store.dispatch("bindTrips").then((res) => {
       console.log('what happens if theres no trips data? ', res)
       console.log("stop spinner");
@@ -85,7 +87,8 @@ export default {
       showAddTrip: false
     };
   },
-  computed: mapState(["errors", "trips", "joinedTrips"]),
+  computed: {...mapState(["errors",  "joinedTrips"]),
+  ...mapGetters(['tripsOrdered'])},
   methods: {
     //CANNOT use arrow shorthand => for functions if need "this.$store"
     toggleAddTrip() {

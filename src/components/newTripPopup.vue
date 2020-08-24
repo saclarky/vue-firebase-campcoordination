@@ -17,9 +17,11 @@
               </div>
                <div class="row rowStyle">
                  <input type="radio" name="dateFlex" value="true" id="flex" v-model="radioFlex" selected>
-                 <label class="rowItem smText" for="flex">Flexible Dates</label>
+                 <label class="rowItem smText" for="flex">Finalized Dates</label>
+                 <input type="radio" name="dateFlex" value="false" id="poss" v-model="radioFlex">
+                 <label class="rowItem smText" for="poss">Possible Dates</label>
                  <input type="radio" name="dateFlex" value="false" id="hard" v-model="radioFlex">
-                 <label class="rowItem smText" for="hard">Fixed Dates</label>
+                 <label class="rowItem smText" for="hard">No Dates</label>
               </div>
               <div class="row rowStyle">
                 <!-- <div style="font-size:.8rem; color:red;"> Required: </div> -->
@@ -95,7 +97,7 @@ export default {
         name: this.title,
         dateStart: this.range.start,
         dateEnd: this.range.end,
-        flexible: this.radioFlex,
+        finalDates: this.radioFlex,
         group: this.group,
         template: this.groupGearTemplate,
         indTemplate: this.indGearTemplate,

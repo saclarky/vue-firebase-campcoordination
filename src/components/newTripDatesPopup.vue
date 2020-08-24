@@ -6,12 +6,12 @@
           <div class="modal-body">
             <form v-on:submit.prevent class="column columnStyle">
               
-               <div class="row rowStyle">
+               <!-- <div class="row rowStyle">
                  <input type="radio" name="dateFlex" value="true" id="flex" v-model="radioFlex" selected>
                  <label class="rowItem smText" for="flex">Flexible Dates</label>
                  <input type="radio" name="dateFlex" value="false" id="hard" v-model="radioFlex">
                  <label class="rowItem smText" for="hard">Fixed Dates</label>
-              </div>
+              </div> -->
               <div class="row rowStyle">
                 <!-- <div style="font-size:.8rem; color:red;"> Required: </div> -->
                 <v-date-picker mode="range" v-model="range" is-inline />
@@ -35,8 +35,7 @@ export default {
       range: {
         start: new Date(),
         end: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+2)
-      },
-      radioFlex: true
+      }
     }
   },
   props: ['tid'],
@@ -46,8 +45,7 @@ export default {
       let data = {
         tid: this.tid,
         dateStart: this.range.start,
-        dateEnd: this.range.end,
-        flexible: this.radioFlex
+        dateEnd: this.range.end
       };
       // Add new date to tripDates
       this.$store.dispatch('newTripDate', data).then(() => {

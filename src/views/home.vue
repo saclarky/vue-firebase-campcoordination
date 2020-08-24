@@ -51,6 +51,8 @@ export default {
 .home {
   /* width: 750px; */
   margin: auto;
+  position: relative;
+    top: 86px;
 }
 
 .hero {

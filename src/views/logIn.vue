@@ -318,6 +318,10 @@ export default {
 </script>
 
 <style scoped>
+#login {
+    position: relative;
+    top: 54px;
+}
 button {
   cursor: pointer;
    font-size: .9rem;

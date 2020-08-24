@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class='dashMain'>
     <div>
     <div class="addSection">
           
@@ -114,6 +114,10 @@ export default {
 </script>
 
 <style scoped>
+.dashMain {
+  position: relative;
+    top: 86px;
+}
 .joined {
   border: 2px green solid
 }

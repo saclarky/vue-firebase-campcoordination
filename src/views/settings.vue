@@ -1,5 +1,5 @@
 <template>
-    <section id="settings">
+    <section class="settings">
         <div class="col1">
             <h3>Settings</h3>
             <p>Update your profile</p>
@@ -71,3 +71,10 @@ console.log("TODO- delete userNotifications, profiel, references and auth")
      } 
     }
 </script>
+
+<style>
+.settings {
+    position: relative;
+    top: 86px;
+}
+</style>

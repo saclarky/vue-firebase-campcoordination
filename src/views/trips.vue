@@ -1,19 +1,21 @@
 <template>
   <div class="main">
     <div class="hero">
-      <div class="hero-top" id="nav-bar">
-        <h1 class="hero-title">Trips</h1>
-        <div class="hero-icon"></div>
-      </div>
-      <div class="hero-bottom">
-        <div class="hero-content">
+      <div class="hero-top" >
+        <!-- <h1 class="hero-title">Trips</h1>
+        <div class="hero-icon"></div> -->
+         <div class="hero-content">
           <!-- TODO: new trip action, hidden form? -->
           <a id="show-modal" @click="toggleAddTrip()" class="hero-cta-button button grow">New Trip</a>
           <!-- use the modal component, pass in the prop -->
           <newTripPopup v-if="showAddTrip" @close="toggleAddTrip()">
            
           </newTripPopup>
-        </div>
+      </div>
+      </div>
+      <div class="hero-bottom">
+       
+        
 
         
         <div class="tripBlock">
@@ -44,8 +46,8 @@
               v-if="item.date"
             >{{new Date(item.date.seconds * 1000).getDate() }} {{ new Date(item.date.seconds * 1000).toLocaleString('default', { month: 'long' }) }} {{new Date(item.date.seconds * 1000).getFullYear() }}</div>
             <div v-if="item.location">{{item.location.Oa}}, {{item.location.Ba}}</div>
-         
-          </div> 
+      
+        </div>
         </div>
       </div>
     </div>
@@ -122,7 +124,8 @@ export default {
 
 <style scoped>
 .main {
-  top: 81px;
+  position: relative;
+    top: 86px;
 }
 /* HERO CSS */
 .hero {

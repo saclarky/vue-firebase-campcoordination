@@ -3,7 +3,6 @@ import VueRouter from 'vue-router'
 import firebase from 'firebase'
 import home from '../views/home.vue'
 import trips from '../views/trips'
-import list from '../views/list'
 import logIn from '../views/logIn'
 import dashboard from '../views/dashboard'
 import trip from '../views/trip.vue'
@@ -47,14 +46,7 @@ meta: {
     meta: {
         requiresAuth: true
     }
-    },{
-    path: '/list',
-    name: 'list',
-    component: list,
-    meta: {
-        requiresAuth: true
-    }
-},
+    },
 {
     path: '/settings',
     name: 'settings',

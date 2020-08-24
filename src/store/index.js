@@ -180,6 +180,7 @@ export const store = new Vuex.Store({
     },
     //USER
     thisUserNotificationsGetter: state => {
+      console.log('getter')
       let responsesObj = []
       let inviteObj = []
 

@@ -19,7 +19,7 @@
         <div class="tripBlock">
           <div class="title">My Trips</div>
           <div v-for="item in tripsOrdered" :key="item.id" :id="item.id" class="tripContent">
-            <div>{{item.dateStart}}</div>
+            <div class='datesStyle'>{{item.dateStart}}</div>
             <div @click="goToTrip(item.id)">{{item.name}}</div>
             <!-- TODO: how validate other rows below? If date field is empty, breaks -->
             <div

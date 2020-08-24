@@ -102,7 +102,7 @@ export const store = new Vuex.Store({
           noDates.push(trip)
         }
       })
-      let sorted = hasDates.sort((a, b) => (a.dateStart > b.dateStart) ? 1 : -1)
+      let sorted = hasDates.sort((a, b) => (new Date(a.dateStart.seconds * 1000) > new Date(b.dateStart.seconds * 1000) ? 1 : -1))
       console.log(state.trips)
       console.log(sorted)
       sorted.forEach(trip => {

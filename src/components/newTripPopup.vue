@@ -23,7 +23,7 @@
                  <input type="radio" name="dateFlex" value="false" id="hard" v-model="radioFlex">
                  <label class="rowItem smText" for="hard">No Dates</label>
               </div>
-              <div class="row rowStyle">
+              <div v-if="radioFlex === 'true' || radioFlex === 'maybe'" class="row rowStyle">
                 <!-- <div style="font-size:.8rem; color:red;"> Required: </div> -->
                 <v-date-picker mode="range" v-model="range" is-inline />
               </div>
@@ -78,8 +78,8 @@ export default {
         start: new Date(),
         end: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+2)
       },
-      group: true,
-      radioFlex: true,
+      group: 'true',
+      radioFlex: 'true',
       groupGearTemplate: 'None',
       indGearTemplate: 'None'
     }

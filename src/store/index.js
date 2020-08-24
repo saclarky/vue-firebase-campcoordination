@@ -102,16 +102,19 @@ export const store = new Vuex.Store({
           noDates.push(trip)
         }
       })
-      let sorted = hasDates.sort((a, b) => (new Date(a.dateStart.seconds * 1000) > new Date(b.dateStart.seconds * 1000) ? 1 : -1))
-      console.log(state.trips)
-      console.log(sorted)
-      sorted.forEach(trip => {
+
+      // formats dates first or else sort is dealing with two formats
+      hasDates.forEach(trip => {
         console.log(trip.dateStart)
         if(trip.dateStart instanceof Object) {
           trip.dateStart = formatDate(trip.dateStart)
           trip.dateEnd = formatDate(trip.dateEnd)
         }        
       })
+      let sorted = hasDates.sort((a, b) => (new Date(Date.parse(a.dateStart)) > new Date(Date.parse(b.dateStart)) ? 1 : -1))
+      console.log(state.trips)
+      console.log(sorted)
+      
       let sortedND = noDates.sort((a, b) => (a.name > b.name) ? 1 : -1)
       return sorted.concat(sortedND)
     },

@@ -33,17 +33,21 @@ export default {
       }
     }
   },
-  props: ['tid'],
+  props: ['tid', 'tidName'],
   methods: {
      suggestNewDate(e) {
        e.preventDefault();
       let data = {
         tid: this.tid,
         dateStart: this.range.start,
-        dateEnd: this.range.end
+        dateEnd: this.range.end,
+        creator: this.$store.state.currentUser.displayName,
+        name: this.tidName,
+        uid: this.$store.state.currentUser.uid
       };
       // Add new date to tripDates
       this.$store.dispatch('newTripDate', data).then(() => {
+        console.log('dates done')
         this.$emit("close");
        this.$toasted.show('Dates added!')
       }).catch(e => {

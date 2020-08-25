@@ -36,6 +36,7 @@
             v-if="showTripDatesPopup"
             @close="toggleTripDatesPopup"
             :tid="thisTrip.id"
+            :tidName="thisTrip.name"
           ></newTripDatesPopup>
 
           <div

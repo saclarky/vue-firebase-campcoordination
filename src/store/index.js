@@ -183,6 +183,7 @@ export const store = new Vuex.Store({
       console.log('getter')
       let responsesObj = []
       let inviteObj = []
+      let tripDatesObj = []
 
       if (state.thisUserNotifications.length > 0) {
         state.thisUserNotifications.forEach(doc => {
@@ -225,15 +226,19 @@ export const store = new Vuex.Store({
             case "tripInvite":
               inviteObj.push(modInvite);
               break
+            case "tripDates":
+              tripDatesObj.push(modInvite)
+              break
             default:
-              responsesObj.push(modInvite)
+              responsesObj.push(modInvite) // I don't think this is a thing
           }
         })
       }
       //return batch of objects by category
       return {
         'tripInvites': inviteObj,
-        'tripResponses': responsesObj
+        'tripResponses': responsesObj,
+        'tripDates': tripDatesObj
       }
     },
 
@@ -438,13 +443,13 @@ export const store = new Vuex.Store({
   },
 
   actions: {
-    logout: function () {
+    logout: function (context) {
       fb.auth
         .signOut()
         .then(() => {
           console.log('then')
-          this.$store.dispatch("clearData"); // authStateChange actually can do this?
-          this.$router.push("/login");
+          context.dispatch("clearData"); // authStateChange actually can do this?
+          router.push("/login");
         })
         .catch((err) => {
           console.log(err);
@@ -675,7 +680,7 @@ export const store = new Vuex.Store({
                     })
                   } else if (obj.template === "Generic List") {
                     console.log('copy over generic group gear list')
-                      fb.db.collection('defaultGroupGear').get().then((results) => {
+                    fb.db.collection('defaultGroupGear').get().then((results) => {
                       if (!results.empty) {
                         console.log('not empty')
                         //TODO if results.docs.exists
@@ -692,13 +697,13 @@ export const store = new Vuex.Store({
                     })
                   } else {
                     console.log('no group gear template selected')
-                   resolve()
+                    resolve()
                   }
 
                 } else {
                   console.log("Next promise 4")
                   //otherwise no group stuff, resolve
-                 resolve()
+                  resolve()
                 }
               })
 
@@ -879,6 +884,8 @@ export const store = new Vuex.Store({
         group: data.type
       })
     },
+
+    // CAMPERS
     inviteCamper: ({ state, dispatch }, data) => {
       console.log('invite camper')
       return new Promise((resolve, reject) => {
@@ -1108,6 +1115,34 @@ export const store = new Vuex.Store({
 
       })
     },
+    sendCampersNotification: (context, data) => {
+      console.log('campers notification sending')
+      return new Promise(resolve => {
+      // Get all the Yes campers and give them notification
+      fb.db.collection('campers').doc(data.tid).get().then(cc => {
+        console.log('3',cc.data())
+        let users = Object.keys(cc.data())
+        // Remove creator from notifications list
+        users.splice(users.indexOf(data.cuid),1)
+        console.log(users)
+        let subprom = []
+        users.forEach(c => {
+          // Save notification for dashboard
+          subprom.push(fb.db.collection('userNotifications').doc(c).collection('notifications').add({
+            'category': 'tripDates',
+            'tid': data.tid,
+            'time': new Date().getTime(),
+            'text': data.creator + " added new dates to " + data.name,            
+            'from': data.creator,
+            'to': c
+          }))
+        })
+        Promise.all(subprom).then(() => {
+          resolve()
+        })
+      })
+    })
+    },
     searchUsersByEmail: (context, data) => {
       let email = data.email;
       console.log('searching users', email)
@@ -1131,13 +1166,33 @@ export const store = new Vuex.Store({
       })
 
     },
-    newTripDate: ({ state }, obj) => {
-      return fb.db.collection('tripDates').doc(obj.tid).collection('dates').add({
+
+    // DATES
+    newTripDate: ({ state, dispatch }, obj) => {
+      console.log('dates')
+      return new Promise(resolve => {
+        console.log('1')
+       fb.db.collection('tripDates').doc(obj.tid).collection('dates').add({
         startDate: obj.dateStart,
         endDate: obj.dateEnd,
         user: state.currentUser.displayName,
         votes: { [state.currentUser.displayName]: true }
+      }).then(() => {
+        console.log('2')
+        let nextData = {
+          'tid': obj.tid,          
+          'creator': obj.creator,
+          'name': obj.name,
+          'cuid': obj.uid
+        }
+        console.log(nextData)
+         dispatch('sendCampersNotification', nextData).then(() => {
+           console.log('4')
+           resolve()
+         })
+       
       })
+    })
     },
     tripDatesVote: ({ state }, data) => {
       var tmp = 'votes.' + state.currentUser.displayName

@@ -89,6 +89,7 @@ section {
 a {
   color: #09709a;
   font-size: 1.1rem;
+  cursor:pointer;
 }
 
 a.router-link-exact-active {

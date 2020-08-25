@@ -181,18 +181,20 @@ const calendar = this.$refs.datesCal
     margin-bottom: 5px;
 }
 .showVote {
-  background: url("../../assets/check_circle.svg") no-repeat center center;
+  background: url("../../assets/circle_tick_grey.svg") no-repeat center center;
   background-size: contain;
   width: 20px;
   height: 20px;
   display: inline-block;
+  padding-right:10px;
 }
 .noVote {
-  background: url("../../assets/minus_x.svg") no-repeat center center;
+  background: url("../../assets/circle_cancel_grey.svg") no-repeat center center;
   background-size: contain;
   width: 20px;
   height: 20px;
   display: inline-block;
+  padding-right:10px;
 }
 .up {
   background: url("../../assets/thumb_up.svg") no-repeat center center;
@@ -213,6 +215,7 @@ const calendar = this.$refs.datesCal
 }
 .votesText {
   font-size: 0.8rem;
+  color: #637381;
 }
 .votes {
   display: flex;
@@ -220,7 +223,6 @@ const calendar = this.$refs.datesCal
   /* justify-content: center; */
   align-items: center;
   margin-left: 15px;
-  color: gray;
 }
 .display {
   display: inline-block;

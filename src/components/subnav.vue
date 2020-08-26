@@ -7,6 +7,7 @@
       <a href="#gearSection" @click="scrollingTrip">Gear</a>
       <a href="#mealsSection" @click="scrollingTrip">Meals</a>
       <a href="#itinerarySection" @click="scrollingTrip">Itinerary</a>
+      <a href="#activityLogSection" @click="scrollingTrip">Activity Log</a>
     </section>
   </header>
 </template>

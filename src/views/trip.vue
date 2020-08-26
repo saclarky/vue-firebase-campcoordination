@@ -1,6 +1,5 @@
 <template>
   <div id="topScroll" class="main">
-   
     <div class="hero">
       <div class="hero-top" id="nav-bar">
         <h1 class="hero-title hero-items">{{thisTrip.name}}</h1>
@@ -10,8 +9,7 @@
       <div class="hero-bottom">
         <div class="hero-content">
           <!-- TODO: new trip action, hidden form? -->
-          <div class='typeColor'>
-           
+          <div class="typeColor">
             <span v-if="thisTrip.group===true">Group Trip</span>
             <span v-if="thisTrip.group===false">Individual Trip</span>
           </div>
@@ -26,11 +24,17 @@
           <div id="datesSection" class="row splitPane scroller">
             <div class="smCol rightBorder">
               Dates
-              <button v-if="!thisTrip.finalDates" @click="toggleTripDatesPopup">Suggest New Dates</button>
-             
+              <button
+                v-if="!thisTrip.finalDates"
+                @click="toggleTripDatesPopup"
+              >Suggest New Dates</button>
             </div>
             <dates v-if="!thisTrip.finalDates"></dates>
-            <finalDates :thisTripDateStart="thisTrip.dateStart" :thisTripDateEnd="thisTrip.dateEnd" v-if="thisTrip.finalDates"></finalDates>
+            <finalDates
+              :thisTripDateStart="thisTrip.dateStart"
+              :thisTripDateEnd="thisTrip.dateEnd"
+              v-if="thisTrip.finalDates"
+            ></finalDates>
           </div>
           <newTripDatesPopup
             v-if="showTripDatesPopup"
@@ -39,54 +43,13 @@
             :tidName="thisTrip.name"
           ></newTripDatesPopup>
 
-          <div
-            id="campersSection"
-            :class="{row:true, splitPane:true, hide: !thisTrip.group, scroller:true}"
-          >
+          <div id="campersSection" :class="{row:true, splitPane:true, hide: !thisTrip.group, scroller:true}" >
             <div class="smCol rightBorder">
               Campers
               <button @click="toggleAddCamper">Invite</button>
             </div>
             <div class="lgCol datesData">
-              <div>Confirmed, can edit trip page</div>
-              <div v-for="(yes, uid) in thisTripCampers" :key="uid">
-                {{yes}}
-                <button
-                  @click="removeCamper(uid)"
-                  :class="{buttonDisabled: thisTrip.uid === uid} "
-                >remove</button>
-              </div>
-              <div>Pending, can view trip page</div>
-              <div v-for="(rsvp, uid) in thisTripCampersPending" :key="uid">
-                {{rsvp}}
-                <button @click="removeCamper(uid)">remove</button>
-              </div>
-              <div>Declined, no access to the trip</div>
-              <div v-for="(no, uid) in thisTripCampersNo" :key="uid">
-                {{no}}
-                <button @click="removeCamper(uid)">remove</button>
-              </div>
-            </div>
-            <div>
-              <div>
-                Activity Log
-                <span
-                  @click="toggleCamperActivityLog"
-                  :class="{downArrowIcon: showCamperActivityLog, upArrowIcon: !showCamperActivityLog}"
-                ></span>
-              </div>
-              <!-- empty time fields/missing field dealt with in vuex getter -->
-              <div
-                :class="{hide: showCamperActivityLog}"
-                v-for="invite in thisTripInviteLogs"
-                :key="invite.id"
-              >
-                <span class="logEntry">
-                  {{invite.time}}
-                  -
-                  {{invite.text}}
-                </span>
-              </div>
+              <campers></campers>
             </div>
           </div>
           <inviteCamperPopup
@@ -136,10 +99,12 @@
           </div>
         </div>
       </div>
-
-      <div v-if="showMessages" id="messages">
-        <hr />Messages Section and notifications?
-        <i class="plusIcon"></i>
+      <hr />
+      <div id="activityLogSection" class="row splitPane scroller">
+        <div class="smCol rightBorder">Activity Log</div>
+        <div class="lgCol datesData">
+          <activityLog></activityLog>
+        </div>
       </div>
     </div>
   </div>
@@ -147,15 +112,17 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import inviteCamperPopup from "../components/inviteCamperPopup";
+import inviteCamperPopup from "../components/campers/inviteCamperPopup";
+import campers from "../components/campers/campers";
 import dates from "../components/dates/dates";
-import finalDates from "../components/dates/finalDates"
+import finalDates from "../components/dates/finalDates";
 import newTripDatesPopup from "../components/dates/newTripDatesPopup";
-import gear from '../components/gear'
+import gear from "../components/gear";
 import meals from "../components/meals";
 // import subnav from "../components/subnav";
-import itinerary from "../components/itinerary/itinerary"
-import newItinEntryPopup from '../components/itinerary/newItinEntryPopup';
+import itinerary from "../components/itinerary/itinerary";
+import newItinEntryPopup from "../components/itinerary/newItinEntryPopup";
+import activityLog from "../components/activityLog";
 
 export default {
   name: "trip",
@@ -165,76 +132,74 @@ export default {
       console.log("no trip, pushing to trips");
       this.$router.push({ path: "/trips" });
     }
-    
   },
   mounted() {
-    console.log('mounted')
-// Cache selectors
-var topMenu = document.getElementById("subnavSection"),
-    // topMenuHeight = topMenu.outerHeight()+15,
-    // topMenuHeight = '116px',
-    // All list items
-    menuItems = topMenu.children,
-    // Divs corresponding to menu items
-    scrollItems = []
-    for(let i = 0; i < menuItems.length; i++) {
-      var itemA = menuItems[i].getAttribute("href").split('#')[1]
-      var item = document.getElementById(itemA) 
+    console.log("mounted");
+    // Cache selectors
+    var topMenu = document.getElementById("subnavSection"),
+      // topMenuHeight = topMenu.outerHeight()+15,
+      // topMenuHeight = '116px',
+      // All list items
+      menuItems = topMenu.children,
+      // Divs corresponding to menu items
+      scrollItems = [];
+    for (let i = 0; i < menuItems.length; i++) {
+      var itemA = menuItems[i].getAttribute("href").split("#")[1];
+      var item = document.getElementById(itemA);
       // console.log(item)
-      if (item) {scrollItems.push(item)}
+      if (item) {
+        scrollItems.push(item);
+      }
     }
 
-// Bind to scroll
-window.addEventListener('scroll', function() {
-   // Get container scroll position
-   var fromTop = window.pageYOffset+100;
+    // Bind to scroll
+    window.addEventListener("scroll", function () {
+      // Get container scroll position
+      var fromTop = window.pageYOffset + 100;
 
-  //  console.log('window',window.pageYOffset,window.pageYOffset+116)
-   // Get id of current scroll item
-   var cur = []
-   scrollItems.forEach(function(t){
-    //  console.log(t.id,fromTop, t.offsetTop, t.getBoundingClientRect())
-     if (t.offsetTop < fromTop)
-       cur.push(t);
-   });
-  //  console.log(cur)
-   // Get the id of the current element
-   if(cur.length === 0) {
-     //empty, no matches
-     cur = [scrollItems[0]]
-    //  console.log(cur)
-   }
-   var id = cur[cur.length-1].id;
-  //  var id = cur[0].id
-  //  console.log(id)
-   menuItems.forEach(t => {
-t.classList.remove('active')
-
-    
-   })
-    menuItems.forEach(t => {
-
-    //  console.log(t.getAttribute("href"))
-     if(t.getAttribute("href") == '#'+id) {
-      //  console.log("MATCH")
-       t.classList.add('active')
-       return
-     }
-   })
-  //  // Set/remove active class
- 
-    })
-      },
+      //  console.log('window',window.pageYOffset,window.pageYOffset+116)
+      // Get id of current scroll item
+      var cur = [];
+      scrollItems.forEach(function (t) {
+        //  console.log(t.id,fromTop, t.offsetTop, t.getBoundingClientRect())
+        if (t.offsetTop < fromTop) cur.push(t);
+      });
+      //  console.log(cur)
+      // Get the id of the current element
+      if (cur.length === 0) {
+        //empty, no matches
+        cur = [scrollItems[0]];
+        //  console.log(cur)
+      }
+      var id = cur[cur.length - 1].id;
+      //  var id = cur[0].id
+      //  console.log(id)
+      menuItems.forEach((t) => {
+        t.classList.remove("active");
+      });
+      menuItems.forEach((t) => {
+        //  console.log(t.getAttribute("href"))
+        if (t.getAttribute("href") == "#" + id) {
+          //  console.log("MATCH")
+          t.classList.add("active");
+          return;
+        }
+      });
+      //  // Set/remove active class
+    });
+  },
   components: {
     // subnav,
     dates,
     finalDates,
     newTripDatesPopup,
     inviteCamperPopup,
+    campers,
     gear,
     meals,
     itinerary,
-    newItinEntryPopup
+    newItinEntryPopup,
+    activityLog,
   },
   computed: {
     ...mapState([
@@ -252,12 +217,11 @@ t.classList.remove('active')
       showDashboard: true,
       showMessages: true,
       showInviteCamper: false,
-      showCamperActivityLog: false
+      showCamperActivityLog: false,
     };
   },
   methods: {
-    
-     toggleTripDatesPopup() {
+    toggleTripDatesPopup() {
       this.showTripDatesPopup = !this.showTripDatesPopup;
     },
     // ITINERARY ENTRIES
@@ -268,7 +232,7 @@ t.classList.remove('active')
       this.showInviteCamper = !this.showInviteCamper;
     },
     toggleCamperActivityLog() {
-      console.log(this.showCamperActivityLog)
+      console.log(this.showCamperActivityLog);
       this.showCamperActivityLog = !this.showCamperActivityLog;
     },
     removeCamper(camperID) {
@@ -305,15 +269,12 @@ t.classList.remove('active')
       } else {
         this.$toasted.show("Cannot delete trip owner.");
       }
-    }
-    
-    
+    },
   },
 };
 </script>
 
 <style scoped>
-
 h4 {
   margin: 0;
   padding: 0;
@@ -339,12 +300,12 @@ h4 {
 }
 .hero-top {
   display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    /* padding: 15px 0; */
-    color: #f7ffff;
-    padding: 5px 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  /* padding: 15px 0; */
+  color: #f7ffff;
+  padding: 5px 0;
 }
 .hero-items {
   margin: 0 5px;

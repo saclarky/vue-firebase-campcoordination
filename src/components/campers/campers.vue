@@ -1,15 +1,9 @@
 <template>
   <div>
-    <div class="row actionRow" @click="returnToDashboard()">
-      <div class="leftArrowIcon clickable"></div>
-      <p class="clickable">Trip</p>
-      <p>&#47;&#47;</p>
-      <p>Camper Details</p>
-      <div class="actionRowPlaceholder"></div>
-    </div>
+   
 
     <div class="row">
-      <i @click="toggleAddUser" class="plusIcon"></i>
+    
       <div class="wrapper col1">
         <div>Confirmed, can edit trip page</div>
         <div v-for="(yes, uid) in thisTripCampers" :key="uid">
@@ -27,63 +21,30 @@
           <button @click="removeCamper(uid)">remove</button>
         </div>
       </div>
-      <div class="wrapper col2">
-        <div>Activity Log</div>
-        <!-- empty time fields/missing field dealt with in vuex getter -->
-        <div v-for="invite in thisTripInviteLogs" :key="invite.id">
-          <span class="logEntry">
-            {{invite.time}}
-            -
-            {{invite.text}}
-          </span>
-        </div>
-      </div>
+     
     </div>
-    <!-- use the modal component, pass in the prop -->
-    <inviteCamperPopup @closeInvite="toggleAddUser()" v-if="showInviteUser" :tripid="thisTripID">
-      <!--
-      you can use custom content here to overwrite
-      default content
-      -->
-
-      <template v-slot:body>
-        <h3>{{thisTrip.name}}</h3>
-      </template>
-      <!-- <h3 slot="header">custom header</h3> -->
-    </inviteCamperPopup>
+   
   </div>
 </template>
 
 <script>
-import { mapGetters, mapState } from "vuex";
-import inviteCamperPopup from "../components/inviteCamperPopup";
+import { mapState } from "vuex";
 export default {
   data: function() {
     return {
-      showInviteUser: false
+    
     };
   },
   computed: {
-    ...mapGetters(["thisTripInviteLogs"]),
 
     ...mapState([
       "thisTripCampers",
       "thisTripCampersNo",
       "thisTripCampersPending",
-      "thisTrip",
-      "thisTripID"
+      "thisTrip"
     ])
   },
-  components: {
-    inviteCamperPopup
-  },
   methods: {
-    toggleAddUser() {
-      this.showInviteUser = !this.showInviteUser;
-    },
-    returnToDashboard() {
-      this.$emit("closeCamperDetails");
-    },
     removeCamper(camperID) {
       // TODO: don't have 'remove' button by the camp owner. disabled?
       console.log("Remove ",camperID);
@@ -140,14 +101,6 @@ export default {
 .actionRowPlaceholder {
   flex: 1;
 }
-.leftArrowIcon {
-  background: url("../assets/rightArrow.svg") no-repeat center center;
-  background-size: contain;
-  width: 15px;
-  height: 15px;
-  color: black;
-  transform: rotate(180deg); /*TODO in gimp*/
-}
 
 .clickable {
   cursor: pointer;
@@ -158,14 +111,7 @@ export default {
   padding: 5px;
   display: inline;
 }
-.plusIcon {
-  background: url("../assets/add-plus.svg") no-repeat center center;
-  background-size: contain;
-  width: 50px;
-  height: 50px;
-  margin-bottom: 15px;
-  cursor: pointer;
-}
+
 .buttonDisabled {
   display: none;
 }

@@ -532,6 +532,8 @@ export const store = new Vuex.Store({
       return context.bindFirestoreRef('thisUserNotifications', fb.db.collection('userNotifications')
         .doc(context.state.currentUser.uid).collection('notifications').orderBy("time", "desc").limit(20))
     }),
+
+    // TRIPS 
     createTripPageData: ({ dispatch, commit }, tid) => {
       let id = tid
       console.log('Wrapper function to run actions for setting up data for a trip page')
@@ -750,7 +752,7 @@ export const store = new Vuex.Store({
                       .delete())
                   })
                   Promise.all(waitingDates).then(() => {
-                    // fb.db.collection('tripActivityLog').doc(id).collection('logs').delete() NOT A FUNCTION/not necessary
+                   
                     console.log('still concerned, TODO check logs collection is not orphaned')
                     fb.db.collection('tripDates').doc(id).delete()
                   })
@@ -768,7 +770,7 @@ export const store = new Vuex.Store({
                       .delete())
                   })
                   Promise.all(waitingGear).then(() => {
-                    // fb.db.collection('tripActivityLog').doc(id).collection('logs').delete() NOT A FUNCTION/not necessary
+                  
                     console.log('still concerned, TODO check logs collection is not orphaned')
                     fb.db.collection('groupGear').doc(id).delete()
                   })
@@ -785,7 +787,7 @@ export const store = new Vuex.Store({
                       .delete())
                   })
                   Promise.all(waitingIGear).then(() => {
-                    // fb.db.collection('tripActivityLog').doc(id).collection('logs').delete() NOT A FUNCTION/not necessary
+                   
                     console.log('individual gear all goob?')
                     // fb.db.collection('individualGear').doc(state.currentUser.uid)
                     // fb.db.collection('groupGear').doc(id).delete()
@@ -806,7 +808,7 @@ export const store = new Vuex.Store({
                     .delete())
                 })
                 Promise.all(waiting).then(() => {
-                  // fb.db.collection('tripActivityLog').doc(id).collection('logs').delete() NOT A FUNCTION/not necessary
+                 
                   console.log('still concerned, TODO check logs collection is not orphaned')
                   fb.db.collection('tripActivityLog').doc(id).delete()
                 })
@@ -832,7 +834,7 @@ export const store = new Vuex.Store({
                       .delete())
                   })
                   Promise.all(waitingGMeals).then(() => {
-                    // fb.db.collection('tripActivityLog').doc(id).collection('logs').delete() NOT A FUNCTION/not necessary
+                    
                     console.log('still concerned, TODO check logs collection is not orphaned')
                     fb.db.collection('groupMeals').doc(id).delete()
                   })
@@ -849,7 +851,7 @@ export const store = new Vuex.Store({
                       .delete())
                   })
                   Promise.all(waitingIMeals).then(() => {
-                    // fb.db.collection('tripActivityLog').doc(id).collection('logs').delete() NOT A FUNCTION/not necessary
+                   
                     console.log('individual gear all goob?')
                     // fb.db.collection('individualGear').doc(state.currentUser.uid)
                     // fb.db.collection('groupGear').doc(id).delete()
@@ -883,6 +885,16 @@ export const store = new Vuex.Store({
       return fb.db.collection('trips').doc(data.trip).update({
         group: data.type
       })
+    },
+    addTripNotification: (context, data) => {
+       // Add an activity log message about the invite
+       return fb.db.collection('tripActivityLog').doc(data.tid).collection('logs')
+       .add({
+         'time': new Date().getTime(), 
+         'from': data.fromUID,
+         'text': data.text,
+         'category': data.category
+       })
     },
 
     // CAMPERS
@@ -923,12 +935,13 @@ export const store = new Vuex.Store({
               // Get name
               let uidToName = userID.data().name;
               // Add an activity log message about the invite
-              fb.db.collection('tripActivityLog').doc(tid).collection('logs')
-                .add({
-                  'time': new Date().getTime(), 'from': state.currentUser.uid,
-                  'text': state.currentUser.displayName + " invited " + uidToName + " to join the trip",
-                  'category': "invite"
-                })
+              let addData = {
+                'tid': tid,
+                'from': state.currentUser.uid,
+                'text': state.currentUser.displayName + " invited " + uidToName + " to join the trip",
+                'category': "tripInvite"
+              }
+              dispatch('addTripNotification', addData)
                 .then((res) => {
                   console.log(res) //invite id is here res.id
                   // Add to pending campers
@@ -965,7 +978,7 @@ export const store = new Vuex.Store({
           })
       })
     },
-    removeCamperAction: ({ state }, data) => {
+    removeCamperAction: ({ state, dispatch }, data) => {
       // Check which table to delete from
       // Add trip activity log
       console.log('remove camper action')
@@ -982,12 +995,13 @@ export const store = new Vuex.Store({
           }))
         }
         // Add an activity log message about the removal
-        prom.push(fb.db.collection('tripActivityLog').doc(state.thisTripID).collection('logs')
-          .add({
-            'time': new Date().getTime(), 'from': state.currentUser.uid,
-            'text': state.currentUser.displayName + " removed " + data.name + " from the trip",
-            'category': "invite"
-          }))
+        let rmData= { 
+          'tid': state.thisTrip.id,
+          'from': state.currentUser.uid,
+          'text': state.currentUser.displayName + " removed " + data.name + " from the trip",
+          'category': "tripInvite"
+        }
+        prom.push(dispatch('addTripNotification', rmData))
 
         // Remove their dashboard notification so can't rejoin etc?
         // Add notification to user dashboard
@@ -1012,7 +1026,7 @@ export const store = new Vuex.Store({
       })
 
     },
-    joinTripAction: ({ state }, data) => {
+    joinTripAction: ({ state, dispatch }, data) => {
       //  deal with scenario of alreayd declined, now joining
       // TODO deal with if the camper has since been removed from the trip, aka deadline
       return new Promise((resolve, reject) => {
@@ -1044,12 +1058,13 @@ export const store = new Vuex.Store({
         })
 
         // Add an activity log message about the invite
-        let d = fb.db.collection('tripActivityLog').doc(data.tid).collection('logs')
-          .add({
-            'time': new Date().getTime(), 'from': state.currentUser.uid,
-            'text': state.currentUser.displayName + " accepted trip invite.",
-            'category': "inviteRSVP"
-          })
+        let jData = {
+          'tid': data.tid,
+          'from': state.currentUser.uid,
+          'text': state.currentUser.displayName + " accepted trip invite.",
+          'category': "tripInvite"
+        }
+        let d = dispatch('addTripNotification', jData)
         // update user notification response
         let e = fb.db.collection('userNotifications').doc(state.currentUser.uid).collection('notifications')
           .doc(data.nid).update({
@@ -1065,7 +1080,7 @@ export const store = new Vuex.Store({
 
       })
     },
-    declineTripAction: ({ state }, data) => {
+    declineTripAction: ({ state, dispatch }, data) => {
       return new Promise((resolve, reject) => {
 
         // update user notification response
@@ -1101,12 +1116,13 @@ export const store = new Vuex.Store({
           // TODO have two tabs open and test auto-update on trip page
         })
         // Add an activity log message about the invite
-        let a = fb.db.collection('tripActivityLog').doc(data.tid).collection('logs')
-          .add({
-            'time': new Date().getTime(), 'from': state.currentUser.uid,
-            'text': state.currentUser.displayName + " declined trip invite.",
-            'category': "inviteRSVP"
-          })
+        let dData = {
+          'tid': data.tid,
+           'from': state.currentUser.uid,
+          'text': state.currentUser.displayName + " declined trip invite.",
+          'category': "tripInvite"
+        }
+        let a = dispatch('addTripNotification', dData)
         Promise.all([a, b, c, d, e]).then(() => {
           resolve('declined')
         }).catch(e => {
@@ -1179,16 +1195,22 @@ export const store = new Vuex.Store({
         votes: { [state.currentUser.displayName]: true }
       }).then(() => {
         console.log('2')
+        // let nextData = {
+        //   'tid': obj.tid,          
+        //   'creator': obj.creator,
+        //   'name': obj.name,
+        //   'cuid': obj.uid,
+        //   'text':obj.creator + " added new dates to " + obj.name,
+        //   'category': 'tripDates'
+        // }
         let nextData = {
-          'tid': obj.tid,          
-          'creator': obj.creator,
-          'name': obj.name,
-          'cuid': obj.uid,
-          'text':obj.creator + " added new dates to " + obj.name,
-          'category': 'tripDates'
+          'tid': obj.tid,
+          'fromUID': obj.uid,
+          'category': 'tripDates',
+          'text':obj.creator + " added new dates to " + obj.name, 
         }
         console.log(nextData)
-         dispatch('sendCampersNotification', nextData).then(() => {
+         dispatch('addTripNotification', nextData).then(() => {
            console.log('4')
            resolve()
          })       
@@ -1213,15 +1235,13 @@ export const store = new Vuex.Store({
       }).then(() => {
         console.log('2')
         let nextData = {
-          'tid': data.tid,          
-          'creator': data.creator,
-          'name': data.name,
-          'cuid': data.uid,
+          'tid': data.tid,
+          'fromUID': data.uid,
           'text': data.creator + " finalized dates for " + data.name,
           'category': 'tripDates'
-        }
+        }        
         console.log(nextData)
-         dispatch('sendCampersNotification', nextData).then(() => {
+         dispatch('addTripNotification', nextData).then(() => {
            console.log('4')
            resolve()
          })       

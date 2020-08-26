@@ -1129,10 +1129,10 @@ export const store = new Vuex.Store({
         users.forEach(c => {
           // Save notification for dashboard
           subprom.push(fb.db.collection('userNotifications').doc(c).collection('notifications').add({
-            'category': 'tripDates',
+            'category': data.category,
             'tid': data.tid,
             'time': new Date().getTime(),
-            'text': data.creator + " added new dates to " + data.name,            
+            'text': data.text,            
             'from': data.creator,
             'to': c
           }))
@@ -1183,14 +1183,15 @@ export const store = new Vuex.Store({
           'tid': obj.tid,          
           'creator': obj.creator,
           'name': obj.name,
-          'cuid': obj.uid
+          'cuid': obj.uid,
+          'text':obj.creator + " added new dates to " + obj.name,
+          'category': 'tripDates'
         }
         console.log(nextData)
          dispatch('sendCampersNotification', nextData).then(() => {
            console.log('4')
            resolve()
-         })
-       
+         })       
       })
     })
     },
@@ -1203,12 +1204,30 @@ export const store = new Vuex.Store({
     tripDatesDeleteAction: (context, data) => {
       return fb.db.collection('tripDates').doc(data.tid).collection('dates').doc(data.id).delete()
     },
-    finalizeTripDatesAction: (context, data) => {
-      return fb.db.collection("trips").doc(data.tid).update({
+    finalizeTripDatesAction: ({dispatch}, data) => {
+      return new Promise(resolve => {
+         fb.db.collection("trips").doc(data.tid).update({
         finalDates: data.final,
         dateStart: data.start,
         dateEnd: data.end
+      }).then(() => {
+        console.log('2')
+        let nextData = {
+          'tid': data.tid,          
+          'creator': data.creator,
+          'name': data.name,
+          'cuid': data.uid,
+          'text': data.creator + " finalized dates for " + data.name,
+          'category': 'tripDates'
+        }
+        console.log(nextData)
+         dispatch('sendCampersNotification', nextData).then(() => {
+           console.log('4')
+           resolve()
+         })       
       })
+    })
+      // record notification
     },
     unfinalizeTripDatesAction: (context, data) => {
       return fb.db.collection("trips").doc(data.tid).update({

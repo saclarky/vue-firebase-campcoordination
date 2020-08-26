@@ -18,7 +18,6 @@ export default {
   },
   computed: {
     attr: function () {
-      console.log(this.thisTrip.dateStart)
       return [
         {
           key: "today",

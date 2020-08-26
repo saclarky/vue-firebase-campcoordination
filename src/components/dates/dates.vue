@@ -127,9 +127,11 @@ const calendar = this.$refs.datesCal
        final: true,
         tid: this.thisTrip.id,
         start: new Date(Date.parse(start)),
-        end: new Date(Date.parse(end))
+        end: new Date(Date.parse(end)),
+         creator: this.$store.state.currentUser.displayName,
+        name: this.thisTrip.name,
+        uid: this.$store.state.currentUser.uid
       };
-      console.log(data)
       this.$store
         .dispatch("finalizeTripDatesAction", data)
         .then(() => {

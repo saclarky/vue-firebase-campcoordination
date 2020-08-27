@@ -179,54 +179,55 @@ export const store = new Vuex.Store({
       return state.thisTripDates
     },
     //USER
-    thisUserNotificationsGetter: state => {
-      console.log('getter')
+    thisUserInvitesGetter: state => {
+      console.log('invites getter')
       let inviteObj = []
-
+      function formatTime(dd) {
+         //am/pm
+         let hours = dd.getHours();
+         let flipper = " AM";
+         if (hours >= 12) {
+          if (hours > 12) {
+           hours = hours - 12;
+          }
+           flipper = " PM";
+         }
+         if (hours == 0) {
+           hours = 12;
+         }
+         let m = dd.getMinutes();
+         m = m < 10 ? "0" + m : m;         
+      
+        let newFormat =
+          dd.getDate() +
+          " " +
+          dd.toLocaleString("default", {
+            month: "long"
+          }) +
+          " " +
+          dd.getFullYear() +
+          " " +
+          hours +
+          ":" +
+          m +
+          flipper;
+        return newFormat
+      }
       if (state.thisUserNotifications.length > 0) {
         state.thisUserNotifications.forEach(doc => {
-          // console.log('is this a data situation?', doc)
-          // No it's basically already doc.data() but it has ID too
-          let modInvite = doc;
-          if ("time" in modInvite) {
-            let dd = new Date(modInvite.time);
-            //am/pm
-            let hours = dd.getHours();
-            let flipper = " AM";
-            if (hours >= 12) {
-              hours = hours - 12;
-              flipper = " PM";
-            }
-            if (hours == 0) {
-              hours = 12;
-            }
-            let m = dd.getMinutes();
-            m = m < 10 ? "0" + m : m;
-            modInvite.time =
-              dd.getDate() +
-              " " +
-              dd.toLocaleString("default", {
-                month: "long"
-              }) +
-              " " +
-              dd.getFullYear() +
-              " " +
-              hours +
-              ":" +
-              m +
-              flipper;
-          } else {
-            modInvite.time = "";
+          if (doc.category === 'Trip Invite') {
+            console.log(doc.time)
+            // if (doc.time instanceof Object) {
+              let dd = formatTime(new Date(doc.time))
+              doc.time=dd
+            //  }
+                 inviteObj.push(doc);  
           }
-
-              inviteObj.push(modInvite);
-         
+                 
         })
       }
       //return batch of objects by category
-      return {
-        'tripInvites': inviteObj
-      }
+      return  inviteObj      
     },
 
     //GEAR
@@ -874,11 +875,13 @@ export const store = new Vuex.Store({
       })
     },
     addTripNotification: (context, data) => {
+      console.log('add trip n', data)
        // Add an activity log message about the invite
        return fb.db.collection('tripActivityLog').doc(data.tid).collection('logs')
+       // ALERT always set-up correct keys for this dispatch
        .add({
          'time': new Date().getTime(), 
-         'from': data.fromUID,
+         'from': data.from,
          'text': data.text,
          'category': data.category
        })
@@ -918,7 +921,7 @@ export const store = new Vuex.Store({
             if (allCampers.includes(userID.id)) {
               resolve('duplicate')
             } else {
-              console.log('not invited yet')
+              console.log('not invited yet', userID.data())
               // Get name
               let uidToName = userID.data().name;
               // Add an activity log message about the invite
@@ -1184,7 +1187,7 @@ export const store = new Vuex.Store({
         console.log('2')
         let nextData = {
           'tid': obj.tid,
-          'fromUID': obj.uid,
+          'from': obj.uid,
           'category': 'Trip Dates',
           'text':obj.creator + " added new dates: " + obj.dateStart.getDate() + ' ' + obj.dateStart.toLocaleString("default", {
             month: "long"}) + ' ' + obj.dateStart.getFullYear()
@@ -1212,7 +1215,7 @@ export const store = new Vuex.Store({
         console.log('2')
         let nextData = {
           'tid': data.tid,
-          'fromUID': data.uid,
+          'from': data.uid,
           'text': data.creator + " deleted dates: " + data.start + " - " + data.end, // TODO: ... the actual dates haha
           'category': 'Trip Dates'
         }        
@@ -1234,7 +1237,7 @@ export const store = new Vuex.Store({
         console.log('2')
         let nextData = {
           'tid': data.tid,
-          'fromUID': data.uid,
+          'from': data.uid,
           'text': data.creator + " finalized dates for " + data.name,
           'category': 'tripDates'
         }        

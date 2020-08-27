@@ -1,61 +1,58 @@
 <template>
   <div class="main">
     <div class="hero">
-      <div class="hero-top" >
+      <div class="hero-top">
         <!-- <h1 class="hero-title">Trips</h1>
-        <div class="hero-icon"></div> -->
-         <div class="hero-content">
+        <div class="hero-icon"></div>-->
+        <div class="hero-content">
           <!-- TODO: new trip action, hidden form? -->
           <a id="show-modal" @click="toggleAddTrip()" class="hero-cta-button button grow">New Trip</a>
           <!-- use the modal component, pass in the prop -->
-          <newTripPopup v-if="showAddTrip" @close="toggleAddTrip()">
-           
-          </newTripPopup>
-      </div>
+          <newTripPopup v-if="showAddTrip" @close="toggleAddTrip()"></newTripPopup>
+        </div>
       </div>
       <div class="hero-bottom">
-       
-        
-
-        
-        <div class="tripBlock">
-          <div class="title">My Trips</div>
-          <div v-for="item in tripsOrdered" :key="item.id" :id="item.id" class="tripContent">
-            <div class='datesStyle'>{{item.dateStart}}</div>
-            <div @click="goToTrip(item.id)">{{item.name}}</div>
-            <!-- TODO: how validate other rows below? If date field is empty, breaks -->
-            <div
-              v-if="item.date"
-            >{{new Date(item.date.seconds * 1000).getDate() }} {{ new Date(item.date.seconds * 1000).toLocaleString('default', { month: 'long' }) }} {{new Date(item.date.seconds * 1000).getFullYear() }}</div>
-            <div v-if="item.location">{{item.location.Oa}}, {{item.location.Ba}}</div>
-            <!-- <a @click="goToTrip">Go</a> -->
-            <!-- input value isn't title, it's id for syncing data change with store/firestore -->
-            <!-- <input type="checkbox" :id="item.id" :value="item.id" :checked="status" @change="updateStatus"> -->
-            <!-- <label class="strikethrough" :for="item.id"> {{item.name}} </label> -->
-            <!-- TODO: sort checked items to bottom of list? -->
-            <!-- <small style="text-decoration:underline;" @click="deleteTrip(item.id)">Delete</small> -->
-            <i class="cell text deleteIcon" @click="deleteTrip(item.id)"></i>
+        <div class="row tripsSection">
+          <div class="tripBlock">
+            <div class="title">My Trips</div>
+            <div v-for="item in tripsOrdered" :key="item.id" :id="item.id" class="tripContent">
+              <div class="datesStyle">{{item.dateStart}}</div>
+              <div @click="goToTrip(item.id)">{{item.name}}</div>
+              <!-- TODO: how validate other rows below? If date field is empty, breaks -->
+              <div
+                v-if="item.date"
+              >{{new Date(item.date.seconds * 1000).getDate() }} {{ new Date(item.date.seconds * 1000).toLocaleString('default', { month: 'long' }) }} {{new Date(item.date.seconds * 1000).getFullYear() }}</div>
+              <div v-if="item.location">{{item.location.Oa}}, {{item.location.Ba}}</div>
+              <!-- <a @click="goToTrip">Go</a> -->
+              <!-- input value isn't title, it's id for syncing data change with store/firestore -->
+              <!-- <input type="checkbox" :id="item.id" :value="item.id" :checked="status" @change="updateStatus"> -->
+              <!-- <label class="strikethrough" :for="item.id"> {{item.name}} </label> -->
+              <!-- TODO: sort checked items to bottom of list? -->
+              <!-- <small style="text-decoration:underline;" @click="deleteTrip(item.id)">Delete</small> -->
+              <i class="cell text deleteIcon" @click="deleteTrip(item.id)"></i>
+            </div>
           </div>
-        </div>
-        <div class="tripBlock">
-          <div class="title"> Joined Trips </div>
-          <div v-for="item in joinedTrips" :key="item.id" :id="item.id" class="tripContent">
-            <div @click="goToTrip(item.id)">{{item.name}}</div>
-            <!-- TODO: how validate other rows below? If date field is empty, breaks -->
-            <div
-              v-if="item.date"
-            >{{new Date(item.date.seconds * 1000).getDate() }} {{ new Date(item.date.seconds * 1000).toLocaleString('default', { month: 'long' }) }} {{new Date(item.date.seconds * 1000).getFullYear() }}</div>
-            <div v-if="item.location">{{item.location.Oa}}, {{item.location.Ba}}</div>
-      
-        </div>
+          <div class="tripBlock">
+            <div class="title">Joined Trips</div>
+            <div v-for="item in joinedTrips" :key="item.id" :id="item.id" class="tripContent">
+              <div @click="goToTrip(item.id)">{{item.name}}</div>
+              <!-- TODO: how validate other rows below? If date field is empty, breaks -->
+              <div
+                v-if="item.date"
+              >{{new Date(item.date.seconds * 1000).getDate() }} {{ new Date(item.date.seconds * 1000).toLocaleString('default', { month: 'long' }) }} {{new Date(item.date.seconds * 1000).getFullYear() }}</div>
+              <div v-if="item.location">{{item.location.Oa}}, {{item.location.Ba}}</div>
+            </div>
+          </div>
+          <div class="tripBlock">
+            <div class="title">Trip Invites</div>
+           <tripInvites></tripInvites>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- ADD TRIP SECTION -->
-    <div v-if="showAddTrip">
-      <div v-if="errors !== ''" id="errors">{{ errors }}</div>
-    </div>
+    
   </div>
 </template>
 
@@ -63,69 +60,74 @@
 <script>
 // import { db } from "@/main"
 import { mapState, mapGetters } from "vuex";
-import newTripPopup from "../components/newTripPopup.vue";
-
+import newTripPopup from "../components/trips/newTripPopup.vue";
+import tripInvites from '../components/trips/tripInvites'
 export default {
   name: "trips",
   created() {
-    console.log("TODO: MUST separate owned from joined trips somehow, asterisk? and disable delete...")
+    console.log(
+      "TODO: MUST separate owned from joined trips somehow, asterisk? and disable delete..."
+    );
     //TODO: If not logged in yet does it work?
     // TODO: listen for promise for loading spinner?
     // TODO: do this only once? like on app load?
     this.$store.dispatch("bindTrips").then((res) => {
-      console.log('what happens if theres no trips data? ', res)
+      console.log("what happens if theres no trips data? ", res);
       console.log("stop spinner");
     });
-    this.$store.dispatch("bindJoinedTrips")
+    this.$store.dispatch("bindJoinedTrips");
     //   this.$store.dispatch("setItems");
   },
   components: {
-    newTripPopup: newTripPopup
+    newTripPopup,
+    tripInvites
   },
-  data: function() {
+  data: function () {
     return {
       //   test: []
       status: false, //todo: compare dates?
-      showAddTrip: false
+      showAddTrip: false,
     };
   },
-  computed: {...mapState(["errors",  "joinedTrips"]),
-  ...mapGetters(['tripsOrdered'])},
+  computed: {
+    ...mapState(["errors", "joinedTrips"]),
+    ...mapGetters(["tripsOrdered"]),
+  },
   methods: {
     //CANNOT use arrow shorthand => for functions if need "this.$store"
     toggleAddTrip() {
       this.showAddTrip = !this.showAddTrip;
     },
-    deleteTrip: function(id) {
+    deleteTrip: function (id) {
       console.log("delete trip");
-      this.$store.dispatch("deleteTripAction", id).then((res,rej) => {
+      this.$store.dispatch("deleteTripAction", id).then((res, rej) => {
         if (res) {
-          if(res == 'Trip deleted') {
-            this.$toasted.show('Trip deleted')
+          if (res == "Trip deleted") {
+            this.$toasted.show("Trip deleted");
           } else {
-            this.$toasted.show(res)
+            this.$toasted.show(res);
           }
         } else {
-          this.$toasted.show(rej)
+          this.$toasted.show(rej);
         }
-      })
+      });
     },
-    goToTrip: function(e) {
+    goToTrip: function (e) {
       console.log("dispatch ");
       console.log(e);
       // Major issue on clicking div of event returning sub=element info instead of triggering div
       // so make sure pass in id in function...
       //promise??
       this.$store.dispatch("createTripPageData", e);
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style scoped>
 .main {
   position: relative;
-    top: 86px;
+  top: 86px;
 }
 /* HERO CSS */
 .hero {
@@ -150,7 +152,7 @@ export default {
   align-items: center;
   /* justify-content: space-between; */
   /* padding: 15px 0; */
-  color: #f7ffff;
+  /* color: #f7ffff; */
   padding: 10px 5px 30px 5px;
 }
 .hero-cta-button {
@@ -174,6 +176,9 @@ export default {
   width: 50px;
   height: 50px;
   margin-bottom: 15px;
+}
+.tripsSection {
+  padding: 0 20px;
 }
 
 .tripContent {
@@ -209,8 +214,11 @@ div.tripContent > div {
   text-decoration: underline;
 }
 .datesStyle {
-  font-size:.9rem;
-  color:rgb(82, 82, 82);
+  font-size: 0.9rem;
+  color: rgb(82, 82, 82);
   font-style: italic;
+}
+.tripBlock {
+  padding: 0 20px;
 }
 </style>

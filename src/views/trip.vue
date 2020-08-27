@@ -110,7 +110,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from "vuex";
+import { mapState } from "vuex";
 import inviteCamperPopup from "../components/campers/inviteCamperPopup";
 import campers from "../components/campers/campers";
 import dates from "../components/dates/dates";
@@ -206,8 +206,7 @@ export default {
       "thisTripCampers",
       "thisTripCampersNo",
       "thisTripCampersPending",
-    ]),
-    ...mapGetters(["thisTripInviteLogs"]),
+    ])
   },
   data: function () {
     return {

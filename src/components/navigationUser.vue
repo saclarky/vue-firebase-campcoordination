@@ -11,9 +11,7 @@
           <router-link to="/trips">Trips</router-link>
         </div>
          
-            <div class="menu-item" >
-              <router-link to="/dashboard">Alerts</router-link>
-            </div>
+          
             <div class="menu-item" >
               <router-link to="/settings">Account</router-link>
             </div>

@@ -21,12 +21,16 @@
 </template>
 
 <script>
+import {mapState} from 'vuex';
 export default {
-  props: ["ddid", "tid"],
+  props: ["ddid", "tid", "dstart", "dend"],
   data: function () {
     return {
       showSpinner: false,
     };
+  },
+  computed: {
+    ...mapState(['currentUser'])
   },
   methods: {
     deleteDates() {
@@ -34,7 +38,11 @@ export default {
      console.log('delete dates')
      let data = {
         tid: this.tid,
-        id: this.ddid
+        id: this.ddid,
+        start: this.dstart,
+        end: this.dend,
+        uid: this.currentUser.uid,
+        creator: this.currentUser.displayName
       };
       console.log(data)
       this.$store

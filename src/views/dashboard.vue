@@ -30,23 +30,7 @@
         <span :class="{deleted: !alert.tripDeleted}"> The owner deleted this trip</span>
       </div>
 
-      <!--  RESPONSES remove -->
-      <div v-for="alert in thisUserNotificationsGetter.tripResponses" :key="alert.id" >
-        <span>{{alert.text}}</span>
-      </div>
 
-<!-- TRIP DATES ALERTS -->
-      <div v-for="dates in thisUserNotificationsGetter.tripDates" :key="dates.id">
-         <span :class="{strike: dates.tripDeleted}">
-        {{dates.time}}
-          -
-          {{dates.text}}
-          </span>
-          <span :class="{deleted: dates.tripDeleted}">
-          <button @click="viewTrip(dates.tid)">View Trip</button>       
-        </span>
-        <span :class="{deleted: !dates.tripDeleted}"> The owner deleted this trip</span>
-      </div>
     </div>
   </div>
 </template>

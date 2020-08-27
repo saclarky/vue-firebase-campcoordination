@@ -1,106 +1,128 @@
 <template>
-  <div class='row'>
-    <div class='calCol'>
-        <v-calendar ref="datesCal" :attributes="attrs"></v-calendar>
-      </div>
-  <div class='lgCol'>
-   
+  <div class="row">
+    <div class="calCol">
+      <v-calendar ref="datesCal" :attributes="attrs"></v-calendar>
+    </div>
+    <div class="lgCol">
       <div class="datesData" v-for="date in thisTripDatesGetter" :key="date.id">
-        <div class='datesRow'>
-           <span class="deleteIcon" @click="toggleDatesDelete(date.id)">
-                  <svg width="22px" height="22px" viewbox="0 0 22 22">
-                    <path
-                      fill="#c0c0c0"
-                      d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"
-                    />
-                  </svg>
-                </span>
-  
-         <span :id="date.id" class='theDates' @click="moveCal(date.id,date.startDate)"> {{date.startDate}} - {{date.endDate}} </span>
-          <span
-            class="up"
-            @click="vote(true, date.id)"
-          ></span>
-          <span class="down" @click="vote(false, date.id)"></span>
-          <button class='choose' @click='finalDates(date.startDate, date.endDate)'>Finalize These Dates</button>
-          </div>
-          <span v-for="(vote, name) in date.votes" :key="name" class="votes">
-            <span :class="{showVote:vote, noVote:!vote}"></span>
-            <span class="votesText">{{name}}</span>
+        <div class="datesRow">
+          <span class="deleteIcon" @click="toggleDatesDelete(date.id, date.startDate, date.endDate)">
+            <svg width="22px" height="22px" viewBox="0 0 22 22">
+              <path
+                fill="#c0c0c0"
+                d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4z"
+              />
+            </svg>
           </span>
-        
+
+          <span
+            :id="date.id"
+            class="theDates"
+            @click="moveCal(date.id,date.startDate)"
+          >{{date.startDate}} - {{date.endDate}}</span>
+          <span class="up" @click="vote(true, date.id)"></span>
+          <span class="down" @click="vote(false, date.id)"></span>
+          <button
+            class="choose"
+            @click="finalDates(date.startDate, date.endDate)"
+          >Finalize These Dates</button>
+        </div>
+        <span v-for="(vote, name) in date.votes" :key="name" class="votes">
+          <span :class="{showVote:vote, noVote:!vote}"></span>
+          <span class="votesText">{{name}}</span>
+        </span>
       </div>
-  </div>
-      
-    <deleteTripDatesPopup v-if="showDeleteTripDates" @close="toggleDatesDelete('')" :ddid="datesID" :tid="thisTrip.id"></deleteTripDatesPopup>
+    </div>
+
+    <deleteTripDatesPopup
+      v-if="showDeleteTripDates"
+      @close="toggleDatesDelete('','','')"
+      :ddid="datesID"
+      :dstart="delDatesStart"
+      :dend="delDatesEnd"
+      :tid="thisTrip.id"
+    ></deleteTripDatesPopup>
   </div>
 </template>
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import deleteTripDatesPopup from './deleteTripDatesPopup'
+import deleteTripDatesPopup from "./deleteTripDatesPopup";
 export default {
- mounted() {
-console.log(this.thisTripDatesGetter[0])
-var startCalPage = this.thisTripDatesGetter[0].startDate
-document.getElementById(this.thisTripDatesGetter[0].id).style.color='#43c3f7'
-// Get the calendar ref
-const calendar = this.$refs.datesCal
-
-// Moves to today's date
-if(startCalPage) {
- calendar.move(new Date(Date.parse(startCalPage)), {transition:'slide-h'})
-}
- },
- components: {deleteTripDatesPopup},
- data() {
-return {
-  datesID: '',
-  showDeleteTripDates: false
-}
- },
+  mounted() {
+    console.log(this.thisTripDatesGetter[0]);
+    var startCalPage
+    if (this.thisTripDatesGetter[0] === undefined) {
+       startCalPage = new Date();
+    } else {
+       startCalPage = new Date(
+        Date.parse(this.thisTripDatesGetter[0].startDate)
+      );
+      document.getElementById(this.thisTripDatesGetter[0].id).style.color =
+        "#43c3f7";
+    }
+    // Get the calendar ref
+    const calendar = this.$refs.datesCal;
+    // Moves to today's date
+    if (startCalPage) {
+      calendar.move(startCalPage, { transition: "slide-h" });
+    }
+  },
+  components: { deleteTripDatesPopup },
+  data() {
+    return {
+      datesID: "",
+      delDatesStart: '',
+      delDatesEnd: '',
+      showDeleteTripDates: false,
+    };
+  },
   computed: {
-    attrs: function() {
-      let vcd = []
-      console.log('empty? UNDFND', this.thisTripDates)
-      if(this.thisTripDates) {
-this.thisTripDates.forEach(element => {
-        vcd.push({start: new Date(Date.parse(element.startDate)), end: new Date(Date.parse(element.endDate))})
-      });
+    attrs: function () {
+      let vcd = [];
+      console.log("empty? UNDFND", this.thisTripDates);
+      if (this.thisTripDates) {
+        this.thisTripDates.forEach((element) => {
+          vcd.push({
+            start: new Date(Date.parse(element.startDate)),
+            end: new Date(Date.parse(element.endDate)),
+          });
+        });
       } else {
-        vcd = [{start: new Date(), end: new Date().getDate()+2}]
+        vcd = [{ start: new Date(), end: new Date().getDate() + 2 }];
       }
-      
+
       return [
         {
-          key: 'today',
+          key: "today",
           highlight: true,
           // color: 'teal',
-          dates: vcd
-        }
-      ]
+          dates: vcd,
+        },
+      ];
     },
-   
-    ...mapState(["thisTrip",'thisTripDates']),
-    ...mapGetters(["thisTripDatesGetter"])
+
+    ...mapState(["thisTrip", "thisTripDates"]),
+    ...mapGetters(["thisTripDatesGetter"]),
   },
   methods: {
-   toggleDatesDelete(did) {
-     this.datesID = did;
-     this.showDeleteTripDates = !this.showDeleteTripDates;
-   },
-   moveCal(idSearch,dd) {
-     document.getElementsByClassName('theDates').forEach(item => {
-       item.style.color="#3a3a3a"
-     })
-     document.getElementById(idSearch).style.color='#43c3f7'
-    // Get the calendar ref
-const calendar = this.$refs.datesCal
+    toggleDatesDelete(did, dst, de) {
+      this.datesID = did;
+      this.delDatesStart= dst
+      this.delDatesEnd=de
+      this.showDeleteTripDates = !this.showDeleteTripDates;
+    },
+    moveCal(idSearch, dd) {
+      document.getElementsByClassName("theDates").forEach((item) => {
+        item.style.color = "#3a3a3a";
+      });
+      document.getElementById(idSearch).style.color = "#43c3f7";
+      // Get the calendar ref
+      const calendar = this.$refs.datesCal;
 
-// Moves to today's date
- calendar.move(new Date(Date.parse(dd)), {transition:'slide-h'})
-
-   },
+      // Moves to today's date
+      calendar.move(new Date(Date.parse(dd)), { transition: "slide-h" });
+    },
     vote(v, i) {
       let data = {
         tid: this.thisTrip.id,
@@ -122,15 +144,15 @@ const calendar = this.$refs.datesCal
     },
     finalDates(start, end) {
       // trip.finalDates==true
-     console.log('final dates')
-     let data = {
-       final: true,
+      console.log("final dates");
+      let data = {
+        final: true,
         tid: this.thisTrip.id,
         start: new Date(Date.parse(start)),
         end: new Date(Date.parse(end)),
-         creator: this.$store.state.currentUser.displayName,
+        creator: this.$store.state.currentUser.displayName,
         name: this.thisTrip.name,
-        uid: this.$store.state.currentUser.uid
+        uid: this.$store.state.currentUser.uid,
       };
       this.$store
         .dispatch("finalizeTripDatesAction", data)
@@ -142,10 +164,8 @@ const calendar = this.$refs.datesCal
           this.$toasted.show(e.message);
         });
       //trip.dateStart/End = dates
-
-
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>
@@ -177,10 +197,10 @@ const calendar = this.$refs.datesCal
 
 .datesRow {
   display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 5px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 5px;
 }
 .showVote {
   background: url("../../assets/circle_tick_grey.svg") no-repeat center center;
@@ -188,7 +208,7 @@ const calendar = this.$refs.datesCal
   width: 20px;
   height: 20px;
   display: inline-block;
-  padding-right:10px;
+  padding-right: 10px;
 }
 .noVote {
   background: url("../../assets/circle_cancel_grey.svg") no-repeat center center;
@@ -196,7 +216,7 @@ const calendar = this.$refs.datesCal
   width: 20px;
   height: 20px;
   display: inline-block;
-  padding-right:10px;
+  padding-right: 10px;
 }
 .up {
   background: url("../../assets/thumb_up.svg") no-repeat center center;
@@ -233,9 +253,9 @@ const calendar = this.$refs.datesCal
   display: none;
 }
 .theDates {
-    /* font-weight: bold; */
-    color: #3a3a3a;
-    cursor: pointer;
+  /* font-weight: bold; */
+  color: #3a3a3a;
+  cursor: pointer;
 }
 .deleteIcon {
   /* background: url("../assets/delete.svg") no-repeat center center; */

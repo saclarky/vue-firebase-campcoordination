@@ -119,7 +119,7 @@ export const store = new Vuex.Store({
       } else {
 
         state.thisTripActivityLog.forEach(key => {
-          if (['invite', 'inviteRSVP'].includes(key.category)) {
+          // if (['invite', 'inviteRSVP'].includes(key.category)) {
             let modInvite = key;
             if ("time" in modInvite) {
               let dd = new Date(modInvite.time);
@@ -153,7 +153,7 @@ export const store = new Vuex.Store({
               modInvite.time = "TBD";
             }
             tripInviteLogs.push(modInvite);
-          }
+          // }
         });
         return tripInviteLogs;
       }
@@ -181,9 +181,7 @@ export const store = new Vuex.Store({
     //USER
     thisUserNotificationsGetter: state => {
       console.log('getter')
-      let responsesObj = []
       let inviteObj = []
-      let tripDatesObj = []
 
       if (state.thisUserNotifications.length > 0) {
         state.thisUserNotifications.forEach(doc => {
@@ -221,24 +219,13 @@ export const store = new Vuex.Store({
             modInvite.time = "";
           }
 
-          // Trip Invitations Category
-          switch (doc.category) {
-            case "tripInvite":
               inviteObj.push(modInvite);
-              break
-            case "tripDates":
-              tripDatesObj.push(modInvite)
-              break
-            default:
-              responsesObj.push(modInvite) // I don't think this is a thing
-          }
+         
         })
       }
       //return batch of objects by category
       return {
-        'tripInvites': inviteObj,
-        'tripResponses': responsesObj,
-        'tripDates': tripDatesObj
+        'tripInvites': inviteObj
       }
     },
 
@@ -939,7 +926,7 @@ export const store = new Vuex.Store({
                 'tid': tid,
                 'from': state.currentUser.uid,
                 'text': state.currentUser.displayName + " invited " + uidToName + " to join the trip",
-                'category': "tripInvite"
+                'category': "Trip Invite"
               }
               dispatch('addTripNotification', addData)
                 .then((res) => {
@@ -949,7 +936,7 @@ export const store = new Vuex.Store({
                     .then(() => {
                       // Add notification to user dashboard
                       fb.db.collection('userNotifications').doc(userID.id).collection('notifications').add({
-                        'category': 'tripInvite',
+                        'category': 'Trip Invite',
                         'tid': tid,
                         'time': new Date().getTime(),
                         'text': state.currentUser.displayName + " invited you to join " + state.thisTrip.name,
@@ -999,7 +986,7 @@ export const store = new Vuex.Store({
           'tid': state.thisTrip.id,
           'from': state.currentUser.uid,
           'text': state.currentUser.displayName + " removed " + data.name + " from the trip",
-          'category': "tripInvite"
+          'category': "Trip Invite"
         }
         prom.push(dispatch('addTripNotification', rmData))
 
@@ -1062,7 +1049,7 @@ export const store = new Vuex.Store({
           'tid': data.tid,
           'from': state.currentUser.uid,
           'text': state.currentUser.displayName + " accepted trip invite.",
-          'category': "tripInvite"
+          'category': "Trip Invite"
         }
         let d = dispatch('addTripNotification', jData)
         // update user notification response
@@ -1120,7 +1107,7 @@ export const store = new Vuex.Store({
           'tid': data.tid,
            'from': state.currentUser.uid,
           'text': state.currentUser.displayName + " declined trip invite.",
-          'category': "tripInvite"
+          'category': "Trip Invite"
         }
         let a = dispatch('addTripNotification', dData)
         Promise.all([a, b, c, d, e]).then(() => {
@@ -1195,19 +1182,14 @@ export const store = new Vuex.Store({
         votes: { [state.currentUser.displayName]: true }
       }).then(() => {
         console.log('2')
-        // let nextData = {
-        //   'tid': obj.tid,          
-        //   'creator': obj.creator,
-        //   'name': obj.name,
-        //   'cuid': obj.uid,
-        //   'text':obj.creator + " added new dates to " + obj.name,
-        //   'category': 'tripDates'
-        // }
         let nextData = {
           'tid': obj.tid,
           'fromUID': obj.uid,
-          'category': 'tripDates',
-          'text':obj.creator + " added new dates to " + obj.name, 
+          'category': 'Trip Dates',
+          'text':obj.creator + " added new dates: " + obj.dateStart.getDate() + ' ' + obj.dateStart.toLocaleString("default", {
+            month: "long"}) + ' ' + obj.dateStart.getFullYear()
+           + ' - ' + obj.dateEnd.getDate() + ' ' + obj.dateEnd.toLocaleString("default", {
+            month: "long"}) + ' ' + obj.dateEnd.getFullYear()
         }
         console.log(nextData)
          dispatch('addTripNotification', nextData).then(() => {
@@ -1223,8 +1205,24 @@ export const store = new Vuex.Store({
         [tmp]: data.vote
       })
     },
-    tripDatesDeleteAction: (context, data) => {
-      return fb.db.collection('tripDates').doc(data.tid).collection('dates').doc(data.id).delete()
+    tripDatesDeleteAction: ({dispatch}, data) => {
+      return new Promise(resolve => {
+         fb.db.collection('tripDates').doc(data.tid).collection('dates').doc(data.id).delete()
+      .then(() => {
+        console.log('2')
+        let nextData = {
+          'tid': data.tid,
+          'fromUID': data.uid,
+          'text': data.creator + " deleted dates: " + data.start + " - " + data.end, // TODO: ... the actual dates haha
+          'category': 'Trip Dates'
+        }        
+        console.log(nextData)
+         dispatch('addTripNotification', nextData).then(() => {
+           console.log('4')
+           resolve()
+         })       
+      })
+    })
     },
     finalizeTripDatesAction: ({dispatch}, data) => {
       return new Promise(resolve => {

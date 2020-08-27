@@ -40,7 +40,6 @@
             v-if="showTripDatesPopup"
             @close="toggleTripDatesPopup"
             :tid="thisTrip.id"
-            :tidName="thisTrip.name"
           ></newTripDatesPopup>
 
           <div id="campersSection" :class="{row:true, splitPane:true, hide: !thisTrip.group, scroller:true}" >
@@ -102,7 +101,7 @@
       <hr />
       <div id="activityLogSection" class="row splitPane scroller">
         <div class="smCol rightBorder">Activity Log</div>
-        <div class="lgCol datesData">
+        <div class="lgCol datesData alignLeft">
           <activityLog></activityLog>
         </div>
       </div>
@@ -510,5 +509,8 @@ h4 {
   color: white;
   font-size: 1.3rem;
   font-family: "Kalam", cursive;
+}
+.alignLeft {
+  text-align: left;
 }
 </style>

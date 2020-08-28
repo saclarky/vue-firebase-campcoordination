@@ -1,6 +1,7 @@
 <template>
   <div class="row">
     <div class="calCol">
+        <div class="loader" v-if="showSpinner"></div>
       <button @click="unfinalizeTripDates">Undo These Dates</button>
       <v-calendar ref="finalCal" :attributes="attr" ></v-calendar>
     </div>
@@ -15,6 +16,11 @@ export default {
     const calendar = this.$refs.finalCal;
     // Moves to today's date
     calendar.move(new Date(this.thisTrip.dateStart.seconds*1000), { transition: "slide-h" });
+  },
+  data() {
+    return {
+      showSpinner: false
+    }
   },
   computed: {
     attr: function () {
@@ -32,6 +38,7 @@ export default {
 
   methods: {
     unfinalizeTripDates() {
+      this.showSpinner = true
       console.log("unfinal dates");
       let data = {
         tid: this.thisTrip.id,
@@ -40,9 +47,11 @@ export default {
       this.$store
         .dispatch("unfinalizeTripDatesAction", data)
         .then(() => {
+          this.showSpinner = false;
           this.$toasted.show("Done!");
         })
         .catch((e) => {
+          this.showSpinner = false;
           console.log(e);
           this.$toasted.show(e.message);
         });

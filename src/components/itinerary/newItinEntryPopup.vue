@@ -21,6 +21,7 @@
                 
  
               <div class="row rowStyle2">
+                <div class="loader" v-if="showSpinner"></div>
                 <input type="submit" class="rowItem" @click="addEntry" value="Save" />
                <button class='rowItem' @click="$emit('close')">Cancel</button>
               </div>
@@ -38,6 +39,7 @@ export default {
   components: { VueTimepicker },
   data() {
     return {
+      showSpinner: false,
         newEntryDate: new Date(),
         newEntryTime: {
         hh: "08",
@@ -52,15 +54,19 @@ export default {
   methods: {
      addEntry(e) {
        e.preventDefault();
+       this.showSpinner = true
       if (!this.newEntryText) {
+        this.showSpinner = false;
         this.$toasted.show("Please add a description.");
         return;
       }
       if (!this.newEntryDate) {
+        this.showSpinner = false;
         this.$toasted.show("Please add a date.");
         return;
       }
       if (!this.newEntryTime) {
+        this.showSpinner = false;
         this.$toasted.show("Please add a time.");
         return;
       }
@@ -87,11 +93,13 @@ export default {
       console.log(data);
       // Add new date to tripDates
       this.$store.dispatch('addItinEntry', data).then(() => {
+        this.showSpinner = false;
         this.$emit("close");
         this.newEntryText=''
         this.newEntryDate=''
        this.$toasted.show('Entry added!')
       }).catch(e => {
+        this.showSpinner = false;
         console.log(e)
         this.$toasted.show(e.message)
       })

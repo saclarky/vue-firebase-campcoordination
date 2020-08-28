@@ -24,6 +24,7 @@
               </div>
 
               <div class="row rowStyle2">
+                <div class="loader" v-if="showSpinner"></div>
                 <input type="submit" class="rowItem" @click="updateEntry" value="Save" />
                 <button class="rowItem" @click="$emit('close')">Cancel</button>
               </div>
@@ -44,6 +45,7 @@ this.editEntryTime = this.objTime
   components: { VueTimepicker },
   data() {
     return {
+      showSpinner: false,
       editEntryDate: this.entry.dateJS,
       editEntryTime: {
         hh: '',
@@ -85,6 +87,7 @@ this.editEntryTime = this.objTime
   methods: {
     updateEntry(e) {
       e.preventDefault();
+      this.showSpinner = true;
       if (
         this.editEntryDate == this.entry.dateJS &&
         this.items == this.entry.entry &&
@@ -92,6 +95,7 @@ this.editEntryTime = this.objTime
         this.editEntryTime.mm == this.objTime.mm &&
         this.editEntryTime.A == this.objTime.A
       ) {
+        this.showSpinner = false;
         this.$toasted.show("No changes made!");
         return;
       }
@@ -99,12 +103,15 @@ this.editEntryTime = this.objTime
       if (this.editEntryTime.hh=="" && this.editEntryTime.mm=="" && this.editEntryTime.A=='') {
         this.editEntryTime = this.objTime
       } else if (this.editEntryTime.hh=="") {
+        this.showSpinner = false;
         this.$toasted.show("Please choose an hour.")
         return
       }else if (this.editEntryTime.mm=="") {
+        this.showSpinner = false;
         this.$toasted.show("Please choose minutes.")
         return
       }else if (this.editEntryTime.A=="") {
+        this.showSpinner = false;
         this.$toasted.show("Please choose AM or PM.")
         return
       }
@@ -135,10 +142,12 @@ this.editEntryTime = this.objTime
       this.$store
         .dispatch("updateItinEntryAction", data)
         .then(() => {
+          this.showSpinner = false;
           this.$emit("close");
           this.$toasted.show("Updated!");
         })
         .catch((e) => {
+          this.showSpinner = false;
           console.log(e);
           this.$toasted.show(e.message);
         });

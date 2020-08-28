@@ -12,6 +12,7 @@
                 <v-date-picker mode="range" v-model="range" is-inline />
               </div>
               <div class="row rowStyle">
+                <div class="loader" v-if="showSpinner"></div>
                 <input type="submit" class="rowItem" @click="suggestNewDate" value="Save" />
                 <button class='rowItem' @click="$emit('close')">Cancel</button>
               </div>
@@ -27,6 +28,7 @@
 export default {
   data() {
     return {
+      showSpinner: false,
       range: {
         start: new Date(),
         end: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+2)
@@ -38,6 +40,7 @@ export default {
   methods: {
      suggestNewDate(e) {
        e.preventDefault();
+       this.showSpinner = true;
       let data = {
         tid: this.tid,
         dateStart: this.range.start,
@@ -46,9 +49,11 @@ export default {
       };
       // Add new date to tripDates
       this.$store.dispatch('newTripDate', data).then(() => {
+        this.showSpinner = false;
         this.$emit("close");
        this.$toasted.show('Dates added!')
       }).catch(e => {
+        this.showSpinner = false;
         console.log(e)
         this.$toasted.show(e.message)
       })

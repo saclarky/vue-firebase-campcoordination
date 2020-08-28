@@ -25,6 +25,7 @@
 <input v-model='items' id='food' placeholder='Bagels, Cream Cheese'>
 </div>
               <div class="row rowStyle">
+                <div class="loader" v-if="showSpinner"></div>
                 <input type="submit" class="rowItem" @click="newMeal" value="Save" />
                 <button class='rowItem' @click="$emit('close')">Cancel</button>
               </div>
@@ -40,6 +41,7 @@
 export default {
   data() {
     return {
+      showSpinner: false,
         day: new Date(),
        type: 'Breakfast',
        items:''
@@ -49,6 +51,7 @@ export default {
   methods: {
      newMeal(e) {
        e.preventDefault();
+       this.showSpinner = true;
       let data = {
         tid: this.tid,
         page: this.page,
@@ -59,9 +62,11 @@ export default {
       console.log(data)
       // Add new date to tripDates
       this.$store.dispatch('newTripMealDate', data).then(() => {
+        this.showSpinner = false;
         this.$emit("close");
        this.$toasted.show('Meal added!')
       }).catch(e => {
+        this.showSpinner = false
         console.log(e)
         this.$toasted.show(e.message)
       })

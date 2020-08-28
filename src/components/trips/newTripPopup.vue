@@ -29,14 +29,15 @@
               </div>
 
               
-              <div class='column columnStyle'>
-                <div class='teal'>Trip Type:</div>
+              <div class='column leftColumn'>
+                <div class='row rowStyle'>
+                <div class='rowItem smText'>Trip Type:</div>
                 <div class="row rowStyle">
                  <input type="radio" name="tripType" value="true" id="group" v-model="group" selected>
                  <label class="rowItem smText" for="group">Group</label>
                  <input type="radio" name="tripType" value="false" id="ind" v-model="group">
                  <label class="rowItem smText" for="ind">Individual</label>
-              </div></div>
+              </div></div></div>
               <div class='column leftColumn'>
               <div :class="{row:true, rowStyle:true, hidden:this.group=='false'}">
                 <label class="rowItem smText" for="templateChoice">Group gear list:</label>
@@ -58,6 +59,7 @@
 
               <!-- TODO: choose list categories? -->
               <div class="row rowStyle">
+                 <div class="loader" v-if="showSpinner"></div>
                 <input type="submit" class="rowItem" @click="saveNewTrip" value="Save" />
                 <button @click="$emit('close')">Cancel</button>
               </div>
@@ -73,6 +75,7 @@
 export default {
   data() {
     return {
+      showSpinner: false,
       title: "",
       range: {
         start: new Date(),
@@ -88,7 +91,9 @@ export default {
   methods: {
     saveNewTrip(e) {
       e.preventDefault();
+      this.showSpinner = true;
       if (!this.title) {
+        this.showSpinner = false;
         this.$toasted.show("Need a trip name!");
         return;
       }
@@ -122,9 +127,11 @@ export default {
       };
       console.log(data)
       this.$store.dispatch("saveNewTripAction", data).then(() => {
+        this.showSpinner = false
         this.$emit("close");
           this.$toasted.show("Success! Trip Saved.");      
       }).catch(e => {
+        this.showSpinner = false
         console.log(e)
         this.$toasted.show(e.message)
       })

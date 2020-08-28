@@ -21,7 +21,8 @@
               <div class='mainText'>{{item.name}}</div> </span>
               <!-- <div v-if="item.location">{{item.location.Oa}}, {{item.location.Ba}}</div> -->
               <i :class="{cell:true, text: true, deleteIcon:true, hide:item.joined, show:!item.joined}" @click="toggleDeleteTrip(item.id)"></i>
-              <span :class="{show:item.joined, hide:!item.joined}">invited</span>
+              <i :class="{cell:true, text: true, addedPersonIcon:true, hide:!item.joined, show:item.joined}"></i>
+              
             </div>
           </div>        
           <div class="tripBlock">
@@ -178,6 +179,14 @@ div.tripContent > div {
 
 .deleteIcon {
   background: url("../assets/delete.svg") no-repeat center center;
+  background-size: contain;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.addedPersonIcon {
+  background: url("../assets/person_add.svg") no-repeat center center;
   background-size: contain;
   width: 24px;
   height: 24px;

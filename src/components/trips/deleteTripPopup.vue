@@ -5,7 +5,7 @@
         <div class="modal-container">
           <div class="modal-header">Are you Sure?</div>
           <div class="modal-body">
-            <div>This will delete all of the trip data.</div>
+            <div>This will permanently delete all of the trip data.</div>
             <form v-on:submit.prevent>
             <div class="row rowStyle">
               <div class="loader" v-if="showSpinner"></div>

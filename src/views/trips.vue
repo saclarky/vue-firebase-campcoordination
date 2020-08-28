@@ -17,18 +17,16 @@
             <div class="title">Upcoming Trips</div>
             <div v-for="item in tripsOrdered" :key="item.id" :id="item.id" class="tripContent">
              <span @click="goToTrip(item.id)" class='row entryStyle'>
-               <div class="datesStyle">{{item.dateStart}}</div>
-              <div class='mainText'>{{item.name}}</div> </span>
+               <div class="datesStyle cell">{{item.dateStart}}</div>
+              <div class='mainText cell'>{{item.name}}</div> </span>
               <!-- <div v-if="item.location">{{item.location.Oa}}, {{item.location.Ba}}</div> -->
               <i :class="{cell:true, text: true, deleteIcon:true, hide:item.joined, show:!item.joined}" @click="toggleDeleteTrip(item.id)"></i>
-              <i :class="{cell:true, text: true, addedPersonIcon:true, hide:!item.joined, show:item.joined}"></i>
-              
+              <span :class="{hide:!item.joined, show:item.joined}">
+              <button @click="joinTrip(item.id, item.alertID, item.isDeclined)" :class="{cell:true, joined: item.isJoined}" :disabled="item.isJoined">Join</button>
+          <button @click="declineTrip(item.id, item.alertID, item.isJoined)" :class="{cell: true, declined: item.isDeclined}" :disabled="item.isDeclined">Decline</button>
+              </span>
             </div>
-          </div>        
-          <div class="tripBlock">
-            <div class="title">Trip Invites</div>
-           <tripInvites></tripInvites>
-          </div>
+          </div>  
         </div>
       </div>
     </div>    
@@ -41,7 +39,7 @@
 // import { db } from "@/main"
 import { mapState, mapGetters } from "vuex";
 import newTripPopup from "../components/trips/newTripPopup.vue";
-import tripInvites from '../components/trips/tripInvites'
+// import tripInvites from '../components/trips/tripInvites'
 import deleteTripPopup from '../components/trips/deleteTripPopup'
 export default {
   name: "trips",
@@ -52,6 +50,7 @@ export default {
     //TODO: If not logged in yet does it work?
     // TODO: listen for promise for loading spinner?
     // TODO: do this only once? like on app load?
+    this.$store.dispatch("bindUserNotifications")
     this.$store.dispatch("bindTrips").then((res) => {
       console.log("what happens if theres no trips data? ", res);
       console.log("stop spinner");
@@ -61,7 +60,7 @@ export default {
   },
   components: {
     newTripPopup,
-    tripInvites,
+    // tripInvites,
     deleteTripPopup
   },
   data: function () {
@@ -74,6 +73,7 @@ export default {
     };
   },
   computed: {
+    
     ...mapState(["errors"]),
     ...mapGetters(["tripsOrdered"]),
   },
@@ -95,6 +95,40 @@ export default {
       //promise??
       this.$store.dispatch("createTripPageData", e);
     },
+     joinTrip: function(tripID, notiID, isD) {
+      console.log("tid: ", tripID, 'nid ', notiID);
+      // change response to true?
+      // disable buttons and add actual RSVP value in gray italics? Or...
+      // is better UX to highlight the join button as the RSVP but leave everything active
+      // because then could decline in the future if plans change, or re-join if declined.
+      // TODO: in that case need a way for trip campers to remove/block user in the future if no longer invited...
+      // retract invitation --> disable user notification join/decline w /disabled attribute, give a note like 'trip is full',
+      // remove from pending
+      this.$store
+        .dispatch("joinTripAction", { tid: tripID, nid: notiID, isDeclined: isD })
+        .then((res, rej) => {
+          if (res) {
+            this.$toasted.show("Done! Joined trip.");
+            // TODO how indicate to vue that response is joined, getter action? and then assign highlight class to join button
+            // and disable the join button...
+          } else {
+            this.$toasted.show(rej);
+          }
+        });
+    },
+    declineTrip: function(tripID, notiID, isJ) {
+      this.$store
+        .dispatch("declineTripAction", { tid: tripID, nid: notiID, isJoined: isJ })
+        .then((res, rej) => {
+          if (res) {
+            this.$toasted.show("Done! Declined trip.");
+            // TODO how indicate to vue that response is declined, getter action? and then assign highlight class to button
+            // and disable the button...
+          } else {
+            this.$toasted.show(rej);
+          }
+        });
+    }
   },
 };
 </script>
@@ -200,11 +234,11 @@ div.tripContent > div {
   font-size: 0.9rem;
   color: rgb(82, 82, 82);
   font-style: italic;
-  padding-right: 15px;
+  /* padding-right: 15px; */
 }
 .tripBlock {
   padding: 0 20px;
-  width: 50%;
+  /* width: 50%; */
 }
 .mainText {
   font-size: 1rem;
@@ -212,11 +246,24 @@ div.tripContent > div {
 .entryStyle {
   align-items: center;
   flex: 1;
+  padding: 0 5px;
 }
 .hide {
   display: none;
 }
 .show {
   display: inline-block;
+}
+.joined {
+  border: 2px green solid
+}
+.declined {
+  border: 2px red solid
+}
+.cell {
+  padding: 0 5px;
+}
+button {
+  margin: 0 5px;
 }
 </style>

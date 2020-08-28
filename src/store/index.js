@@ -96,10 +96,17 @@ export const store = new Vuex.Store({
       console.log('j', state.joinedTrips)
       console.log('o', state.trips)
       allTrips.forEach(trip => {
-        if(trip.uid === state.currentUser.uid) {
+        if (trip.uid === state.currentUser.uid) {
           trip.joined = false
         } else {
-trip.joined=true
+          trip.joined = true
+          state.thisUserNotifications.forEach(invite => {
+            if (invite.tid === trip.id) {
+              trip.isDeclined = invite.isDeclined
+              trip.isJoined = invite.isJoined
+              trip.alertID = invite.id
+            }
+          })
         }
         if (trip.finalDates) {
           hasDates.push(trip)
@@ -128,39 +135,39 @@ trip.joined=true
 
         state.thisTripActivityLog.forEach(key => {
           // if (['invite', 'inviteRSVP'].includes(key.category)) {
-            let modInvite = key;
-            if ("time" in modInvite) {
-              let dd = new Date(modInvite.time);
-              //am/pm
-              let hours = dd.getHours();
-              let flipper = " AM";
-              if (hours >= 12) {
-                hours = hours - 12;
-                flipper = " PM";
-              }
-              if (hours == 0) {
-                hours = 12;
-              }
-              let m = dd.getMinutes();
-              m = m < 10 ? "0" + m : m;
-
-              modInvite.time =
-                dd.getDate() +
-                " " +
-                dd.toLocaleString("default", {
-                  month: "long"
-                }) +
-                " " +
-                dd.getFullYear() +
-                " " +
-                hours +
-                ":" +
-                m +
-                flipper;
-            } else {
-              modInvite.time = "TBD";
+          let modInvite = key;
+          if ("time" in modInvite) {
+            let dd = new Date(modInvite.time);
+            //am/pm
+            let hours = dd.getHours();
+            let flipper = " AM";
+            if (hours >= 12) {
+              hours = hours - 12;
+              flipper = " PM";
             }
-            tripInviteLogs.push(modInvite);
+            if (hours == 0) {
+              hours = 12;
+            }
+            let m = dd.getMinutes();
+            m = m < 10 ? "0" + m : m;
+
+            modInvite.time =
+              dd.getDate() +
+              " " +
+              dd.toLocaleString("default", {
+                month: "long"
+              }) +
+              " " +
+              dd.getFullYear() +
+              " " +
+              hours +
+              ":" +
+              m +
+              flipper;
+          } else {
+            modInvite.time = "TBD";
+          }
+          tripInviteLogs.push(modInvite);
           // }
         });
         return tripInviteLogs;
@@ -191,21 +198,21 @@ trip.joined=true
       console.log('invites getter')
       let inviteObj = []
       function formatTime(dd) {
-         //am/pm
-         let hours = dd.getHours();
-         let flipper = " AM";
-         if (hours >= 12) {
+        //am/pm
+        let hours = dd.getHours();
+        let flipper = " AM";
+        if (hours >= 12) {
           if (hours > 12) {
-           hours = hours - 12;
+            hours = hours - 12;
           }
-           flipper = " PM";
-         }
-         if (hours == 0) {
-           hours = 12;
-         }
-         let m = dd.getMinutes();
-         m = m < 10 ? "0" + m : m;         
-      
+          flipper = " PM";
+        }
+        if (hours == 0) {
+          hours = 12;
+        }
+        let m = dd.getMinutes();
+        m = m < 10 ? "0" + m : m;
+
         let newFormat =
           dd.getDate() +
           " " +
@@ -226,16 +233,16 @@ trip.joined=true
           if (doc.category === 'Trip Invite') {
             console.log(doc.time)
             // if (doc.time instanceof Object) {
-              let dd = formatTime(new Date(doc.time))
-              doc.time=dd
+            let dd = formatTime(new Date(doc.time))
+            doc.time = dd
             //  }
-                 inviteObj.push(doc);  
+            inviteObj.push(doc);
           }
-                 
+
         })
       }
       //return batch of objects by category
-      return  inviteObj      
+      return inviteObj
     },
 
     //GEAR
@@ -748,7 +755,7 @@ trip.joined=true
                       .delete())
                   })
                   Promise.all(waitingDates).then(() => {
-                   
+
                     console.log('still concerned, TODO check logs collection is not orphaned')
                     fb.db.collection('tripDates').doc(id).delete()
                   })
@@ -766,7 +773,7 @@ trip.joined=true
                       .delete())
                   })
                   Promise.all(waitingGear).then(() => {
-                  
+
                     console.log('still concerned, TODO check logs collection is not orphaned')
                     fb.db.collection('groupGear').doc(id).delete()
                   })
@@ -783,7 +790,7 @@ trip.joined=true
                       .delete())
                   })
                   Promise.all(waitingIGear).then(() => {
-                   
+
                     console.log('individual gear all goob?')
                     // fb.db.collection('individualGear').doc(state.currentUser.uid)
                     // fb.db.collection('groupGear').doc(id).delete()
@@ -804,7 +811,7 @@ trip.joined=true
                     .delete())
                 })
                 Promise.all(waiting).then(() => {
-                 
+
                   console.log('still concerned, TODO check logs collection is not orphaned')
                   fb.db.collection('tripActivityLog').doc(id).delete()
                 })
@@ -830,7 +837,7 @@ trip.joined=true
                       .delete())
                   })
                   Promise.all(waitingGMeals).then(() => {
-                    
+
                     console.log('still concerned, TODO check logs collection is not orphaned')
                     fb.db.collection('groupMeals').doc(id).delete()
                   })
@@ -847,7 +854,7 @@ trip.joined=true
                       .delete())
                   })
                   Promise.all(waitingIMeals).then(() => {
-                   
+
                     console.log('individual gear all goob?')
                     // fb.db.collection('individualGear').doc(state.currentUser.uid)
                     // fb.db.collection('groupGear').doc(id).delete()
@@ -884,15 +891,15 @@ trip.joined=true
     },
     addTripNotification: (context, data) => {
       console.log('add trip n', data)
-       // Add an activity log message about the invite
-       return fb.db.collection('tripActivityLog').doc(data.tid).collection('logs')
-       // ALERT always set-up correct keys for this dispatch
-       .add({
-         'time': new Date().getTime(), 
-         'from': data.from,
-         'text': data.text,
-         'category': data.category
-       })
+      // Add an activity log message about the invite
+      return fb.db.collection('tripActivityLog').doc(data.tid).collection('logs')
+        // ALERT always set-up correct keys for this dispatch
+        .add({
+          'time': new Date().getTime(),
+          'from': data.from,
+          'text': data.text,
+          'category': data.category
+        })
     },
 
     // CAMPERS
@@ -993,7 +1000,7 @@ trip.joined=true
           }))
         }
         // Add an activity log message about the removal
-        let rmData= { 
+        let rmData = {
           'tid': state.thisTrip.id,
           'from': state.currentUser.uid,
           'text': state.currentUser.displayName + " removed " + data.name + " from the trip",
@@ -1025,6 +1032,7 @@ trip.joined=true
 
     },
     joinTripAction: ({ state, dispatch }, data) => {
+      console.log(data)
       //  deal with scenario of alreayd declined, now joining
       // TODO deal with if the camper has since been removed from the trip, aka deadline
       return new Promise((resolve, reject) => {
@@ -1080,7 +1088,7 @@ trip.joined=true
     },
     declineTripAction: ({ state, dispatch }, data) => {
       return new Promise((resolve, reject) => {
-
+console.log(data)
         // update user notification response
         let d = fb.db.collection('userNotifications').doc(state.currentUser.uid).collection('notifications')
           .doc(data.nid).update({
@@ -1116,7 +1124,7 @@ trip.joined=true
         // Add an activity log message about the invite
         let dData = {
           'tid': data.tid,
-           'from': state.currentUser.uid,
+          'from': state.currentUser.uid,
           'text': state.currentUser.displayName + " declined trip invite.",
           'category': "Trip Invite"
         }
@@ -1132,30 +1140,30 @@ trip.joined=true
     sendCampersNotification: (context, data) => {
       console.log('campers notification sending')
       return new Promise(resolve => {
-      // Get all the Yes campers and give them notification
-      fb.db.collection('campers').doc(data.tid).get().then(cc => {
-        console.log('3',cc.data())
-        let users = Object.keys(cc.data())
-        // Remove creator from notifications list
-        users.splice(users.indexOf(data.cuid),1)
-        console.log(users)
-        let subprom = []
-        users.forEach(c => {
-          // Save notification for dashboard
-          subprom.push(fb.db.collection('userNotifications').doc(c).collection('notifications').add({
-            'category': data.category,
-            'tid': data.tid,
-            'time': new Date().getTime(),
-            'text': data.text,            
-            'from': data.creator,
-            'to': c
-          }))
-        })
-        Promise.all(subprom).then(() => {
-          resolve()
+        // Get all the Yes campers and give them notification
+        fb.db.collection('campers').doc(data.tid).get().then(cc => {
+          console.log('3', cc.data())
+          let users = Object.keys(cc.data())
+          // Remove creator from notifications list
+          users.splice(users.indexOf(data.cuid), 1)
+          console.log(users)
+          let subprom = []
+          users.forEach(c => {
+            // Save notification for dashboard
+            subprom.push(fb.db.collection('userNotifications').doc(c).collection('notifications').add({
+              'category': data.category,
+              'tid': data.tid,
+              'time': new Date().getTime(),
+              'text': data.text,
+              'from': data.creator,
+              'to': c
+            }))
+          })
+          Promise.all(subprom).then(() => {
+            resolve()
+          })
         })
       })
-    })
     },
     searchUsersByEmail: (context, data) => {
       let email = data.email;
@@ -1186,29 +1194,31 @@ trip.joined=true
       console.log('dates')
       return new Promise(resolve => {
         console.log('1')
-       fb.db.collection('tripDates').doc(obj.tid).collection('dates').add({
-        startDate: obj.dateStart,
-        endDate: obj.dateEnd,
-        user: state.currentUser.displayName,
-        votes: { [state.currentUser.displayName]: true }
-      }).then(() => {
-        console.log('2')
-        let nextData = {
-          'tid': obj.tid,
-          'from': obj.uid,
-          'category': 'Trip Dates',
-          'text':obj.creator + " added new dates: " + obj.dateStart.getDate() + ' ' + obj.dateStart.toLocaleString("default", {
-            month: "long"}) + ' ' + obj.dateStart.getFullYear()
-           + ' - ' + obj.dateEnd.getDate() + ' ' + obj.dateEnd.toLocaleString("default", {
-            month: "long"}) + ' ' + obj.dateEnd.getFullYear()
-        }
-        console.log(nextData)
-         dispatch('addTripNotification', nextData).then(() => {
-           console.log('4')
-           resolve()
-         })       
+        fb.db.collection('tripDates').doc(obj.tid).collection('dates').add({
+          startDate: obj.dateStart,
+          endDate: obj.dateEnd,
+          user: state.currentUser.displayName,
+          votes: { [state.currentUser.displayName]: true }
+        }).then(() => {
+          console.log('2')
+          let nextData = {
+            'tid': obj.tid,
+            'from': obj.uid,
+            'category': 'Trip Dates',
+            'text': obj.creator + " added new dates: " + obj.dateStart.getDate() + ' ' + obj.dateStart.toLocaleString("default", {
+              month: "long"
+            }) + ' ' + obj.dateStart.getFullYear()
+              + ' - ' + obj.dateEnd.getDate() + ' ' + obj.dateEnd.toLocaleString("default", {
+                month: "long"
+              }) + ' ' + obj.dateEnd.getFullYear()
+          }
+          console.log(nextData)
+          dispatch('addTripNotification', nextData).then(() => {
+            console.log('4')
+            resolve()
+          })
+        })
       })
-    })
     },
     tripDatesVote: ({ state }, data) => {
       var tmp = 'votes.' + state.currentUser.displayName
@@ -1216,46 +1226,46 @@ trip.joined=true
         [tmp]: data.vote
       })
     },
-    tripDatesDeleteAction: ({dispatch}, data) => {
+    tripDatesDeleteAction: ({ dispatch }, data) => {
       return new Promise(resolve => {
-         fb.db.collection('tripDates').doc(data.tid).collection('dates').doc(data.id).delete()
-      .then(() => {
-        console.log('2')
-        let nextData = {
-          'tid': data.tid,
-          'from': data.uid,
-          'text': data.creator + " deleted dates: " + data.start + " - " + data.end, // TODO: ... the actual dates haha
-          'category': 'Trip Dates'
-        }        
-        console.log(nextData)
-         dispatch('addTripNotification', nextData).then(() => {
-           console.log('4')
-           resolve()
-         })       
+        fb.db.collection('tripDates').doc(data.tid).collection('dates').doc(data.id).delete()
+          .then(() => {
+            console.log('2')
+            let nextData = {
+              'tid': data.tid,
+              'from': data.uid,
+              'text': data.creator + " deleted dates: " + data.start + " - " + data.end, // TODO: ... the actual dates haha
+              'category': 'Trip Dates'
+            }
+            console.log(nextData)
+            dispatch('addTripNotification', nextData).then(() => {
+              console.log('4')
+              resolve()
+            })
+          })
       })
-    })
     },
-    finalizeTripDatesAction: ({dispatch}, data) => {
+    finalizeTripDatesAction: ({ dispatch }, data) => {
       return new Promise(resolve => {
-         fb.db.collection("trips").doc(data.tid).update({
-        finalDates: data.final,
-        dateStart: data.start,
-        dateEnd: data.end
-      }).then(() => {
-        console.log('2')
-        let nextData = {
-          'tid': data.tid,
-          'from': data.uid,
-          'text': data.creator + " finalized dates for " + data.name,
-          'category': 'tripDates'
-        }        
-        console.log(nextData)
-         dispatch('addTripNotification', nextData).then(() => {
-           console.log('4')
-           resolve()
-         })       
+        fb.db.collection("trips").doc(data.tid).update({
+          finalDates: data.final,
+          dateStart: data.start,
+          dateEnd: data.end
+        }).then(() => {
+          console.log('2')
+          let nextData = {
+            'tid': data.tid,
+            'from': data.uid,
+            'text': data.creator + " finalized dates for " + data.name,
+            'category': 'tripDates'
+          }
+          console.log(nextData)
+          dispatch('addTripNotification', nextData).then(() => {
+            console.log('4')
+            resolve()
+          })
+        })
       })
-    })
       // record notification
     },
     unfinalizeTripDatesAction: (context, data) => {

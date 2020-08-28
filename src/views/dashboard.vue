@@ -12,23 +12,7 @@
           <button @click="editMyList">Add</button>
           <!-- TODO: Add w enter key -->
         </div>
-      <div>Notifications</div>
-      <!-- TODO filter responded, time frame etc -->
-      <div v-for="alert in thisUserNotificationsGetter.tripInvites" :key="alert.id" >
-        <!-- from | time | category | message | actions/responded -->
-        <span :class="{strike: alert.tripDeleted}">
-          {{alert.time}}
-          -
-          {{alert.text}}
-        </span>
-        <span :class="{deleted: alert.tripDeleted}">
-          <!-- TODO change text to joined/declined after a selecton, innerHTML -->
-          <button @click="joinTrip(alert.tid, alert.id, alert.isDeclined)" :class="{joined: alert.isJoined}" :disabled="alert.isJoined">Join</button>
-          <button @click="declineTrip(alert.tid, alert.id, alert.isJoined)" :class="{declined: alert.isDeclined}" :disabled="alert.isDeclined">Decline</button>
-          <!-- <button>Delete</button> -->
-        </span>
-        <span :class="{deleted: !alert.tripDeleted}"> The owner deleted this trip</span>
-      </div>
+     
 
 
     </div>

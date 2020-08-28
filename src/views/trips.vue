@@ -20,19 +20,11 @@
                <div class="datesStyle">{{item.dateStart}}</div>
               <div class='mainText'>{{item.name}}</div> </span>
               <!-- <div v-if="item.location">{{item.location.Oa}}, {{item.location.Ba}}</div> -->
-              <i class="cell text deleteIcon" @click="deleteTrip(item.id)"></i>
+              <i :class="{cell:true, text: true, deleteIcon:true, hide:item.joined, show:!item.joined}" @click="deleteTrip(item.id)"></i>
+              <span :class="{show:item.joined, hide:!item.joined}">invited</span>
             </div>
           </div>
-          <div class="tripBlock">
-            <div class="title">Joined Trips</div>
-            <div v-for="item in joinedTrips" :key="item.id" :id="item.id" class="tripContent">
-               <span @click="goToTrip(item.id)" class='row entryStyle'>
-                 <div class="datesStyle">{{item.dateStart}}</div>
-              <div class='mainText'>{{item.name}}</div>
-               </span>
-               <span class="datesStyle">Joined</span>
-            </div>
-          </div>
+        
           <div class="tripBlock">
             <div class="title">Trip Invites</div>
            <tripInvites></tripInvites>
@@ -80,7 +72,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(["errors", "joinedTrips"]),
+    ...mapState(["errors"]),
     ...mapGetters(["tripsOrdered"]),
   },
   methods: {
@@ -211,7 +203,7 @@ div.tripContent > div {
 }
 .tripBlock {
   padding: 0 20px;
-  width: 33%;
+  width: 50%;
 }
 .mainText {
   font-size: 1rem;
@@ -219,5 +211,11 @@ div.tripContent > div {
 .entryStyle {
   align-items: center;
   flex: 1;
+}
+.hide {
+  display: none;
+}
+.show {
+  display: inline-block;
 }
 </style>

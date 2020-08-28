@@ -77,7 +77,7 @@ export const store = new Vuex.Store({
   getters: {
     // TRIPS
     tripsOrdered: state => {
-      console.log("Sprt trips by date or name")
+      console.log("Sort trips by date or name, and combine joined/owned")
       function formatDate(dff) {
         let dd = new Date(dff.seconds * 1000)
         let newFormat =
@@ -92,7 +92,15 @@ export const store = new Vuex.Store({
       }
       let hasDates = []
       let noDates = []
-      state.trips.forEach(trip => {
+      let allTrips = state.trips.concat(state.joinedTrips)
+      console.log('j', state.joinedTrips)
+      console.log('o', state.trips)
+      allTrips.forEach(trip => {
+        if(trip.uid === state.currentUser.uid) {
+          trip.joined = false
+        } else {
+trip.joined=true
+        }
         if (trip.finalDates) {
           hasDates.push(trip)
         } else {

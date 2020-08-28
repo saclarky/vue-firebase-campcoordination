@@ -20,21 +20,18 @@
                <div class="datesStyle">{{item.dateStart}}</div>
               <div class='mainText'>{{item.name}}</div> </span>
               <!-- <div v-if="item.location">{{item.location.Oa}}, {{item.location.Ba}}</div> -->
-              <i :class="{cell:true, text: true, deleteIcon:true, hide:item.joined, show:!item.joined}" @click="deleteTrip(item.id)"></i>
+              <i :class="{cell:true, text: true, deleteIcon:true, hide:item.joined, show:!item.joined}" @click="toggleDeleteTrip(item.id)"></i>
               <span :class="{show:item.joined, hide:!item.joined}">invited</span>
             </div>
-          </div>
-        
+          </div>        
           <div class="tripBlock">
             <div class="title">Trip Invites</div>
            <tripInvites></tripInvites>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- ADD TRIP SECTION -->
-    
+    </div>    
+    <deleteTripPopup v-if="showDeleteTrip" :tid='delTID' @close="toggleDeleteTrip('')"></deleteTripPopup>
   </div>
 </template>
 
@@ -44,6 +41,7 @@
 import { mapState, mapGetters } from "vuex";
 import newTripPopup from "../components/trips/newTripPopup.vue";
 import tripInvites from '../components/trips/tripInvites'
+import deleteTripPopup from '../components/trips/deleteTripPopup'
 export default {
   name: "trips",
   created() {
@@ -62,13 +60,16 @@ export default {
   },
   components: {
     newTripPopup,
-    tripInvites
+    tripInvites,
+    deleteTripPopup
   },
   data: function () {
     return {
       //   test: []
+      delTID: '',
       status: false, //todo: compare dates?
       showAddTrip: false,
+      showDeleteTrip: false
     };
   },
   computed: {
@@ -80,20 +81,11 @@ export default {
     toggleAddTrip() {
       this.showAddTrip = !this.showAddTrip;
     },
-    deleteTrip: function (id) {
-      console.log("delete trip");
-      this.$store.dispatch("deleteTripAction", id).then((res, rej) => {
-        if (res) {
-          if (res == "Trip deleted") {
-            this.$toasted.show("Trip deleted");
-          } else {
-            this.$toasted.show(res);
-          }
-        } else {
-          this.$toasted.show(rej);
-        }
-      });
+    toggleDeleteTrip(id) {
+      this.delTID = id
+      this.showDeleteTrip = !this.showDeleteTrip
     },
+    
     goToTrip: function (e) {
       console.log("dispatch ");
       console.log(e);

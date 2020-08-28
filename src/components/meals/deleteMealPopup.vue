@@ -136,29 +136,5 @@ button.rowItem {
   -webkit-transform: scale(1.1);
   transform: scale(1.1);
 }
-.plusHide {
-  display: none;
-}
-.plusShow {
-  display: inline-block;
-}
-.plusIcon {
-  background: url("../assets/add-plus.svg") no-repeat center center;
-  background-size: contain;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  vertical-align: middle;
-  padding: 10px;
-}
-.minusIcon {
-  background: url("../assets/add-minus.svg") no-repeat center center;
-  background-size: contain;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  vertical-align: middle;
-  padding: 10px;
-}
 
 </style>

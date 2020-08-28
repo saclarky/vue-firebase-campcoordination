@@ -70,11 +70,5 @@ a {
 a:hover {
   color: #43c3f7;
 }
-.hero-icon {
-  background: url("../assets/Camping.png") no-repeat center center;
-  background-size: contain;
-  width: 25px;
-  height: 25px;
-  margin-bottom: 0;
-}
+
 </style>

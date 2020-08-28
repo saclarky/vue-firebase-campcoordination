@@ -10,9 +10,9 @@
 <script>
 console.log("App!")
 import {mapState} from 'vuex'
-import navigation from './components/navigation.vue'
-import navigationUser from './components/navigationUser'
-import subnav from './components/subnav'
+import navigation from './components/navigation/navigation'
+import navigationUser from './components/navigation/navigationUser'
+import subnav from './components/navigation/subnav'
 export default {
   
   components: {navigation, navigationUser,subnav},

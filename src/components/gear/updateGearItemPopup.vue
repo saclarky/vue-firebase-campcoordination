@@ -208,7 +208,7 @@ button.rowItem {
   display: inline-block;
 }
 .plusIcon {
-  background: url("../assets/add-plus.svg") no-repeat center center;
+  background: url("../../assets/add-plus.svg") no-repeat center center;
   background-size: contain;
   width: 24px;
   height: 24px;
@@ -217,7 +217,7 @@ button.rowItem {
   padding: 10px;
 }
 .minusIcon {
-  background: url("../assets/add-minus.svg") no-repeat center center;
+  background: url("../../assets/add-minus.svg") no-repeat center center;
   background-size: contain;
   width: 24px;
   height: 24px;

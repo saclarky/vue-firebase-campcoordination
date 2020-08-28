@@ -5,11 +5,11 @@
         <div class="modal-container">
           <div class="modal-header">Are you Sure?</div>
           <div class="modal-body">
-            <div>This will delete all the gear in this category.</div>
+            <div>This will delete the gear item.</div>
             <form v-on:submit.prevent>
             <div class="row rowStyle">
               <div class="loader" v-if="showSpinner"></div>
-              <button class="rowItem" @click="deleteGearCategory">Delete</button>
+              <button class="rowItem" @click="deleteItem">Delete</button>
               <button class="rowItem" @click="$emit('close')">Cancel</button>
             </div>
             </form>
@@ -22,32 +22,32 @@
 
 <script>
 export default {
-  props: ["itemcat", "itempage"],
+  props: ["id", "tid", "page"],
   data: function () {
     return {
       showSpinner: false,
     };
   },
   methods: {
-    deleteGearCategory: function () {
+    deleteItem: function () {
       this.showSpinner = true;
-      let data = {
-        page: this.itempage,
-        category: this.itemcat
-      };
+      let data = { 
+        page: this.page,
+        id: this.id,
+        tid: this.tid
+         }      
       this.$store
-        .dispatch("deleteGearCategory", data)
-        .then((res) => {
-          this.showSpinner = false;
-          this.$toasted.show(res);
-          if (res === "Deleted category!") {
-            this.$emit("close");
-          }
+        .dispatch("deleteGearItemAction", data)
+        .then(() => {
+           this.showSpinner = false;
+          this.$toasted.show("Deleted item!");
+          this.$emit("close")
+          
         })
         .catch((e) => {
-          this.showSpinner = false;
-          console.log(e);
+          console.log(e)
           this.$toasted.show(e.message);
+           this.showSpinner = false;
         });
     },
   },
@@ -140,24 +140,6 @@ button.rowItem {
 }
 .plusShow {
   display: inline-block;
-}
-.plusIcon {
-  background: url("../assets/add-plus.svg") no-repeat center center;
-  background-size: contain;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  vertical-align: middle;
-  padding: 10px;
-}
-.minusIcon {
-  background: url("../assets/add-minus.svg") no-repeat center center;
-  background-size: contain;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  vertical-align: middle;
-  padding: 10px;
 }
 
 </style>

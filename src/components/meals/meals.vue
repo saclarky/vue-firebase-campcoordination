@@ -370,7 +370,7 @@ h4 {
   display: none;
 }
 .downArrowIcon {
-  background: url("../assets/rightArrow.svg") no-repeat center center;
+  background: url("../../assets/rightArrow.svg") no-repeat center center;
   background-size: contain;
   width: 15px;
   height: 15px;
@@ -379,7 +379,7 @@ h4 {
   cursor: pointer;
 }
 .upArrowIcon {
-  background: url("../assets/rightArrow.svg") no-repeat center center;
+  background: url("../../assets/rightArrow.svg") no-repeat center center;
   background-size: contain;
   width: 15px;
   height: 15px;
@@ -388,7 +388,7 @@ h4 {
   cursor: pointer;
 }
 .leftArrowIcon {
-  background: url("../assets/rightArrow.svg") no-repeat center center;
+  background: url("../../assets/rightArrow.svg") no-repeat center center;
   background-size: contain;
   width: 15px;
   height: 15px;
@@ -397,7 +397,7 @@ h4 {
   cursor: pointer;
 }
 .rightArrowIcon {
-  background: url("../assets/rightArrow.svg") no-repeat center center;
+  background: url("../../assets/rightArrow.svg") no-repeat center center;
   background-size: contain;
   width: 15px;
   height: 15px;

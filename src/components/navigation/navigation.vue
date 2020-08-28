@@ -3,44 +3,30 @@
     <section class='nav'>
       <div>
         <!-- <div class="logo-wrap"><i class="material-icons"> near_me </i>	</div> -->
-      
+        <router-link to="home" class="hero-icon"></router-link>
       </div>
       <div class='row rowStyle'>
-              
-          <div class="menu-item" >
-          <router-link to="/trips">Trips</router-link>
-        </div>
-         
+        <div v-if="!currentUser">
+          <router-link to="/login">Login</router-link>
+        </div>        
+        <div v-if="currentUser" class="nav-menu">
+          <div>Hi, {{currentUser.displayName}}!</div>
           
-            <div class="menu-item" >
-              <router-link to="/settings">Account</router-link>
-            </div>
-            <div class="menu-item">
-              <a @click="logout">Logout</a>
-            </div>
-      
-   
-      
+        </div>
+       
       </div>
     </section>
   </header>
 </template>
 
 <script>
-
+import { mapState } from "vuex";
 
 export default {
-  data: function () {
-    return {
-    };
-  },
- 
-  methods: {
-    
-    logout() {
-      this.$store.dispatch('logout')
-    },
-  },
+  
+  computed: {
+    ...mapState(["currentUser"]),
+  }  
 };
 </script>
 
@@ -50,24 +36,25 @@ section {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: 0 30px;
+  padding: 10px 30px;
 }
 .rowStyle {
   align-items:center;
 }
 .nav {
-  top: 51px;
+  top: 0;
     left: 0;
     right: 0;
     position: fixed;
-    background: #e2e2e2;
+    background: #ececec;
     z-index: 100;
 }
 .nav-menu {
-  padding: 0 15px;
+  /* padding: 0 15px; */
   /* background-color: #f7f7f7; */
   width: 120px;
-  font-size: 1.2rem;
+  font-size: 1.2rem;  
+  color: #054d6b;
 }
 .menu {
   position: absolute;
@@ -79,19 +66,20 @@ section {
 }
 /* .selected-menu-class {    
 } */
-
+.menu-item {
+  font-size: 1.1rem;
+  padding: 15px;
+}
 .col {
   display: flex;
   margin: 0 10px;
 }
 a {
   color: #09709a;
-  font-size: 1.1rem;
-  cursor:pointer;
 }
 
 a.router-link-exact-active {
-  color: #43c3f7;
+  color: #42b983;
 }
 /* ul {
     display: flex;
@@ -110,7 +98,7 @@ a.router-link-exact-active {
                 text-decoration: none;
             } */
 .hero-icon {
-  background: url("../assets/Camping.png") no-repeat center center;
+  background: url("../../assets/Camping.png") no-repeat center center;
   background-size: contain;
   width: 25px;
   height: 25px;

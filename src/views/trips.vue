@@ -14,33 +14,23 @@
       <div class="hero-bottom">
         <div class="row tripsSection">
           <div class="tripBlock">
-            <div class="title">My Trips</div>
+            <div class="title">Upcoming Trips</div>
             <div v-for="item in tripsOrdered" :key="item.id" :id="item.id" class="tripContent">
-              <div class="datesStyle">{{item.dateStart}}</div>
-              <div @click="goToTrip(item.id)">{{item.name}}</div>
-              <!-- TODO: how validate other rows below? If date field is empty, breaks -->
-              <div
-                v-if="item.date"
-              >{{new Date(item.date.seconds * 1000).getDate() }} {{ new Date(item.date.seconds * 1000).toLocaleString('default', { month: 'long' }) }} {{new Date(item.date.seconds * 1000).getFullYear() }}</div>
-              <div v-if="item.location">{{item.location.Oa}}, {{item.location.Ba}}</div>
-              <!-- <a @click="goToTrip">Go</a> -->
-              <!-- input value isn't title, it's id for syncing data change with store/firestore -->
-              <!-- <input type="checkbox" :id="item.id" :value="item.id" :checked="status" @change="updateStatus"> -->
-              <!-- <label class="strikethrough" :for="item.id"> {{item.name}} </label> -->
-              <!-- TODO: sort checked items to bottom of list? -->
-              <!-- <small style="text-decoration:underline;" @click="deleteTrip(item.id)">Delete</small> -->
+             <span @click="goToTrip(item.id)" class='row entryStyle'>
+               <div class="datesStyle">{{item.dateStart}}</div>
+              <div class='mainText'>{{item.name}}</div> </span>
+              <!-- <div v-if="item.location">{{item.location.Oa}}, {{item.location.Ba}}</div> -->
               <i class="cell text deleteIcon" @click="deleteTrip(item.id)"></i>
             </div>
           </div>
           <div class="tripBlock">
             <div class="title">Joined Trips</div>
             <div v-for="item in joinedTrips" :key="item.id" :id="item.id" class="tripContent">
-              <div @click="goToTrip(item.id)">{{item.name}}</div>
-              <!-- TODO: how validate other rows below? If date field is empty, breaks -->
-              <div
-                v-if="item.date"
-              >{{new Date(item.date.seconds * 1000).getDate() }} {{ new Date(item.date.seconds * 1000).toLocaleString('default', { month: 'long' }) }} {{new Date(item.date.seconds * 1000).getFullYear() }}</div>
-              <div v-if="item.location">{{item.location.Oa}}, {{item.location.Ba}}</div>
+               <span @click="goToTrip(item.id)" class='row entryStyle'>
+                 <div class="datesStyle">{{item.dateStart}}</div>
+              <div class='mainText'>{{item.name}}</div>
+               </span>
+               <span class="datesStyle">Joined</span>
             </div>
           </div>
           <div class="tripBlock">
@@ -183,7 +173,7 @@ export default {
 
 .tripContent {
   margin-top: 15px;
-  padding: 10px;
+  padding: 5px;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -217,8 +207,17 @@ div.tripContent > div {
   font-size: 0.9rem;
   color: rgb(82, 82, 82);
   font-style: italic;
+  padding-right: 15px;
 }
 .tripBlock {
   padding: 0 20px;
+  width: 33%;
+}
+.mainText {
+  font-size: 1rem;
+}
+.entryStyle {
+  align-items: center;
+  flex: 1;
 }
 </style>

@@ -2,12 +2,12 @@
   <div class='dashMain'>
     
       <!-- TODO filter responded, time frame etc -->
-      <div v-for="alert in thisUserInvitesGetter" :key="alert.id" >
+      <div v-for="alert in thisUserInvitesGetter" :key="alert.id" class='tripContent'>
         <!-- from | time | category | message | actions/responded -->
-        <span :class="{strike: alert.tripDeleted}">
+        <span :class="{strike: alert.tripDeleted, datesStyle:true}">
           {{alert.time}}
           -
-          {{alert.text}}
+          <span class='mainText'>{{alert.text}}</span>
         </span>
         <span :class="{deleted: alert.tripDeleted}">
           <!-- TODO change text to joined/declined after a selecton, innerHTML -->
@@ -15,7 +15,7 @@
           <button @click="declineTrip(alert.tid, alert.id, alert.isJoined)" :class="{declined: alert.isDeclined}" :disabled="alert.isDeclined">Decline</button>
           <!-- <button>Delete</button> -->
         </span>
-        <span :class="{deleted: !alert.tripDeleted}"> The owner deleted this trip</span>
+        <span :class="{deleted: !alert.tripDeleted, mainText:true}"> The owner deleted this trip</span>
       </div>
   </div>
 </template>
@@ -82,7 +82,23 @@ export default {
 </script>
 
 <style scoped>
-
+.tripContent {
+  margin-top: 15px;
+  padding: 5px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  background-color: #d6dee6d9;
+}
+.datesStyle {
+  font-size: 0.9rem;
+  color: rgb(82, 82, 82);
+  font-style: italic;
+}
+.mainText {
+  font-size: 1rem;
+}
 .joined {
   border: 2px green solid
 }
